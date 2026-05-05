@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Movie, PaginatedResponse } from '../types';
 import { apiClient } from '../api/client';
 import { MovieCard } from '../components/MovieCard';
+import { MovieCardList } from '../components/MovieCardList';
 import { StatCard } from '../components/StatCard';
 import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
+import { ViewToggle } from '../components/ViewToggle';
 import comStyles from '../styles/components.module.css';
 
 interface ListFilmsProps {
@@ -13,6 +15,7 @@ interface ListFilmsProps {
 }
 
 type FilterType = 'status' | 'resolution' | 'codec' | 'audio' | 'hdr';
+type ViewType = 'grid' | 'list';
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
@@ -54,6 +57,15 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
     hdr: [],
   });
   const [modalFilter, setModalFilter] = useState<FilterType | null>(null);
+  const [view, setView] = useState<ViewType>(() => {
+    const saved = localStorage.getItem('films-view');
+    return (saved as ViewType) || 'grid';
+  });
+
+  const handleViewChange = (newView: ViewType) => {
+    setView(newView);
+    localStorage.setItem('films-view', newView);
+  };
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -101,13 +113,14 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   return (
     <div style={{ padding: '16px 20px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-        <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
-        <FilterChip
-          label="Statut"
-          active={activeFilters.status.length > 0}
-          count={activeFilters.status.length}
+          <FilterChip
+            label="Statut"
+            active={activeFilters.status.length > 0}
+            count={activeFilters.status.length}
           onClick={() => setModalFilter('status')}
         />
         
@@ -155,6 +168,9 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
             Effacer tout
           </button>
         )}
+        </div>
+
+        <ViewToggle view={view} onViewChange={handleViewChange} />
       </div>
 
       {/* Stats */}
@@ -165,7 +181,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         <StatCard label="Problèmes" value="0" subLabel="fichiers manquants" />
       </div>
 
-      {/* Grid */}
+      {/* Grid or List */}
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Chargement...
@@ -174,10 +190,16 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Aucun film trouvé
         </div>
-      ) : (
+      ) : view === 'grid' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {movies.map((movie) => (
+            <MovieCardList key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
           ))}
         </div>
       )}

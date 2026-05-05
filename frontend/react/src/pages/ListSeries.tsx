@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Series, PaginatedResponse } from '../types';
 import { apiClient } from '../api/client';
 import { SeriesCard } from '../components/SeriesCard';
+import { SeriesCardList } from '../components/SeriesCardList';
 import { StatCard } from '../components/StatCard';
 import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
+import { ViewToggle } from '../components/ViewToggle';
 
 interface ListSeriesProps {
   onSelectSeries: (id: number) => void;
@@ -12,6 +14,7 @@ interface ListSeriesProps {
 }
 
 type FilterType = 'status' | 'resolution' | 'codec' | 'audio' | 'hdr';
+type ViewType = 'grid' | 'list';
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
@@ -53,6 +56,15 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     hdr: [],
   });
   const [modalFilter, setModalFilter] = useState<FilterType | null>(null);
+  const [view, setView] = useState<ViewType>(() => {
+    const saved = localStorage.getItem('series-view');
+    return (saved as ViewType) || 'grid';
+  });
+
+  const handleViewChange = (newView: ViewType) => {
+    setView(newView);
+    localStorage.setItem('series-view', newView);
+  };
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -100,11 +112,12 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   return (
     <div style={{ padding: '16px 20px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-        <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
-        <FilterChip
-          label="Statut"
+          <FilterChip
+            label="Statut"
           active={activeFilters.status.length > 0}
           count={activeFilters.status.length}
           onClick={() => setModalFilter('status')}
@@ -154,6 +167,9 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
             Effacer tout
           </button>
         )}
+        </div>
+
+        <ViewToggle view={view} onViewChange={handleViewChange} />
       </div>
 
       {/* Stats */}
@@ -164,7 +180,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         <StatCard label="Problèmes" value="0" subLabel="épisodes manquants" />
       </div>
 
-      {/* Grid */}
+      {/* Grid or List */}
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Chargement...
@@ -173,10 +189,16 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Aucune série trouvée
         </div>
-      ) : (
+      ) : view === 'grid' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
           {series.map((s) => (
             <SeriesCard key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {series.map((s) => (
+            <SeriesCardList key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
           ))}
         </div>
       )}

@@ -165,3 +165,137 @@
   text-align: center;
 }
 
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  border: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 2px;
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  transition: all 0.15s ease;
+}
+
+.view-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.view-toggle-btn:hover {
+  background: var(--color-background-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.view-toggle-btn-active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.view-toggle-btn-active:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* List View Cards */
+.card-list {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.card-list:hover {
+  border-color: var(--color-border-secondary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-list-poster {
+  width: 60px;
+  min-width: 60px;
+  height: 88px;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.card-list-poster-initial {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  opacity: 0.18;
+}
+
+.card-list-poster-title {
+  font-size: 8px;
+  color: var(--color-text-tertiary);
+  opacity: 0.4;
+  text-align: center;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-list-poster-status {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.card-list-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.card-list-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-list-meta {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-list-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
