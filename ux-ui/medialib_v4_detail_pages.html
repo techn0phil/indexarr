@@ -1,0 +1,558 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);font-size:13px;}
+.app{display:flex;height:900px;background:var(--color-background-tertiary);}
+.sidebar{width:210px;min-width:210px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;flex-shrink:0;}
+.logo{padding:16px 18px 14px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:8px;}
+.logo-mark{width:22px;height:22px;background:#1D9E75;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:13px;height:13px;fill:white;}
+.logo-name{font-size:15px;font-weight:500;color:var(--color-text-primary);}
+.nav{padding:10px 0;flex:1;}
+.nav-group{padding:8px 14px 3px;font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.07em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 18px;color:var(--color-text-secondary);cursor:pointer;border-left:2px solid transparent;}
+.nav-item.active{color:#0F6E56;border-left-color:#1D9E75;background:#E1F5EE;font-weight:500;}
+.nav-item:hover:not(.active){background:var(--color-background-secondary);}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.75;}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:99px;background:var(--color-background-secondary);color:var(--color-text-tertiary);border:0.5px solid var(--color-border-tertiary);}
+.nav-item.active .nav-badge{background:#9FE1CB;color:#085041;border-color:#5DCAA5;}
+.sidebar-footer{padding:12px 18px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:6px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid transparent;}
+.back-btn:hover{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);}
+.back-btn svg{width:14px;height:14px;}
+.topbar-sep{width:0.5px;height:18px;background:var(--color-border-tertiary);}
+.breadcrumb{font-size:12px;color:var(--color-text-tertiary);}
+.breadcrumb span{color:var(--color-text-secondary);}
+.search-material{position:relative;margin-left:auto;}
+.search-material input{width:200px;height:36px;background:var(--color-background-secondary);border:none;border-radius:99px;padding:0 14px 0 38px;font-size:12px;color:var(--color-text-primary);outline:none;}
+.search-material input:focus{background:var(--color-background-primary);box-shadow:0 0 0 1.5px #1D9E75;}
+.search-material input::placeholder{color:var(--color-text-tertiary);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.search-icon svg{width:14px;height:14px;color:var(--color-text-tertiary);}
+
+.content{flex:1;overflow-y:auto;}
+.page{display:none;}.page.active{display:block;}
+
+/* ---- LIST PAGE ---- */
+.list-filters{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:8px 20px;display:flex;align-items:center;gap:6px;}
+.chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:11px;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;}
+.chip:hover{border-color:var(--color-border-secondary);}
+.chip.has-val{background:#E1F5EE;border-color:#5DCAA5;color:#085041;}
+.chip svg{width:11px;height:11px;opacity:.6;}
+.f-sep{width:0.5px;height:18px;background:var(--color-border-tertiary);flex-shrink:0;}
+.view-tog{display:flex;gap:2px;margin-left:auto;}
+.v-btn{width:28px;height:26px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-tertiary);}
+.v-btn svg{width:13px;height:13px;}
+.v-btn.active{background:#1D9E75;color:white;border-color:#1D9E75;}
+.list-content{padding:16px 20px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;}
+.stat-lbl{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.stat-val{font-size:20px;font-weight:500;color:var(--color-text-primary);}
+.stat-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:1px;}
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;}
+.mcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer;}
+.mcard:hover{border-color:#5DCAA5;}
+.poster{height:180px;background:var(--color-background-secondary);position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
+.sbar{position:absolute;bottom:0;left:0;right:0;height:3px;}
+.sbar.ok{background:#1D9E75;}.sbar.warn{background:#EF9F27;}.sbar.miss{background:#E24B4A;}
+.cbody{padding:9px 10px;}
+.ctitle{font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.cmeta{display:flex;flex-wrap:wrap;gap:3px;}
+.b{font-size:9px;padding:2px 6px;border-radius:99px;font-weight:500;}
+.b-4k{background:#FAEEDA;color:#633806;}.b-hd{background:#EAF3DE;color:#27500A;}.b-dv{background:#EEEDFE;color:#3C3489;}.b-hdr{background:#E6F1FB;color:#0C447C;}.b-miss{background:#FCEBEB;color:#791F1F;}.b-codec{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);}
+
+/* ---- MOVIE DETAIL PAGE ---- */
+.detail-hero{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:24px 24px 20px;}
+.hero-inner{display:flex;gap:20px;align-items:flex-start;}
+.hero-poster{width:110px;min-width:110px;height:160px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+.hero-info{flex:1;min-width:0;}
+.hero-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;}
+.hero-sub{font-size:13px;color:var(--color-text-tertiary);margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;}
+.hero-sub span{display:flex;align-items:center;gap:4px;}
+.hero-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.hero-synopsis{font-size:12px;color:var(--color-text-secondary);line-height:1.6;max-width:560px;}
+.hero-actions{display:flex;gap:8px;margin-top:14px;}
+.btn-act{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;font-weight:500;}
+.btn-prim{background:#1D9E75;color:white;border:none;}
+.btn-sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);}
+.btn-act svg{width:13px;height:13px;}
+.rating-pill{display:flex;align-items:center;gap:4px;background:#FAEEDA;color:#633806;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:500;}
+
+.detail-body{padding:20px 24px;display:grid;grid-template-columns:1fr 260px;gap:20px;}
+.section-title{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.info-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;}
+
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.meta-row{display:flex;flex-direction:column;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.meta-row:nth-last-child(-n+2){border-bottom:none;}
+.meta-lbl{font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px;}
+.meta-val{font-size:12px;color:var(--color-text-primary);font-weight:500;}
+
+.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;}
+.cast-card{text-align:center;cursor:pointer;}
+.cast-avatar{width:44px;height:44px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--color-text-tertiary);margin:0 auto 6px;}
+.cast-name{font-size:10px;font-weight:500;color:var(--color-text-primary);text-align:center;}
+.cast-role{font-size:9px;color:var(--color-text-tertiary);text-align:center;}
+
+.mediainfo-table{width:100%;border-collapse:collapse;}
+.mediainfo-table th{font-size:10px;color:var(--color-text-tertiary);font-weight:500;padding:6px 8px;text-align:left;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);}
+.mediainfo-table td{font-size:11px;color:var(--color-text-secondary);padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.mediainfo-table tr:last-child td{border-bottom:none;}
+.mediainfo-table td:first-child{color:var(--color-text-tertiary);width:38%;}
+.track-sep{font-size:10px;font-weight:500;color:var(--color-text-tertiary);padding:8px 8px 4px;background:var(--color-background-tertiary);display:block;}
+
+.side-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;}
+.tmdb-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px;}
+.tmdb-row:last-child{border-bottom:none;}
+.tmdb-lbl{color:var(--color-text-tertiary);}
+.tmdb-val{color:var(--color-text-primary);font-weight:500;}
+.source-badge{font-size:9px;padding:2px 6px;border-radius:99px;background:#E6F1FB;color:#0C447C;font-weight:500;}
+
+/* ---- SERIES DETAIL PAGE ---- */
+.series-hero{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:24px;}
+.season-tabs{display:flex;gap:4px;padding:0 24px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);overflow-x:auto;}
+.s-tab{padding:10px 14px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.s-tab.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:500;}
+.s-tab:hover:not(.active){color:var(--color-text-primary);}
+.season-content{padding:16px 24px;}
+.season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.season-stats{display:flex;gap:12px;font-size:11px;color:var(--color-text-tertiary);}
+.ep-list{display:flex;flex-direction:column;gap:6px;}
+.ep-row{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.ep-row:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary);}
+.ep-num{font-size:11px;font-weight:500;color:var(--color-text-tertiary);min-width:28px;}
+.ep-info{flex:1;min-width:0;}
+.ep-title{font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ep-meta{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;}
+.ep-badges{display:flex;gap:4px;flex-shrink:0;}
+.ep-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ep-size{font-size:10px;color:var(--color-text-tertiary);min-width:55px;text-align:right;}
+.hidden{display:none!important;}
+</style>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 14 14"><path d="M2 11L7 3L12 11Z"/></svg></div>
+      <span class="logo-name">Mediarr</span>
+    </div>
+    <div class="nav">
+      <div class="nav-group">Librairie</div>
+      <div class="nav-item" id="nav-films" onclick="goPage('list-films')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3v10M11 3v10M2 7h12"/></svg>
+        Films
+        <span class="nav-badge">347</span>
+      </div>
+      <div class="nav-item active" id="nav-series" onclick="goPage('list-series')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg>
+        Séries
+        <span class="nav-badge">83</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 5v3l2 2"/></svg>
+        Récents
+      </div>
+      <div class="nav-group" style="margin-top:6px;">Analyse</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-5 3 3 3-4 2 2"/></svg>
+        Statistiques
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11h.01"/></svg>
+        Problèmes
+        <span class="nav-badge" style="background:#FCEBEB;color:#791F1F;border-color:#F09595;">4</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="status-dot"></div>
+      <span style="font-size:11px;color:var(--color-text-tertiary);">Système opérationnel</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar" id="topbar">
+      <div class="back-btn hidden" id="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+        Retour
+      </div>
+      <div class="topbar-sep hidden" id="top-sep"></div>
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <div class="search-material" style="margin-left:auto;">
+        <span class="search-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l2.5 2.5"/></svg></span>
+        <input type="text" placeholder="Rechercher…"/>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- LIST FILMS -->
+      <div class="page" id="page-list-films">
+        <div class="list-filters">
+          <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Filtres</span>
+          <div class="chip has-val"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/></svg>Statut<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/></svg>Résolution<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"/></svg>Codec<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"/></svg>Audio<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="f-sep"></div>
+          <div class="view-tog">
+            <div class="v-btn active"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg></div>
+            <div class="v-btn"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h11M1 6.5h11M1 10h11"/></svg></div>
+          </div>
+        </div>
+        <div class="list-content">
+          <div class="stats-row">
+            <div class="stat"><div class="stat-lbl">Films</div><div class="stat-val">347</div><div class="stat-sub">343 disponibles</div></div>
+            <div class="stat"><div class="stat-lbl">Espace</div><div class="stat-val">8,4 To</div><div class="stat-sub">moy. 24,7 Go</div></div>
+            <div class="stat"><div class="stat-lbl">4K UHD</div><div class="stat-val">128</div><div class="stat-sub">37% de la librairie</div></div>
+            <div class="stat"><div class="stat-lbl">Problèmes</div><div class="stat-val" style="color:#E24B4A;">4</div><div class="stat-sub">fichiers manquants</div></div>
+          </div>
+          <div class="grid-view">
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">I</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Interstellar</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Interstellar</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span><span class="b b-codec">H.265</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">D</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Dune Part Two</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Dune: Deuxième partie</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10+</span><span class="b b-codec">AV1</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">O</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Oppenheimer</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Oppenheimer</div><div class="cmeta"><span class="b b-hd">1080p</span><span class="b b-codec">H.264</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">P</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Poor Things</div><div class="sbar miss"></div></div>
+              <div class="cbody"><div class="ctitle">Poor Things</div><div class="cmeta"><span class="b b-miss">Manquant</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST SERIES -->
+      <div class="page active" id="page-list-series">
+        <div class="list-filters">
+          <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Filtres</span>
+          <div class="chip has-val"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/></svg>Statut<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/></svg>Résolution<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"/></svg>Codec<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="f-sep"></div>
+          <div class="view-tog">
+            <div class="v-btn active"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg></div>
+            <div class="v-btn"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h11M1 6.5h11M1 10h11"/></svg></div>
+          </div>
+        </div>
+        <div class="list-content">
+          <div class="stats-row">
+            <div class="stat"><div class="stat-lbl">Séries</div><div class="stat-val">83</div><div class="stat-sub">79 complètes</div></div>
+            <div class="stat"><div class="stat-lbl">Épisodes</div><div class="stat-val">4 218</div><div class="stat-sub">4 190 disponibles</div></div>
+            <div class="stat"><div class="stat-lbl">Espace</div><div class="stat-val">12,3 To</div><div class="stat-sub">moy. 2,9 Go/ep</div></div>
+            <div class="stat"><div class="stat-lbl">Problèmes</div><div class="stat-val" style="color:#EF9F27;">7</div><div class="stat-sub">épisodes manquants</div></div>
+          </div>
+          <div class="grid-view">
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">BB</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Breaking Bad</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Breaking Bad</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">SS</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Severance</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Severance</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">SH</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Shogun</div><div class="sbar warn"></div></div>
+              <div class="cbody"><div class="ctitle">Shōgun</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b" style="background:#FAEEDA;color:#633806;">3 ep. manq.</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">TL</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">The Last of Us</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">The Last of Us</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOVIE DETAIL -->
+      <div class="page" id="page-detail-movie">
+        <div class="detail-hero">
+          <div class="hero-inner">
+            <div class="hero-poster">
+              <div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">I</div>
+              <div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;text-align:center;padding:0 6px;">Interstellar</div>
+            </div>
+            <div class="hero-info">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div class="hero-title">Interstellar</div>
+                <div class="rating-pill">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="#BA7517"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"/></svg>
+                  8,7
+                </div>
+                <span class="source-badge">TMDB</span>
+              </div>
+              <div class="hero-sub">
+                <span>2014</span>
+                <span>·</span>
+                <span>2h 49min</span>
+                <span>·</span>
+                <span>Science-fiction · Aventure</span>
+                <span>·</span>
+                <span style="color:#1D9E75;font-weight:500;">Disponible</span>
+              </div>
+              <div class="hero-badges">
+                <span class="b b-4k" style="font-size:10px;padding:3px 8px;">4K UHD</span>
+                <span class="b b-dv" style="font-size:10px;padding:3px 8px;">Dolby Vision</span>
+                <span class="b b-hdr" style="font-size:10px;padding:3px 8px;">HDR10</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">H.265</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">TrueHD Atmos</span>
+              </div>
+              <div class="hero-synopsis">Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine et partir à la conquête d'immensités de l'univers encore inconnues.</div>
+              <div class="hero-actions">
+                <button class="btn-act btn-prim"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>Rechercher upgrade</button>
+                <button class="btn-act btn-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M8 4l3 3-3 3"/></svg>Ouvrir dans Radarr</button>
+                <button class="btn-act btn-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M7 5v3M7 9.5h.01"/></svg>TMDB</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div>
+            <div class="section-title">Cast principal</div>
+            <div class="info-card">
+              <div class="cast-grid">
+                <div class="cast-card"><div class="cast-avatar">MM</div><div class="cast-name">Matthew McConaughey</div><div class="cast-role">Cooper</div></div>
+                <div class="cast-card"><div class="cast-avatar">AH</div><div class="cast-name">Anne Hathaway</div><div class="cast-role">Brand</div></div>
+                <div class="cast-card"><div class="cast-avatar">JC</div><div class="cast-name">Jessica Chastain</div><div class="cast-role">Murph (adulte)</div></div>
+                <div class="cast-card"><div class="cast-avatar">MK</div><div class="cast-name">Michael Caine</div><div class="cast-role">Prof. Brand</div></div>
+                <div class="cast-card"><div class="cast-avatar">MC</div><div class="cast-name">Matt Damon</div><div class="cast-role">Dr. Mann</div></div>
+              </div>
+            </div>
+
+            <div class="section-title" style="margin-top:4px;">Métadonnées du fichier</div>
+            <div class="info-card" style="padding:0;overflow:hidden;">
+              <span class="track-sep">Vidéo — piste 1</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>H.265 / HEVC (Main 10)</td></tr>
+                <tr><td>Résolution</td><td>3840 × 2160 (4K UHD)</td></tr>
+                <tr><td>Bitrate</td><td>35,2 Mbps</td></tr>
+                <tr><td>HDR</td><td>Dolby Vision + HDR10 (SMPTE ST 2086)</td></tr>
+                <tr><td>Frame rate</td><td>23,976 fps</td></tr>
+                <tr><td>Color space</td><td>BT.2020 / bt2020nc</td></tr>
+              </table>
+              <span class="track-sep">Audio — piste 1</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>TrueHD Atmos</td></tr>
+                <tr><td>Canaux</td><td>7.1 (L R C LFE Ls Rs Lss Rss)</td></tr>
+                <tr><td>Sample rate</td><td>48 000 Hz</td></tr>
+                <tr><td>Bitrate</td><td>4,8 Mbps</td></tr>
+              </table>
+              <span class="track-sep">Audio — piste 2</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>AC-3 (Dolby Digital)</td></tr>
+                <tr><td>Canaux</td><td>5.1</td></tr>
+                <tr><td>Langue</td><td>Français</td></tr>
+              </table>
+              <span class="track-sep">Sous-titres</span>
+              <table class="mediainfo-table">
+                <tr><td>Piste 1</td><td>Français (SRT)</td></tr>
+                <tr><td>Piste 2</td><td>Anglais (SRT)</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-title">Informations générales</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">Réalisateur</span><span class="tmdb-val">C. Nolan</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Studio</span><span class="tmdb-val">Warner Bros.</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Pays</span><span class="tmdb-val">États-Unis / UK</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Langue orig.</span><span class="tmdb-val">Anglais</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Budget</span><span class="tmdb-val">165 M$</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Box-office</span><span class="tmdb-val">701 M$</span></div>
+            </div>
+
+            <div class="section-title">Fichier</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">Taille</span><span class="tmdb-val">58,3 Go</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Durée</span><span class="tmdb-val">2:49:22</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Conteneur</span><span class="tmdb-val">MKV</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Chemin</span><span class="tmdb-val" style="font-size:10px;font-family:var(--font-mono);">/media/films/Interstellar (2014)/</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Source</span><span class="tmdb-val">Radarr</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Ajouté le</span><span class="tmdb-val">12 jan. 2024</span></div>
+            </div>
+
+            <div class="section-title">Sources externes</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">TMDB ID</span><span class="tmdb-val" style="color:#185FA5;">157336</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">IMDb</span><span class="tmdb-val" style="color:#185FA5;">tt0816692</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Note TMDB</span><span class="tmdb-val">8,7 / 10</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Popularité</span><span class="tmdb-val">97,4</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES DETAIL -->
+      <div class="page" id="page-detail-series">
+        <div class="series-hero">
+          <div class="hero-inner">
+            <div class="hero-poster">
+              <div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">BB</div>
+              <div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;text-align:center;padding:0 6px;">Breaking Bad</div>
+            </div>
+            <div class="hero-info">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div class="hero-title">Breaking Bad</div>
+                <div class="rating-pill"><svg width="11" height="11" viewBox="0 0 12 12" fill="#BA7517"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"/></svg>9,5</div>
+                <span class="source-badge">TVDB</span>
+              </div>
+              <div class="hero-sub">
+                <span>2008 – 2013</span><span>·</span><span>5 saisons · 62 épisodes</span><span>·</span>
+                <span>Drame · Crime</span><span>·</span>
+                <span style="color:#1D9E75;font-weight:500;">Complète</span>
+              </div>
+              <div class="hero-badges">
+                <span class="b b-4k" style="font-size:10px;padding:3px 8px;">4K UHD</span>
+                <span class="b b-dv" style="font-size:10px;padding:3px 8px;">Dolby Vision</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">H.265</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">DTS-HD MA 5.1</span>
+              </div>
+              <div class="hero-synopsis">Walter White, professeur de chimie dans un lycée d'Albuquerque, apprend qu'il est atteint d'un cancer du poumon en phase terminale. Pour assurer l'avenir financier de sa famille, il se lance dans la fabrication et la vente de méthamphétamine.</div>
+              <div class="hero-actions">
+                <button class="btn-act btn-prim"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>Rechercher épisodes</button>
+                <button class="btn-act btn-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M8 4l3 3-3 3"/></svg>Ouvrir dans Sonarr</button>
+                <button class="btn-act btn-sec">TVDB</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="season-tabs" id="season-tabs">
+          <div class="s-tab active" onclick="switchSeason(0,this)">Saison 1</div>
+          <div class="s-tab" onclick="switchSeason(1,this)">Saison 2</div>
+          <div class="s-tab" onclick="switchSeason(2,this)">Saison 3</div>
+          <div class="s-tab" onclick="switchSeason(3,this)">Saison 4</div>
+          <div class="s-tab" onclick="switchSeason(4,this)">Saison 5</div>
+        </div>
+
+        <div class="season-content" id="season-content"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const SEASONS=[
+  {n:1,eps:[
+    {n:1,title:"Pilot",dur:"58min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"8,2 Go",status:"ok"},
+    {n:2,title:"Cat's in the Bag",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,8 Go",status:"ok"},
+    {n:3,title:"...And the Bag's in the River",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok"},
+    {n:4,title:"Cancer Man",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok"},
+    {n:5,title:"Gray Matter",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,6 Go",status:"ok"},
+    {n:6,title:"Crazy Handful of Nothin'",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,4 Go",status:"ok"},
+    {n:7,title:"A No-Rough-Stuff-Type Deal",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,0 Go",status:"ok"},
+  ]},
+  {n:2,eps:[
+    {n:1,title:"Seven Thirty-Seven",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok"},
+    {n:2,title:"Grilled",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,2 Go",status:"ok"},
+    {n:3,title:"Bit by a Dead Bee",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,8 Go",status:"ok"},
+    {n:4,title:"Down",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"—",status:"miss"},
+    {n:5,title:"Breakage",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,0 Go",status:"ok"},
+  ]},
+  {n:3,eps:[
+    {n:1,title:"No Más",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok"},
+    {n:2,title:"Caballo sin Nombre",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok"},
+  ]},
+  {n:4,eps:[
+    {n:1,title:"Box Cutter",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,4 Go",status:"ok"},
+    {n:2,title:"Thirty-Eight Snub",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,2 Go",status:"ok"},
+  ]},
+  {n:5,eps:[
+    {n:1,title:"Live Free or Die",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,5 Go",status:"ok"},
+    {n:2,title:"Madrigal",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,3 Go",status:"ok"},
+    {n:3,title:"Hazard Pay",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok"},
+  ]},
+];
+
+let history=[];
+let currentSeason=0;
+
+function setNavActive(id){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el)el.classList.add('active');
+}
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  history.push(id);
+  updateTopbar(id);
+  if(id==='detail-series')renderSeason(0);
+}
+
+function goBack(){
+  if(history.length>1){
+    history.pop();
+    const prev=history[history.length-1];
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+prev).classList.add('active');
+    updateTopbar(prev);
+  }
+}
+
+function updateTopbar(id){
+  const backBtn=document.getElementById('back-btn');
+  const sep=document.getElementById('top-sep');
+  const bc=document.getElementById('breadcrumb');
+  const isDetail=id.startsWith('detail-');
+  backBtn.classList.toggle('hidden',!isDetail);
+  sep.classList.toggle('hidden',!isDetail);
+  if(id==='detail-movie'){bc.innerHTML='Films <span>/ Interstellar</span>';setNavActive('nav-films');}
+  else if(id==='detail-series'){bc.innerHTML='Séries <span>/ Breaking Bad</span>';setNavActive('nav-series');}
+  else if(id==='list-films'){bc.innerHTML='';setNavActive('nav-films');}
+  else if(id==='list-series'){bc.innerHTML='';setNavActive('nav-series');}
+}
+
+function switchSeason(idx,el){
+  currentSeason=idx;
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderSeason(idx);
+}
+
+function renderSeason(idx){
+  const s=SEASONS[idx];
+  const ok=s.eps.filter(e=>e.status==='ok').length;
+  const miss=s.eps.filter(e=>e.status==='miss').length;
+  const totalSize=s.eps.filter(e=>e.size!=='—').reduce((a,e)=>{const n=parseFloat(e.size.replace(',','.'));return isNaN(n)?a:a+n;},0);
+  document.getElementById('season-content').innerHTML=`
+    <div class="season-header">
+      <div class="section-title" style="margin:0;">Saison ${s.n} — ${s.eps.length} épisodes</div>
+      <div class="season-stats">
+        <span style="color:#1D9E75;">${ok} disponibles</span>
+        ${miss>0?`<span style="color:#E24B4A;">${miss} manquant${miss>1?'s':''}</span>`:''}
+        <span>${totalSize.toFixed(1).replace('.',',')} Go</span>
+      </div>
+    </div>
+    <div class="ep-list">
+      ${s.eps.map(ep=>`
+      <div class="ep-row">
+        <div class="ep-num">E${String(ep.n).padStart(2,'0')}</div>
+        <div class="ep-info">
+          <div class="ep-title">${ep.title}</div>
+          <div class="ep-meta">${ep.dur} · ${ep.codec} · ${ep.audio}</div>
+        </div>
+        <div class="ep-badges">
+          ${ep.res==='4K'?'<span class="b b-4k">4K</span>':'<span class="b b-hd">1080p</span>'}
+          ${ep.status==='miss'?'<span class="b b-miss">Manquant</span>':''}
+        </div>
+        <div class="ep-size">${ep.size}</div>
+        <div class="ep-status" style="background:${ep.status==='ok'?'#1D9E75':'#E24B4A'};"></div>
+      </div>`).join('')}
+    </div>`;
+}
+
+goPage('list-series');
+</script>
