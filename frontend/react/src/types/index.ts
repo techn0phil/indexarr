@@ -133,3 +133,18 @@ export interface StatsResponse {
   missingEpisodes: number;
   error?: string;
 }
+
+export interface ScanStatus {
+  id: number;
+  status: 'idle' | 'running' | 'completed' | 'error' | 'stopped';
+  startedAt?: string;
+  completedAt?: string;
+  filesFound: number;
+  filesProcessed: number;
+  errorMessage?: string;
+}
+
+export interface ScanResponse {
+  success: boolean;
+  message: string;
+}

@@ -1,4 +1,4 @@
-import { Movie, Series, Episode, PaginatedResponse, StatsResponse } from '../types/index';
+import { Movie, Series, Episode, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse } from '../types/index';
 
 const API_BASE = '/api';
 
@@ -36,5 +36,21 @@ export const apiClient = {
   getStats: async () => {
     const response = await fetch(`${API_BASE}/stats`);
     return response.json() as Promise<StatsResponse>;
+  },
+
+  // Scan endpoints
+  triggerScan: async () => {
+    const response = await fetch(`${API_BASE}/scan`, { method: 'POST' });
+    return response.json() as Promise<ScanResponse>;
+  },
+
+  getScanStatus: async () => {
+    const response = await fetch(`${API_BASE}/scan/status`);
+    return response.json() as Promise<ScanStatus>;
+  },
+
+  stopScan: async () => {
+    const response = await fetch(`${API_BASE}/scan/stop`, { method: 'POST' });
+    return response.json() as Promise<ScanResponse>;
   },
 };

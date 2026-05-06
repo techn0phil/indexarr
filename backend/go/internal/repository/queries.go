@@ -49,7 +49,7 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 	}
 
 	// Query movies
-	query := fmt.Sprintf(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id FROM movies WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
+	query := fmt.Sprintf(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster FROM movies WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
@@ -59,7 +59,13 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 	var movies []models.Movie
 	for rows.Next() {
 		var m models.Movie
-		err := rows.Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId)
+		var poster sql.NullString
+		err := rows.Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId, &poster)
+		if poster.Valid {
+			m.Poster = &poster.String
+		} else {
+			m.Poster = nil
+		}
 		if err != nil {
 			return nil, 0, err
 		}
@@ -74,7 +80,13 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 
 func GetMovieByID(db *sql.DB, id int64) (*models.Movie, error) {
 	var m models.Movie
-	err := db.QueryRow(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id FROM movies WHERE id=?`, id).Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId)
+	var poster sql.NullString
+	err := db.QueryRow(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster FROM movies WHERE id=?`, id).Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId, &poster)
+	if poster.Valid {
+		m.Poster = &poster.String
+	} else {
+		m.Poster = nil
+	}
 	if err != nil {
 		return nil, err
 	}

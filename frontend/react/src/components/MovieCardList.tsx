@@ -47,7 +47,7 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && <span className={comStyles['badge-4k']}>4K</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
-          {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks[0].codec}</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks?.[0]?.codec}</span>}
           {movie.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
         </div>
       </div>

@@ -18,13 +18,42 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
 
   return (
     <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
-      <div style={{ height: '180px', background: 'var(--color-background-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', gap: '4px' }}>
-        <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
-          {initials}
-        </div>
-        <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
-          {movie.title}
-        </div>
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '2/3', // Typical poster ratio
+          background: 'var(--color-background-secondary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          gap: '4px',
+        }}
+      >
+        {movie.poster ? (
+          <img
+            src={movie.poster}
+            alt={movie.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              background: 'var(--color-background-secondary)',
+              borderRadius: 0,
+              display: 'block',
+              objectPosition: 'center',
+            }}
+          />
+        ) : (
+          <>
+            <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+              {initials}
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
+              {movie.title}
+            </div>
+          </>
+        )}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: statusColor }} />
       </div>
       <div style={{ padding: '9px 10px' }}>
@@ -35,7 +64,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && <span className={comStyles['badge-4k']}>4K</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
-          {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks[0].codec}</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks?.[0]?.codec}</span>}
           {movie.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
         </div>
       </div>

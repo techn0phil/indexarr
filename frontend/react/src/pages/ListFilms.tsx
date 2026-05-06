@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Movie, PaginatedResponse } from '../types';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { Movie } from '../types';
 import { apiClient } from '../api/client';
+import { useInfiniteList } from '../hooks/useInfiniteList';
 import { MovieCard } from '../components/MovieCard';
 import { MovieCardList } from '../components/MovieCardList';
 import { StatCard } from '../components/StatCard';
 import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
-import comStyles from '../styles/components.module.css';
+import { ScanStatusCard } from '../components/ScanStatusCard';
 
 interface ListFilmsProps {
   onSelectMovie: (id: number) => void;
@@ -46,9 +47,6 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
 };
 
 export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) => {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ available: 0, total: 0, diskSpace: 0, fourK: 0 });
   const [activeFilters, setActiveFilters] = useState<Record<FilterType, string[]>>({
     status: [],
     resolution: [],
@@ -62,45 +60,73 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
     return (saved as ViewType) || 'grid';
   });
 
+  // Build filter params for API
+  const filters = useMemo(() => {
+    const params: Record<string, string> = {};
+    Object.entries(activeFilters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        params[key] = values.join(',');
+      }
+    });
+    if (searchQuery) {
+      params.search = searchQuery;
+    }
+    return params;
+  }, [activeFilters, searchQuery]);
+
+  // Use infinite list hook for pagination
+  const { items: movies, loading, hasMore, loadMore, reset } = useInfiniteList<Movie>({
+    fetchFn: apiClient.getMovies,
+    pageSize: 50,
+    filters,
+  });
+
+  // Infinite scroll sentinel ref
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !loading) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loading, loadMore]);
+
+  // Calculate stats from loaded movies
+  const stats = useMemo(() => {
+    const available = movies.filter((m) => m.status === 'available').length;
+    const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
+    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
+    return { available, total: movies.length, diskSpace, fourK };
+  }, [movies]);
+
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
     localStorage.setItem('films-view', newView);
   };
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
-      try {
-        // Build filter params
-        const filters: Record<string, string> = {};
-        Object.entries(activeFilters).forEach(([key, values]) => {
-          if (values.length > 0) {
-            filters[key] = values.join(',');
-          }
-        });
-
-        if (searchQuery) {
-          filters.search = searchQuery;
-        }
-
-        const response = await apiClient.getMovies(1, 50, filters);
-        const moviesData = response.data || [];
-        setMovies(moviesData);
-        
-        // Calculate stats
-        const available = moviesData.filter((m) => m.status === 'available').length;
-        const diskSpace = moviesData.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
-        const fourK = moviesData.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
-        setStats({ available, total: moviesData.length, diskSpace, fourK });
-      } catch (error) {
-        console.error('Failed to fetch movies:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
-  }, [activeFilters, searchQuery]);
+  const handleScanComplete = () => {
+    // Refresh movies and stats after scan
+    reset();
+  };
 
   const handleFilterApply = (filterType: FilterType, values: string[]) => {
     setActiveFilters((prev) => ({ ...prev, [filterType]: values }));
@@ -174,11 +200,12 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
         <StatCard label="Films" value={stats.total} subLabel={`${stats.available} disponibles`} />
         <StatCard label="Espace" value={`${stats.diskSpace.toFixed(1)} Go`} subLabel="moy. disque" />
         <StatCard label="4K UHD" value={stats.fourK} subLabel={`${stats.total > 0 ? Math.round((stats.fourK / stats.total) * 100) : 0}%`} />
         <StatCard label="Problèmes" value="0" subLabel="fichiers manquants" />
+        <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
       {/* Grid or List */}
@@ -191,17 +218,41 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
           Aucun film trouvé
         </div>
       ) : view === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-          {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+            {movies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
+            ))}
+          </div>
+          {hasMore && (
+            <>
+              <div ref={sentinelRef} style={{ height: '1px' }} />
+              {loading && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
+                  Chargement...
+                </div>
+              )}
+            </>
+          )}
+        </>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {movies.map((movie) => (
-            <MovieCardList key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {movies.map((movie) => (
+              <MovieCardList key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
+            ))}
+          </div>
+          {hasMore && (
+            <>
+              <div ref={sentinelRef} style={{ height: '1px' }} />
+              {loading && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
+                  Chargement...
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
       {/* Filter Modals */}

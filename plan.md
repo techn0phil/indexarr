@@ -50,19 +50,19 @@
 ## PHASE 3: File Scanning & Metadata (2-3 weeks)
 ### Backend:
 
-1. Install mediainfo CLI
-2. Mediainfo parser: Run `mediainfo --Output=JSON`, parse codec/resolution/HDR/bitrate/fps/color space
-3. File scanner: Walk library folders, extract mediainfo, query TMDB/TVDB, determine status
-4. Cron scheduler: Run scanner every X hours (configurable)
-5. Configuration: Load library paths, API keys from .env
-6. Endpoints: `POST /api/scan` (trigger), `GET /api/scan/status`
+✅ 1. Install mediainfo CLI
+✅ 2. Mediainfo parser: Run `mediainfo --Output=JSON`, parse codec/resolution/HDR/bitrate/fps/color space
+✅ 3. File scanner: Walk library folders, extract mediainfo, query TMDB/TVDB, determine status
+✅ 4. Cron scheduler: Run scanner every X hours (configurable)
+✅ 5. Configuration: Load library paths, API keys from .env
+✅ 6. Endpoints: `POST /api/scan` (trigger), `GET /api/scan/status`
 
 ### Frontend:
 
 1. Library path configuration (optional UI in settings)
 2. Stats page: Show scan status, last scanned time, library health (missing %, problems %)
 
-**Result**: ✅ Real file discovery, technical metadata, scheduled scanning
+**Result**: ✅ Real file discovery, technical metadata, scheduled scanning (backend complete)
 
 ## PHASE 4: Polish & Performance (1-2 weeks)
 ### Backend:

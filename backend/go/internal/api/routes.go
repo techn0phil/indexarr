@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"net/http"
 
+	"indexarr/internal/services"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
-func SetupRoutes(db *sql.DB) *chi.Mux {
+func SetupRoutes(db *sql.DB, scheduler *services.Scheduler) *chi.Mux {
 	r := chi.NewRouter()
 
 	// CORS middleware
@@ -40,6 +42,13 @@ func SetupRoutes(db *sql.DB) *chi.Mux {
 
 		// Stats
 		r.Get("/stats", GetStats(db))
+
+		// Scan (only if scheduler is provided)
+		if scheduler != nil {
+			r.Post("/scan", TriggerScan(scheduler))
+			r.Get("/scan/status", GetScanStatus(scheduler))
+			r.Post("/scan/stop", StopScan(scheduler))
+		}
 	})
 
 	return r
