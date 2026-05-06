@@ -56,7 +56,9 @@ RUN addgroup -g 1000 appuser && \
 
 # Create necessary directories
 RUN mkdir -p /app/data /app/frontend /var/log/nginx /var/lib/nginx/tmp \
-    && chown -R appuser:appuser /app /var/log/nginx /var/lib/nginx
+    && chown -R appuser:appuser /app /var/log/nginx /var/lib/nginx \
+    && mkdir -p /tmp/nginx/{client_body,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
+    && chown -R appuser:appuser /tmp/nginx
 
 WORKDIR /app
 
