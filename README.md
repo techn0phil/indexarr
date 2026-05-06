@@ -54,11 +54,73 @@ indexarr/
 
 ## Getting Started
 
-### Prerequisites
-- Node.js (>=18)
-- Go (>=1.20)
+### Quick Start with Docker (Recommended)
 
-### Backend Setup
+The easiest way to run Indexarr is with Docker:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/pschmucker/indexarr.git
+   cd indexarr
+   ```
+
+2. **Create environment file** (optional):
+   ```bash
+   cp .env.example .env
+   # Edit .env with your TMDB/TVDB API keys and media library paths
+   ```
+
+3. **Start the application:**
+   ```bash
+   docker compose up -d
+   ```
+
+4. **Access the application:**
+   - Frontend: http://localhost:8787
+   - API: http://localhost:8787/api
+
+5. **View logs:**
+   ```bash
+   docker compose logs -f
+   ```
+
+6. **Stop the application:**
+   ```bash
+   docker compose down
+   ```
+
+#### Configuration
+
+Edit `docker-compose.yml` or create a `.env` file with:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TZ` | `UTC` | Timezone for scheduled tasks |
+| `TMDB_API_KEY` | - | TMDB API key for movie metadata |
+| `TVDB_API_KEY` | - | TVDB API key for series metadata |
+| `MOVIES_PATH` | `/media/movies` | Comma-separated paths to movies folder |
+| `SERIES_PATH` | `/media/series` | Comma-separated paths to series folder |
+
+#### Using Pre-built Image from GitHub Container Registry
+
+```bash
+docker pull ghcr.io/pschmucker/indexarr:latest
+docker run -d -p 8787:8787 \
+      -e TMDB_API_KEY=fffffffffffffffff \
+      -e TVDB_API_KEY=fffffffffffffffff \
+      -e MOVIES_PATH=/movies \
+      -e SERIES_PATH=/series \
+      -v indexarr_data:/app/data ghcr.io/pschmucker/indexarr:latest
+```
+
+### Manual Development Setup
+
+#### Prerequisites
+- Node.js (>=18)
+- Go (>=1.21)
+- mediainfo CLI
+
+#### Backend Setup
 1. Navigate to backend:
    ```bash
    cd backend/go
@@ -67,16 +129,21 @@ indexarr/
    ```bash
    go mod download && go mod tidy
    ```
-3. Run the server:
+3. Create `.env` file from example:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+4. Run the server:
    ```bash
    go run ./cmd/server
    ```
-4. Run tests:
+5. Run tests:
    ```bash
    go test ./...
    ```
 
-### Frontend Setup
+#### Frontend Setup
 1. Navigate to frontend:
    ```bash
    cd frontend/react
@@ -93,6 +160,16 @@ indexarr/
    ```bash
    npm test
    ```
+
+### Building Docker Image Locally
+
+```bash
+# Build the image
+docker build -t indexarr:latest .
+
+# Run the container
+docker run -d -p 80:80 -v indexarr_data:/app/data indexarr:latest
+```
 
 ## Design & Implementation
 - **Design system:** See `ux-ui/medialib_v4_detail_pages.html` for full mockups and CSS variables.

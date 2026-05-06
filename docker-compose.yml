@@ -1,0 +1,55 @@
+services:
+  indexarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: indexarr:latest
+    container_name: indexarr
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      # Persistent database storage
+      - indexarr_data:/app/data
+      # Optional: Mount your media library (read-only recommended)
+      - ${MOVIES_PATH}:/media/movies:ro
+      - ${SERIES_PATH}:/media/series:ro
+    environment:
+      # Server configuration
+      - SERVER_PORT=8080
+      - DB_PATH=/app/data/indexarr.db
+      - MEDIAINFO_PATH=/usr/bin/mediainfo
+      - GIN_MODE=release
+      
+      # API keys (replace with your actual keys or use .env file)
+      - TMDB_API_KEY=${TMDB_API_KEY:-your_tmdb_api_key_here}
+      - TVDB_API_KEY=${TVDB_API_KEY:-your_tvdb_api_key_here}
+      
+      # Media library paths (comma-separated, adjust to your mounted volumes)
+      - MEDIA_LIBRARY_PATHS=${MEDIA_LIBRARY_PATHS:-/media/movies,/media/series}
+      
+      # Scan configuration
+      - SCAN_INTERVAL=${SCAN_INTERVAL:-24}
+      - SCAN_TIMEOUT=${SCAN_TIMEOUT:-30}
+      
+      # Timezone (optional, adjust to your location)
+      - TZ=${TZ:-UTC}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8787/api/stats"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    # Optional: Resource limits
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 1G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+
+volumes:
+  indexarr_data:
+    driver: local

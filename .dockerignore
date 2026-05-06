@@ -1,0 +1,63 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+LICENSE
+AGENTS.md
+plan.md
+
+# Frontend
+frontend/react/node_modules
+frontend/react/dist
+frontend/react/build
+frontend/react/.vite
+frontend/react/.env
+frontend/react/.env.local
+frontend/react/.env.*.local
+frontend/react/npm-debug.log*
+frontend/react/yarn-debug.log*
+frontend/react/yarn-error.log*
+
+# Backend
+backend/go/indexarr
+backend/go/*.db
+backend/go/*.db-*
+backend/go/*.bak
+backend/go/.env
+backend/go/.env.local
+backend/go/vendor
+backend/go/tmp
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github
+
+# UX/UI mockups
+ux-ui
+
+# Test files and coverage
+*.test
+*.out
+coverage
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.log

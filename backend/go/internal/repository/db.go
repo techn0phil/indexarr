@@ -2,10 +2,13 @@ package repository
 
 import (
 	"database/sql"
-	"os"
+	_ "embed"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:embed schema.sql
+var schemaSQL string
 
 var db *sql.DB
 
@@ -20,13 +23,8 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Read and execute schema
-	schema, err := os.ReadFile("internal/repository/schema.sql")
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err := sqlDB.Exec(string(schema)); err != nil {
+	// Execute embedded schema
+	if _, err := sqlDB.Exec(schemaSQL); err != nil {
 		return nil, err
 	}
 
