@@ -35,13 +35,23 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       {/* Hero */}
       <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '20px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         {/* Poster */}
-        <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
-            {movie.title[0]}
-          </div>
-          <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', paddingX: '6px' }}>
-            {movie.title}
-          </div>
+        <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px', overflow: 'hidden' }}>
+          {movie.poster && movie.poster.startsWith('http') ? (
+            <img
+              src={movie.poster}
+              alt={movie.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+            />
+          ) : (
+            <>
+              <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                {movie.title[0]}
+              </div>
+              <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', padding: '0 6px' }}>
+                {movie.title}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Info */}
@@ -63,24 +73,24 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Badges */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-            {movie.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
               <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 4K UHD
               </span>
             )}
-            {movie.mediaInfo?.videoTracks[0]?.hdr.includes('Dolby') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
               <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Dolby Vision
               </span>
             )}
-            {movie.mediaInfo?.videoTracks[0]?.hdr.includes('HDR10') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
               <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 HDR10
               </span>
             )}
             {movie.mediaInfo?.videoTracks?.[0]?.codec && (
               <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                {movie.mediaInfo.videoTracks[0].codec}
+                {movie.mediaInfo.videoTracks?.[0]?.codec}
               </span>
             )}
           </div>
@@ -108,26 +118,42 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           Cast principal
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', padding: '14px 16px' }}>
-          {movie.cast.slice(0, 5).map((c) => (
+          {movie.cast?.slice(0, 5).map((c) => (
             <div key={c.id} style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  background: 'var(--color-background-secondary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: 'var(--color-text-tertiary)',
-                  margin: '0 auto 6px',
-                }}
-              >
-                {c.avatar}
-              </div>
+              {c.avatar && c.avatar.startsWith('http') ? (
+                <img
+                  src={c.avatar}
+                  alt={c.name}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    margin: '0 auto 6px',
+                    display: 'block',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    background: 'var(--color-background-secondary)',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: 'var(--color-text-tertiary)',
+                    margin: '0 auto 6px',
+                  }}
+                >
+                  {c.name ? c.name[0] : '?'}
+                </div>
+              )}
               <div style={{ fontSize: '10px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                 {c.name}
               </div>

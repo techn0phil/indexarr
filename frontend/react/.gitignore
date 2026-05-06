@@ -1,2 +1,4 @@
 node_modules
 .vite
+*.tsbuildinfo
+vite.config.d.ts

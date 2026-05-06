@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Series, PaginatedResponse } from '../types';
+import { useMemo, useState } from 'react';
+import { Series } from '../types';
 import { apiClient } from '../api/client';
+import { useInfiniteList } from '../hooks/useInfiniteList';
 import { SeriesCard } from '../components/SeriesCard';
 import { SeriesCardList } from '../components/SeriesCardList';
 import { StatCard } from '../components/StatCard';
 import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
+import { ScanStatusCard } from '../components/ScanStatusCard';
 
 interface ListSeriesProps {
   onSelectSeries: (id: number) => void;
@@ -45,9 +47,6 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
 };
 
 export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps) => {
-  const [series, setSeries] = useState<Series[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ complete: 0, total: 0, episodes: 0, diskSpace: 0 });
   const [activeFilters, setActiveFilters] = useState<Record<FilterType, string[]>>({
     status: [],
     resolution: [],
@@ -61,45 +60,44 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     return (saved as ViewType) || 'grid';
   });
 
+  // Build filter params for API
+  const filters = useMemo(() => {
+    const params: Record<string, string> = {};
+    Object.entries(activeFilters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        params[key] = values.join(',');
+      }
+    });
+    if (searchQuery) {
+      params.search = searchQuery;
+    }
+    return params;
+  }, [activeFilters, searchQuery]);
+
+  // Use infinite list hook for pagination
+  const { items: series, loading, hasMore, loadMore, reset } = useInfiniteList<Series>({
+    fetchFn: apiClient.getSeries,
+    pageSize: 50,
+    filters,
+  });
+
+  // Calculate stats from loaded series
+  const stats = useMemo(() => {
+    const complete = series.filter((s) => s.status === 'complete').length;
+    const episodes = series.reduce((sum, s) => sum + s.episodeCount, 0);
+    const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024 * 1024);
+    return { complete, total: series.length, episodes, diskSpace };
+  }, [series]);
+
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
     localStorage.setItem('series-view', newView);
   };
 
-  useEffect(() => {
-    const fetchSeries = async () => {
-      setLoading(true);
-      try {
-        // Build filter params
-        const filters: Record<string, string> = {};
-        Object.entries(activeFilters).forEach(([key, values]) => {
-          if (values.length > 0) {
-            filters[key] = values.join(',');
-          }
-        });
-
-        if (searchQuery) {
-          filters.search = searchQuery;
-        }
-
-        const response = await apiClient.getSeries(1, 50, filters);
-        const seriesData = response.data || [];
-        setSeries(seriesData);
-        
-        // Calculate stats
-        const complete = seriesData.filter((s) => s.status === 'complete').length;
-        const episodes = seriesData.reduce((sum, s) => sum + s.episodeCount, 0);
-        const diskSpace = seriesData.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024 * 1024);
-        setStats({ complete, total: seriesData.length, episodes, diskSpace });
-      } catch (error) {
-        console.error('Failed to fetch series:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSeries();
-  }, [activeFilters, searchQuery]);
+  const handleScanComplete = () => {
+    // Refresh series after scan
+    reset();
+  };
 
   const handleFilterApply = (filterType: FilterType, values: string[]) => {
     setActiveFilters((prev) => ({ ...prev, [filterType]: values }));
@@ -173,11 +171,12 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
         <StatCard label="Séries" value={stats.total} subLabel={`${stats.complete} complètes`} />
         <StatCard label="Épisodes" value={stats.episodes} subLabel="total" />
         <StatCard label="Espace" value={`${stats.diskSpace.toFixed(1)} To`} subLabel="moy. par ep." />
         <StatCard label="Problèmes" value="0" subLabel="épisodes manquants" />
+        <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
       {/* Grid or List */}
@@ -190,17 +189,63 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           Aucune série trouvée
         </div>
       ) : view === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-          {series.map((s) => (
-            <SeriesCard key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+            {series.map((s) => (
+              <SeriesCard key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
+            ))}
+          </div>
+          {hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+              <button
+                onClick={loadMore}
+                disabled={loading}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: loading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+                  background: 'var(--color-background-secondary)',
+                  border: '0.5px solid var(--color-border-tertiary)',
+                  borderRadius: 'var(--border-radius-md)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {loading ? 'Chargement...' : 'Charger plus'}
+              </button>
+            </div>
+          )}
+        </>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {series.map((s) => (
-            <SeriesCardList key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {series.map((s) => (
+              <SeriesCardList key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
+            ))}
+          </div>
+          {hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+              <button
+                onClick={loadMore}
+                disabled={loading}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: loading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+                  background: 'var(--color-background-secondary)',
+                  border: '0.5px solid var(--color-border-tertiary)',
+                  borderRadius: 'var(--border-radius-md)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {loading ? 'Chargement...' : 'Charger plus'}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Filter Modals */}

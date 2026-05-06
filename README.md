@@ -2,7 +2,13 @@
 
 Indexarr is a media library management application inspired by Sonarr and Radarr. It provides centralized catalog management for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
 
-![VDL Integration screenshot](ux-ui/movies.png)
+> [!WARNING]
+> **Disclaimer:** This software is provided as-is, without any warranty. Use at your own risk. The authors and contributors are not responsible for any data loss, damage, or issues resulting from the use of this application.
+>
+> **Note:** This application has been developed with intensive help from AI coding agents (including GitHub Copilot and similar tools).
+
+
+![Main movie page screenshot](ux-ui/movies.png)
 
 ## Features
 - Centralized movie and TV series catalog

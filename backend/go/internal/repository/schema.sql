@@ -13,9 +13,10 @@ CREATE TABLE IF NOT EXISTS movies (
   file_path TEXT,
   container TEXT,
   date_added TEXT,
+  last_scanned TEXT,
   tmdb_id INTEGER,
   imdb_id TEXT,
-  UNIQUE(file_path)
+  poster TEXT
 );
 
 -- Series table
@@ -59,8 +60,19 @@ CREATE TABLE IF NOT EXISTS episodes (
   file_size INTEGER,
   file_path TEXT,
   date_added TEXT,
-  FOREIGN KEY(series_id) REFERENCES series(id),
-  UNIQUE(series_id, season_num, episode_num)
+  last_scanned TEXT,
+  FOREIGN KEY(series_id) REFERENCES series(id)
+);
+
+-- Scan status table (tracks scan progress)
+CREATE TABLE IF NOT EXISTS scan_status (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  status TEXT DEFAULT 'idle',
+  started_at TEXT,
+  completed_at TEXT,
+  files_found INTEGER DEFAULT 0,
+  files_processed INTEGER DEFAULT 0,
+  error_message TEXT
 );
 
 -- Video tracks table

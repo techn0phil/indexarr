@@ -154,7 +154,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     {ep.title}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
-                    {Math.round(ep.duration / 60)} min · {ep.mediaInfo?.videoTracks[0]?.codec || 'N/A'}
+                    {Math.round(ep.duration / 60)} min · {ep.mediaInfo?.videoTracks?.[0]?.codec || 'N/A'}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
