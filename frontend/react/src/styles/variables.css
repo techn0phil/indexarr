@@ -51,8 +51,21 @@
   --topbar-height: 56px;
 }
 
+/* Dark mode via data-theme attribute (manual override) */
+html[data-theme="dark"] {
+  --color-background-primary: #1a1a1a;
+  --color-background-secondary: #2a2a2a;
+  --color-background-tertiary: #3a3a3a;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
+  --color-text-tertiary: #999999;
+  --color-border-tertiary: #404040;
+  --color-border-secondary: #606060;
+}
+
+/* Fallback: Dark mode via system preference (when no manual preference set) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  html:not([data-theme]) {
     --color-background-primary: #1a1a1a;
     --color-background-secondary: #2a2a2a;
     --color-background-tertiary: #3a3a3a;

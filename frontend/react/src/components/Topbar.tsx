@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 import styles from '../styles/topbar.module.css';
 
 interface TopbarProps {
@@ -72,6 +73,8 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
           </span>
         )}
       </div>
+
+      <ThemeToggle />
     </div>
   );
 };

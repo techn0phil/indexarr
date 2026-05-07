@@ -90,3 +90,29 @@
   color: var(--color-text-tertiary);
   font-weight: 500;
 }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 0.5px solid transparent;
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-tertiary);
+  color: var(--color-text-primary);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+}
