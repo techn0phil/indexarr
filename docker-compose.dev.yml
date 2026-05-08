@@ -1,7 +1,9 @@
 services:
   indexarr:
-    image: ghcr.io/pschmucker/indexarr:latest
-    container_name: indexarr
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: indexarr-dev
     restart: unless-stopped
     ports:
       - 8787:8787
@@ -12,15 +14,15 @@ services:
       - ${TV_SHOWS_PATH}:/data/tv-shows:ro
     environment:
       # API keys (replace with your actual keys or use .env file)
-      TMDB_API_KEY: ${TMDB_API_KEY}
-      TVDB_API_KEY: ${TVDB_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TVDB_API_KEY=${TVDB_API_KEY}
       
       # Scan configuration
-      SCAN_INTERVAL: ${SCAN_INTERVAL:-24}
-      SCAN_TIMEOUT: ${SCAN_TIMEOUT:-30}
+      - SCAN_INTERVAL=${SCAN_INTERVAL:-24}
+      - SCAN_TIMEOUT=${SCAN_TIMEOUT:-30}
       
       # Timezone (optional, adjust to your location)
-      TZ: ${TZ:-UTC}
+      - TZ=${TZ:-UTC}
 
 
 volumes:

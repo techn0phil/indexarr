@@ -17,8 +17,8 @@ docker run -d \
   -v indexarr_data:/app/data \
   -e TMDB_API_KEY=your_key \
   -e TVDB_API_KEY=your_key \
-  -e MOVIES_PATH=/media/movies \
-  -e SERIES_PATH=/media/series \
+  -e MOVIES_PATH=/data/movies \
+  -e TV_SHOWS_PATH=/data/tv-shows \
   indexarr:latest
 
 # Pull from GitHub Container Registry
@@ -106,18 +106,16 @@ indexarr/
 
 ```yaml
 volumes:
-  - indexarr_data:/app/data
+  - indexarr-data:/app/data
 ```
 
 ### Media Library Access (Optional)
 
 ```yaml
 volumes:
-  - /host/path/to/movies:/media/movies:ro
-  - /host/path/to/series:/media/series:ro
+  - /host/path/to/movies:/data/movies:ro
+  - /host/path/to/tv-shows:/data/tv-shows:ro
 ```
-
-Set `MEDIA_LIBRARY_PATHS=/media/movies,/media/series`
 
 ## Ports
 
@@ -131,7 +129,7 @@ Set `MEDIA_LIBRARY_PATHS=/media/movies,/media/series`
 The container includes a health check that runs every 30 seconds:
 
 ```bash
-wget --no-verbose --tries=1 --spider http://localhost/api/stats
+wget --no-verbose --tries=1 -O /dev/null http://localhost:8787/health
 ```
 
 Check health status:

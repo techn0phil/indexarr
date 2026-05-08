@@ -54,17 +54,25 @@ indexarr/
 
 ## Getting Started
 
-### Quick Start with Docker (Recommended)
+### Quick Start installation
 
-The easiest way to run Indexarr is with Docker:
+The easiest and recommended way to run Indexarr is with Docker Compose. The provided `docker-compose.yml` is production-ready with automatic restarts, data persistence, and proper networking.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/pschmucker/indexarr.git
-   cd indexarr
-   ```
+#### Prerequisites
+- Docker and Docker Compose installed
+- TMDB and TVDB API keys (optional, but recommended for full metadata)
 
-2. **Create environment file** (optional):
+#### Installation Steps
+
+1. **Create docker-compose file:**
+
+   Download or copy content from https://github.com/pschmucker/indexarr/blob/main/docker-compose.yml
+   
+2. **Configure environment variables:**
+   
+   Download or copy content from https://github.com/pschmucker/indexarr/blob/main/.env.example
+
+   Create a `.env` file with your configuration:
    ```bash
    cp .env.example .env
    # Edit .env with your TMDB/TVDB API keys and media library paths
@@ -74,32 +82,63 @@ The easiest way to run Indexarr is with Docker:
    ```bash
    docker compose up -d
    ```
+   
+   This will:
+   - Pull the latest image from GitHub Container Registry
+   - Create a persistent volume for application data
+   - Mount your media libraries (read-only)
+   - Start the service with automatic restart on failure
 
-4. **Access the application:**
-   - Frontend: http://localhost:8787
-   - API: http://localhost:8787/api
-
-5. **View logs:**
+4. **Verify it's running:**
    ```bash
+   docker compose ps
    docker compose logs -f
    ```
 
-6. **Stop the application:**
-   ```bash
-   docker compose down
-   ```
+5. **Access the application:**
+   - **Frontend:** http://localhost:8787
+   - **API:** http://localhost:8787/api
+   - **Health check:** http://localhost:8787/health
 
-#### Configuration
+#### Configuration Reference
 
-Edit `docker-compose.yml` or create a `.env` file with:
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `TMDB_API_KEY` | - | No | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
+| `TVDB_API_KEY` | - | No | TVDB API key for tv-shows metadata ([get here](https://www.thetvdb.com/api-information)) |
+| `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
+| `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
+| `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
+| `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
+| `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `TZ` | `UTC` | Timezone for scheduled tasks |
-| `TMDB_API_KEY` | - | TMDB API key for movie metadata |
-| `TVDB_API_KEY` | - | TVDB API key for series metadata |
-| `MOVIES_PATH` | `/media/movies` | Comma-separated paths to movies folder |
-| `SERIES_PATH` | `/media/series` | Comma-separated paths to series folder |
+#### Common Operations
+
+**View logs in real-time:**
+```bash
+docker compose logs -f
+```
+
+**Stop the application:**
+```bash
+docker compose down
+```
+
+**Stop and remove all data:**
+```bash
+docker compose down -v
+```
+
+**Restart the application:**
+```bash
+docker compose restart
+```
+
+**Update to latest version:**
+```bash
+docker compose pull
+docker compose up -d
+```
 
 #### Using Pre-built Image from GitHub Container Registry
 
@@ -109,7 +148,7 @@ docker run -d -p 8787:8787 \
       -e TMDB_API_KEY=fffffffffffffffff \
       -e TVDB_API_KEY=fffffffffffffffff \
       -e MOVIES_PATH=/movies \
-      -e SERIES_PATH=/series \
+      -e TV_SHOWS_PATH=/tv-shows \
       -v indexarr_data:/app/data ghcr.io/pschmucker/indexarr:latest
 ```
 

@@ -1,9 +1,9 @@
 # Indexarr Backend (Go)
 
-This is the backend for Indexarr, a media library management application. It provides a RESTful API for managing movies, series, episodes, and technical metadata.
+This is the backend for Indexarr, a media library management application. It provides a RESTful API for managing movies, tv-shows, episodes, and technical metadata.
 
 ## Features
-- RESTful API for movies, series, episodes
+- RESTful API for movies, tv-shows, episodes
 - Multi-criteria filtering and search
 - Media file scanning and metadata extraction
 - Statistics service (totals, disk usage, 4K %)
