@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
@@ -73,9 +73,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Badges */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
               <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                4K UHD
+                4K
+              </span>
+            )}
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+              <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                1080p
               </span>
             )}
             {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
@@ -83,9 +88,34 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 Dolby Vision
               </span>
             )}
+            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+              <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                HDR10+
+              </span>
+            )}
             {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
               <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 HDR10
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'TrueHD') && (
+              <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                TrueHD
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'E-AC-3') && (
+              <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                Dolby Digital Plus
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec.includes('Atmos')) && (
+              <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                Atmos
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'DTS') && (
+              <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                DTS
               </span>
             )}
             {movie.mediaInfo?.videoTracks?.[0]?.codec && (
@@ -173,55 +203,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           </h2>
           <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Video */}
-            <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-              Vidéo — piste 1
-            </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                {movie.mediaInfo?.videoTracks?.[0] && (
-                  <>
-                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Codec
-                      </td>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.videoTracks?.[0]?.codec}
-                      </td>
-                    </tr>
-                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Résolution
-                      </td>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.videoTracks?.[0]?.resolution}
-                      </td>
-                    </tr>
-                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Bitrate
-                      </td>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.videoTracks?.[0]?.bitrate}
-                      </td>
-                    </tr>
-                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        HDR
-                      </td>
-                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.videoTracks?.[0]?.hdr}
-                      </td>
-                    </tr>
-                  </>
-                )}
-              </tbody>
-            </table>
-
-            {/* Audio */}
-            {movie.mediaInfo?.audioTracks && movie.mediaInfo.audioTracks.length > 0 && (
-              <>
-                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-                  Audio — piste 1
+            {movie.mediaInfo?.videoTracks.map((videoTrack, index) => (
+              <Fragment key={index}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                    <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
+                    <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
+                  </svg>
+                  Vidéo — piste {index + 1}
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
@@ -230,7 +219,71 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         Codec
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.audioTracks?.[0]?.codec}
+                        {videoTrack.codec}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Résolution
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.resolution}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Bitrate
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.bitrate}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        FPS
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.fps}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        HDR
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.hdr}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Espace colorimétrique
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.colorSpace}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </Fragment>
+            ))}
+
+            {/* Audio */}
+            {movie.mediaInfo?.audioTracks.map((audioTrack, index) => (
+              <Fragment key={index}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                    <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
+                  </svg>
+                  Audio — piste {index + 1}
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Codec
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.codec}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -238,13 +291,78 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         Canaux
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {movie.mediaInfo?.audioTracks?.[0]?.channels}
+                        {audioTrack.channels}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Bitrate
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.bitrate}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Langue
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.language}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Fréquence d'échantillonnage
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.sampleRate}
                       </td>
                     </tr>
                   </tbody>
                 </table>
-              </>
-            )}
+              </Fragment>
+            ))}
+
+            {/* Subtitles */}
+            {(movie.mediaInfo?.subtitleTracks ?? []).map((subtitleTrack, index) => (
+              <Fragment key={index}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                    <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
+                    <path d="M5 8h6M5 10h4" />
+                  </svg>
+                  Sous-titres — piste {index + 1}
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Langue
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {subtitleTrack.language}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Format
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {subtitleTrack.format}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Forcé
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {subtitleTrack.forced ? 'Oui' : 'Non'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </Fragment>
+            ))}
           </div>
         </div>
       )}

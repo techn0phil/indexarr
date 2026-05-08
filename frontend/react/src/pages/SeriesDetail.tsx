@@ -70,7 +70,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-              {series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
+              {series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('x2160') && (
                 <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                   4K UHD
                 </span>

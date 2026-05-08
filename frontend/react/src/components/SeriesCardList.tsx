@@ -44,7 +44,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           </span>
         </div>
         <div className={comStyles['card-list-badges']}>
-          {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+          {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
             <span className={comStyles['badge-4k']}>4K</span>
           )}
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (

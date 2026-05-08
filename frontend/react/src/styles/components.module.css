@@ -81,6 +81,50 @@
   color: var(--color-badge-hdr-text);
 }
 
+/* Badge for TrueHD */
+.badge-truehd {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-truehd);
+  color: var(--color-badge-truehd-text);
+}
+
+/* Badge for Dolby Digital Plus */
+.badge-ddplus {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-ddplus);
+  color: var(--color-badge-ddplus-text);
+}
+
+/* Badge for Dolby Atmos */
+.badge-atmos {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-atmos);
+  color: var(--color-badge-atmos-text);
+}
+
+/* Badge for DTS */
+.badge-dts {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-dts);
+  color: var(--color-badge-dts-text);
+}
+
 .badge-missing {
   font-size: 9px;
   padding: 2px 6px;

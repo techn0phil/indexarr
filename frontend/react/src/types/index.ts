@@ -98,6 +98,8 @@ export interface AudioTrack {
 export interface SubtitleTrack {
   language: string;
   format: string;
+  forced: boolean;
+  default: boolean;
 }
 
 export interface FilterCriteria {

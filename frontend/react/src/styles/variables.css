@@ -1,17 +1,18 @@
 :root {
   /* Backgrounds */
-  --color-background-primary: #FFFFFF;
-  --color-background-secondary: #F5F5F5;
-  --color-background-tertiary: #EBEBEB;
+  --color-background-primary: light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1));
+  --color-background-secondary: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
+  --color-background-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
 
   /* Text */
-  --color-text-primary: #000000;
-  --color-text-secondary: #606060;
-  --color-text-tertiary: #999999;
+  --color-text-primary: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+  --color-text-secondary: light-dark(rgba(61, 61, 58, 1), rgba(194, 192, 182, 1));
+  --color-text-tertiary: light-dark(rgba(115, 114, 108, 1), rgba(156, 154, 146, 1));
 
   /* Borders */
-  --color-border-tertiary: #D9D9D9;
-  --color-border-secondary: #B3B3B3;
+  --color-border-primary: light-dark(rgba(31, 30, 29, 0.4), rgba(222, 220, 209, 0.4));
+  --color-border-secondary: light-dark(rgba(31, 30, 29, 0.3), rgba(222, 220, 209, 0.3));
+  --color-border-tertiary: light-dark(rgba(31, 30, 29, 0.15), rgba(222, 220, 209, 0.15));
 
   /* Brand */
   --color-primary: #1D9E75;
@@ -34,6 +35,14 @@
   --color-badge-dv-text: #3C3489;
   --color-badge-hdr: #E6F1FB;
   --color-badge-hdr-text: #0C447C;
+  --color-badge-truehd: #E8F8F5;
+  --color-badge-truehd-text: #1B5E50;
+  --color-badge-ddplus: #E8F8F5;
+  --color-badge-ddplus-text: #1B5E50;
+  --color-badge-atmos: #E8F8F5;
+  --color-badge-atmos-text: #1B5E50;
+  --color-badge-dts: #E8F8F5;
+  --color-badge-dts-text: #1B5E50;
   --color-badge-missing: #FCEBEB;
   --color-badge-missing-text: #791F1F;
 

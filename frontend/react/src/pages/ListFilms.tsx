@@ -25,18 +25,26 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
     { value: 'problem', label: 'Problème' },
   ],
   resolution: [
-    { value: '3840', label: '4K UHD (3840x2160)' },
-    { value: '1920', label: '1080p (1920x1080)' },
-    { value: '1280', label: '720p (1280x720)' },
+    { value: '2160', label: '4K UHD (3840x2160)' },
+    { value: '1080', label: 'Full HD (1920x1080)' },
+    { value: '720', label: 'HD (1280x720)' },
+    { value: '480', label: 'SD (720x480)' },
   ],
   codec: [
+    { value: 'AV1', label: 'AV1' },
     { value: 'H.265', label: 'H.265 (HEVC)' },
     { value: 'H.264', label: 'H.264 (AVC)' },
-    { value: 'AV1', label: 'AV1' },
+    { value: 'MPEG-4', label: 'MPEG-4' },
   ],
   audio: [
-    { value: 'TrueHD Atmos', label: 'TrueHD Atmos' },
-    { value: 'DTS-HD MA', label: 'DTS-HD MA' },
+    { value: 'TrueHD Atmos', label: 'Dolby TrueHD Atmos' },
+    { value: 'TrueHD', label: 'Dolby TrueHD' },
+    { value: 'E-AC-3 Atmos', label: 'Dolby Digital Plus Atmos' },
+    { value: 'E-AC-3', label: 'Dolby Digital Plus' },
+    { value: 'AC-3', label: 'Dolby Digital' },
+    { value: 'DTS:X', label: 'DTS:X' },
+    { value: 'DTS-HD MA', label: 'DTS-HD Master Audio' },
+    { value: 'DTS', label: 'DTS' },
     { value: 'AAC', label: 'AAC' },
   ],
   hdr: [
@@ -114,7 +122,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   const stats = useMemo(() => {
     const available = movies.filter((m) => m.status === 'available').length;
     const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
-    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
+    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160')).length;
     return { available, total: movies.length, diskSpace, fourK };
   }, [movies]);
 

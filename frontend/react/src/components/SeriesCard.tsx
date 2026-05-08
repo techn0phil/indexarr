@@ -33,7 +33,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           {series.title}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
+          {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('x2160') && (
             <span className={comStyles['badge-4k']}>4K</span>
           )}
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.hdr.includes('Dolby') && (

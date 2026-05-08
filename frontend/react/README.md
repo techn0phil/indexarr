@@ -3,7 +3,7 @@
 This is the frontend for Indexarr, a media library management application inspired by Sonarr and Radarr. It provides a modern, responsive UI for browsing and managing movies and TV series.
 
 ## Features
-- Grid/list views for movies and series
+- Grid/list views for movies and tv-shows
 - Multi-criteria filtering (status, resolution, codec, audio, HDR)
 - Real-time statistics and search
 - Detail pages with technical info and cast

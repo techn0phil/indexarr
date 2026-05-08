@@ -21,27 +21,43 @@ type MediainfoOutput struct {
 }
 
 type MediainfoTrack struct {
-	Type          string `json:"@type"`
-	Format        string `json:"Format"`
-	FormatProfile string `json:"Format_profile"`
-	CodecID       string `json:"CodecID"`
-	Duration      string `json:"Duration"`
-	Width         string `json:"Width"`
-	Height        string `json:"Height"`
-	FrameRate     string `json:"FrameRate"`
-	FrameRateMode string `json:"FrameRate_Mode"`
-	BitRate       string `json:"BitRate"`
-	BitRateMode   string `json:"BitRate_Mode"`
-	BitDepth      string `json:"BitDepth"`
-	ColorSpace    string `json:"colour_primaries"`
-	HDRFormat     string `json:"HDR_Format"`
-	HDRFormatComp string `json:"HDR_Format_Compatibility"`
-	Channels      string `json:"Channels"`
-	ChannelLayout string `json:"ChannelLayout"`
-	SamplingRate  string `json:"SamplingRate"`
-	Language      string `json:"Language"`
-	Title         string `json:"Title"`
-	FileSize      string `json:"FileSize"`
+	// General track fields
+	FileSize string `json:"FileSize"`
+
+	// Common fields for all track types
+	Type      string `json:"@type"`
+	Format    string `json:"Format"`
+	CodecID   string `json:"CodecID"`
+	Duration  string `json:"Duration"`
+	FrameRate string `json:"FrameRate"`
+	BitRate   string `json:"BitRate"`
+	Default   string `json:"Default"`
+	Forced    string `json:"Forced"`
+
+	// Video-specific fields
+	FormatProfile     string `json:"Format_profile"`
+	HDRFormat         string `json:"HDR_Format"`
+	HDRFormatComp     string `json:"HDR_Format_Compatibility"`
+	Width             string `json:"Width"`
+	Height            string `json:"Height"`
+	FrameRateMode     string `json:"FrameRate_Mode"`
+	ColorSpace        string `json:"ColorSpace"`
+	ChromaSubsampling string `json:"ChromaSubsampling"`
+	BitDepth          string `json:"BitDepth"`
+	ColorPrimaries    string `json:"colour_primaries"`
+
+	// Audio-specific fields
+	FormatCommercial         string `json:"Format_Commercial_IfAny"`
+	FormatAdditionalFeatures string `json:"Format_AdditionalFeatures"`
+	BitRateMode              string `json:"BitRate_Mode"`
+	Channels                 string `json:"Channels"`
+	ChannelLayout            string `json:"ChannelLayout"`
+	SamplingRate             string `json:"SamplingRate"`
+	CompressionMode          string `json:"Compression_Mode"`
+
+	// Audio and Subtitle-specific fields
+	Language string `json:"Language"`
+	Title    string `json:"Title"`
 }
 
 // Extractor handles mediainfo extraction from files
@@ -111,15 +127,18 @@ func (e *Extractor) parseMediaInfo(mi *MediainfoOutput) (*models.MediaInfo, int6
 			info.AudioTracks = append(info.AudioTracks, models.AudioTrack{
 				Codec:      e.parseAudioCodec(track),
 				Channels:   e.parseChannels(track),
-				Language:   track.Language,
+				Language:   e.formatLanguage(track.Language),
 				SampleRate: e.formatSampleRate(track.SamplingRate),
 				Bitrate:    e.formatBitrate(track.BitRate),
+				Default:    track.Default,
 			})
 
 		case "Text":
 			info.SubtitleTracks = append(info.SubtitleTracks, models.SubtitleTrack{
-				Language: track.Language,
+				Language: e.formatLanguage(track.Language),
 				Format:   track.Format,
+				Forced:   track.Forced,
+				Default:  track.Default,
 			})
 		}
 	}
@@ -129,6 +148,7 @@ func (e *Extractor) parseMediaInfo(mi *MediainfoOutput) (*models.MediaInfo, int6
 
 func (e *Extractor) parseVideoCodec(track MediainfoTrack) string {
 	format := track.Format
+
 	if format == "" {
 		return "Unknown"
 	}
@@ -153,9 +173,11 @@ func (e *Extractor) parseVideoCodec(track MediainfoTrack) string {
 func (e *Extractor) parseResolution(track MediainfoTrack) string {
 	width := strings.TrimSpace(track.Width)
 	height := strings.TrimSpace(track.Height)
+
 	if width == "" || height == "" {
 		return "Unknown"
 	}
+
 	// Remove any non-numeric suffixes
 	width = strings.Split(width, " ")[0]
 	height = strings.Split(height, " ")[0]
@@ -168,6 +190,17 @@ func (e *Extractor) parseHDR(track MediainfoTrack) string {
 
 	// Check for Dolby Vision
 	if strings.Contains(strings.ToLower(hdrFormat), "dolby vision") {
+		if (strings.Contains(strings.ToLower(hdrCompat), "hdr10+")) &&
+			track.BitDepth == "10" {
+
+			return "Dolby Vision / HDR10+"
+		}
+		if (strings.Contains(strings.ToLower(hdrCompat), "hdr10")) &&
+			track.BitDepth == "10" {
+
+			return "Dolby Vision / HDR10"
+		}
+
 		return "Dolby Vision"
 	}
 
@@ -181,9 +214,8 @@ func (e *Extractor) parseHDR(track MediainfoTrack) string {
 	if strings.Contains(strings.ToLower(hdrFormat), "smpte st 2086") ||
 		strings.Contains(strings.ToLower(hdrCompat), "hdr10") ||
 		track.BitDepth == "10" {
-		// Only mark as HDR10 if color space is BT.2020
-		if strings.Contains(strings.ToLower(track.ColorSpace), "bt.2020") ||
-			strings.Contains(strings.ToLower(track.ColorSpace), "2020") {
+		// Only mark as HDR10 if color primaries is BT.2020
+		if e.parseColorSpace(track) == "BT.2020" {
 			return "HDR10"
 		}
 	}
@@ -192,58 +224,81 @@ func (e *Extractor) parseHDR(track MediainfoTrack) string {
 }
 
 func (e *Extractor) parseColorSpace(track MediainfoTrack) string {
-	cs := track.ColorSpace
-	if cs == "" {
+	cp := track.ColorPrimaries
+
+	if cp == "" {
 		return "BT.709" // Default SDR color space
 	}
 
-	if strings.Contains(strings.ToLower(cs), "2020") {
+	if strings.Contains(strings.ToLower(cp), "2020") {
 		return "BT.2020"
 	}
-	if strings.Contains(strings.ToLower(cs), "709") {
+	if strings.Contains(strings.ToLower(cp), "709") {
 		return "BT.709"
 	}
-	return cs
+
+	return cp
 }
 
 func (e *Extractor) parseAudioCodec(track MediainfoTrack) string {
 	format := track.Format
-	profile := track.FormatProfile
+	commercialName := track.FormatCommercial
+	additionalFeatures := track.FormatAdditionalFeatures
+	codec := track.CodecID
+	title := track.Title
 
 	if format == "" {
 		return "Unknown"
 	}
 
 	// Handle TrueHD with Atmos
-	if strings.Contains(strings.ToLower(format), "truehd") {
-		if strings.Contains(strings.ToLower(profile), "atmos") ||
-			strings.Contains(strings.ToLower(track.Title), "atmos") {
+	if strings.Contains(strings.ToLower(commercialName), "truehd") ||
+		strings.Contains(strings.ToLower(codec), "truehd") ||
+		strings.Contains(strings.ToLower(title), "truehd") {
+
+		if strings.Contains(strings.ToLower(commercialName), "atmos") ||
+			strings.Contains(strings.ToLower(title), "atmos") {
+
 			return "TrueHD Atmos"
 		}
+
 		return "TrueHD"
 	}
 
 	// Handle DTS variants
-	if strings.Contains(strings.ToUpper(format), "DTS") {
-		if strings.Contains(strings.ToUpper(profile), "MA") {
+	if strings.Contains(strings.ToUpper(format), "DTS") ||
+		strings.Contains(strings.ToUpper(codec), "DTS") {
+
+		if strings.Contains(strings.ToLower(commercialName), "master audio") ||
+			strings.Contains(strings.ToLower(commercialName), "ma") ||
+			strings.Contains(strings.ToLower(title), "master audio") ||
+			strings.Contains(strings.ToLower(title), "ma") {
+
 			return "DTS-HD MA"
 		}
-		if strings.Contains(strings.ToUpper(profile), "X") {
+		if strings.Contains(strings.ToUpper(commercialName), "X") ||
+			strings.Contains(strings.ToLower(title), "X") {
+
 			return "DTS:X"
 		}
+
 		return "DTS"
 	}
 
 	// Handle AC-3 / E-AC-3
 	if strings.Contains(strings.ToUpper(format), "E-AC-3") ||
 		strings.Contains(strings.ToUpper(format), "EAC3") {
-		if strings.Contains(strings.ToLower(track.Title), "atmos") {
+
+		if strings.Contains(strings.ToUpper(additionalFeatures), "JOC") {
 			return "E-AC-3 Atmos"
 		}
+
 		return "E-AC-3"
 	}
+
 	if strings.Contains(strings.ToUpper(format), "AC-3") ||
 		strings.Contains(strings.ToUpper(format), "AC3") {
+
 		return "AC-3"
 	}
 
@@ -282,9 +337,36 @@ func (e *Extractor) parseChannels(track MediainfoTrack) string {
 	}
 }
 
+func (e *Extractor) formatLanguage(code string) string {
+	if code == "" {
+		return "Unknown"
+	}
+
+	switch strings.ToLower(code) {
+	case "en":
+		return "English"
+	case "fr":
+		return "French"
+	case "es":
+		return "Spanish"
+	case "de":
+		return "German"
+	case "it":
+		return "Italian"
+	case "ja":
+		return "Japanese"
+	case "ko":
+		return "Korean"
+	case "zh":
+		return "Chinese"
+	default:
+		return code
+	}
+}
+
 func (e *Extractor) formatBitrate(bitrate string) string {
 	if bitrate == "" {
-		return ""
+		return "Unknown"
 	}
 
 	// Parse as integer (bits per second)
@@ -297,13 +379,19 @@ func (e *Extractor) formatBitrate(bitrate string) string {
 	if bps >= 1000000 {
 		return fmt.Sprintf("%.1f Mbps", bps/1000000)
 	}
-	return fmt.Sprintf("%.0f kbps", bps/1000)
+
+	if bps >= 1000 {
+		return fmt.Sprintf("%.0f kbps", bps/1000)
+	}
+
+	return fmt.Sprintf("%.0f bps", bps)
 }
 
 func (e *Extractor) formatSampleRate(rate string) string {
 	if rate == "" {
-		return ""
+		return "Unknown"
 	}
+
 	return fmt.Sprintf("%s Hz", strings.Split(rate, " ")[0])
 }
 
