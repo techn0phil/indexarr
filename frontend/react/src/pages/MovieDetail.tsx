@@ -63,8 +63,8 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px',
-                background: '#FAF3E2',
-                color: '#BA7517',
+                background: 'var(--color-badge-rating)',
+                color: 'var(--color-badge-rating-text)',
                 borderRadius: '99px',
                 fontSize: '12px',
                 fontWeight: 500,
@@ -74,8 +74,8 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 minWidth: '36px',
                 height: '22px',
               }}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="#BA7517" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
-                <span style={{ fontSize: '12px', fontWeight: 500, color: '#BA7517', lineHeight: 1 }}>{movie.rating?.toFixed(1)}</span>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{movie.rating?.toFixed(1)}</span>
               </span>
             )}
           </h1>

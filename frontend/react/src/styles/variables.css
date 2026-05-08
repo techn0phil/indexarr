@@ -47,6 +47,8 @@
   --color-badge-missing-text: #791F1F;
   --color-badge-problem: #FCEBEB;
   --color-badge-problem-text: #791F1F;
+  --color-badge-rating: #FAF3E2;
+  --color-badge-rating-text: #BA7517;
 
   /* Dimensions */
   --border-radius-md: 6px;
@@ -94,6 +96,8 @@ html[data-theme="dark"] {
   --color-badge-missing-text: #FCEBEB;
   --color-badge-problem: #791F1F;
   --color-badge-problem-text: #FCEBEB;
+  --color-badge-rating: #BA7517;
+  --color-badge-rating-text: #FAF3E2;
 
   --color-primary: #9FE1CB;
   --color-primary-light: #085041;
@@ -135,6 +139,8 @@ html[data-theme="dark"] {
     --color-badge-missing-text: #FCEBEB;
     --color-badge-problem: #791F1F;
     --color-badge-problem-text: #FCEBEB;
+    --color-badge-rating: #BA7517;
+    --color-badge-rating-text: #FAF3E2;
 
     --color-primary: #9FE1CB;
     --color-primary-light: #085041;
