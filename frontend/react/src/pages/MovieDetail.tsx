@@ -73,9 +73,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Badges */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
               <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                4K UHD
+                4K
+              </span>
+            )}
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+              <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                1080p
               </span>
             )}
             {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
@@ -83,9 +88,34 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 Dolby Vision
               </span>
             )}
+            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+              <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                HDR10+
+              </span>
+            )}
             {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
               <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 HDR10
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'TrueHD') && (
+              <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                TrueHD
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'E-AC-3') && (
+              <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                Dolby Digital Plus
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec.includes('Atmos')) && (
+              <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                Atmos
+              </span>
+            )}
+            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'DTS') && (
+              <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                DTS
               </span>
             )}
             {movie.mediaInfo?.videoTracks?.[0]?.codec && (
