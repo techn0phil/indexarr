@@ -210,10 +210,26 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        FPS
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.fps}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
                         HDR
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
                         {videoTrack.hdr}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Espace colorimétrique
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {videoTrack.colorSpace}
                       </td>
                     </tr>
                   </tbody>
@@ -248,6 +264,30 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {audioTrack.channels}
                       </td>
                     </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Bitrate
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.bitrate}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Langue
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.language}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Fréquence d'échantillonnage
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {audioTrack.sampleRate}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </Fragment>
@@ -279,6 +319,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
                         {subtitleTrack.format}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                        Forcé
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                        {subtitleTrack.forced ? 'Oui' : 'Non'}
                       </td>
                     </tr>
                   </tbody>
