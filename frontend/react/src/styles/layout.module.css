@@ -8,8 +8,8 @@
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
-  background-color: var(--color-background-primary);
-  border-right: 0.5px solid var(--color-border-tertiary);
+  background-color: var(--color-background-secondary);
+  border-right: 0.5px solid var(--color-border-secondary);
   display: flex;
   flex-direction: column;
   z-index: 100;

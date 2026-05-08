@@ -147,7 +147,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
         <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
           Cast principal
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', padding: '14px 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-secondary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
           {movie.cast?.slice(0, 5).map((c) => (
             <div key={c.id} style={{ textAlign: 'center' }}>
               {c.avatar && c.avatar.startsWith('http') ? (
@@ -170,7 +170,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     width: '44px',
                     height: '44px',
                     borderRadius: '50%',
-                    background: 'var(--color-background-secondary)',
+                    background: 'var(--color-background-tertiary)',
                     border: '0.5px solid var(--color-border-tertiary)',
                     display: 'flex',
                     alignItems: 'center',
@@ -201,11 +201,11 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
             Métadonnées du fichier
           </h2>
-          <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--color-background-tertiary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Video */}
             {movie.mediaInfo?.videoTracks.map((videoTrack, index) => (
               <Fragment key={index}>
-                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                     <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                     <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
@@ -270,7 +270,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             {/* Audio */}
             {movie.mediaInfo?.audioTracks.map((audioTrack, index) => (
               <Fragment key={index}>
-                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                     <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                   </svg>
@@ -326,7 +326,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             {/* Subtitles */}
             {(movie.mediaInfo?.subtitleTracks ?? []).map((subtitleTrack, index) => (
               <Fragment key={index}>
-                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                     <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                     <path d="M5 8h6M5 10h4" />

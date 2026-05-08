@@ -91,7 +91,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <path d="M8 5v4M8 11h.01" />
           </svg>
           Problèmes
-          <span className={styles['nav-badge']} style={{ background: '#FCEBEB', color: '#791F1F', borderColor: '#F09595' }}>
+          <span className={styles['nav-badge']} style={{ background: 'var(--color-badge-problem)', color: 'var(--color-badge-problem-text)', borderColor: 'var(--color-border-secondary)' }}>
             4
           </span>
         </div>
@@ -104,9 +104,9 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             marginTop: '8px',
             padding: '6px 12px',
             fontSize: '11px',
-            background: '#FCEBEB',
-            color: '#791F1F',
-            border: '0.5px solid #F09595',
+            background: 'var(--color-badge-problem)',
+            color: 'var(--color-badge-problem-text)',
+            border: '0.5px solid var(--color-border-secondary)',
             borderRadius: '4px',
             cursor: 'pointer',
             width: '100%',

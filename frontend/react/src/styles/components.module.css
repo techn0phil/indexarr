@@ -7,8 +7,8 @@
 }
 
 .stat {
-  background-color: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-tertiary);
+  background-color: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
   border-radius: var(--border-radius-lg);
   padding: 12px 14px;
 }
@@ -244,12 +244,12 @@
 }
 
 .view-toggle-btn-active {
-  background: var(--color-primary);
+  background: #1D9E75;
   color: white;
 }
 
 .view-toggle-btn-active:hover {
-  background: var(--color-primary);
+  background: #1D9E75;
   color: white;
 }
 

@@ -45,6 +45,8 @@
   --color-badge-dts-text: #1B5E50;
   --color-badge-missing: #FCEBEB;
   --color-badge-missing-text: #791F1F;
+  --color-badge-problem: #FCEBEB;
+  --color-badge-problem-text: #791F1F;
 
   /* Dimensions */
   --border-radius-md: 6px;
@@ -60,16 +62,85 @@
   --topbar-height: 56px;
 }
 
+/* Dark mode via data-theme attribute (manual override) */
+html[data-theme="dark"] {
+  --color-background-primary: #1a1a1a;
+  --color-background-secondary: #2a2a2a;
+  --color-background-tertiary: #3a3a3a;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
+  --color-text-tertiary: #999999;
+  --color-border-primary: #808080;
+  --color-border-secondary: #606060;
+  --color-border-tertiary: #404040;
+
+  --color-badge-4k: #633806;
+  --color-badge-4k-text: #FAEEDA;
+  --color-badge-1080p: #27500A;
+  --color-badge-1080p-text: #EAF3DE;
+  --color-badge-dv: #3C3489;
+  --color-badge-dv-text: #EEEDFE;
+  --color-badge-hdr: #0C447C;
+  --color-badge-hdr-text: #E6F1FB;
+  --color-badge-truehd: #1B5E50;
+  --color-badge-truehd-text: #E8F8F5;
+  --color-badge-ddplus: #1B5E50;
+  --color-badge-ddplus-text: #E8F8F5;
+  --color-badge-atmos: #1B5E50;
+  --color-badge-atmos-text: #E8F8F5;
+  --color-badge-dts: #1B5E50;
+  --color-badge-dts-text: #E8F8F5;
+  --color-badge-missing: #791F1F;
+  --color-badge-missing-text: #FCEBEB;
+  --color-badge-problem: #791F1F;
+  --color-badge-problem-text: #FCEBEB;
+
+  --color-primary: #9FE1CB;
+  --color-primary-light: #085041;
+  --color-primary-accent: #5DCAA5;
+  --color-primary-dark: #E1F5EE;
+  --color-primary-badge: #1D9E75;
+}
+
+/* Fallback: Dark mode via system preference (when no manual preference set) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  html:not([data-theme]) {
     --color-background-primary: #1a1a1a;
     --color-background-secondary: #2a2a2a;
     --color-background-tertiary: #3a3a3a;
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #CCCCCC;
     --color-text-tertiary: #999999;
-    --color-border-tertiary: #404040;
+    --color-border-primary: #808080;
     --color-border-secondary: #606060;
+    --color-border-tertiary: #404040;
+
+    --color-badge-4k: #633806;
+    --color-badge-4k-text: #FAEEDA;
+    --color-badge-1080p: #27500A;
+    --color-badge-1080p-text: #EAF3DE;
+    --color-badge-dv: #3C3489;
+    --color-badge-dv-text: #EEEDFE;
+    --color-badge-hdr: #0C447C;
+    --color-badge-hdr-text: #E6F1FB;
+    --color-badge-truehd: #1B5E50;
+    --color-badge-truehd-text: #E8F8F5;
+    --color-badge-ddplus: #1B5E50;
+    --color-badge-ddplus-text: #E8F8F5;
+    --color-badge-atmos: #1B5E50;
+    --color-badge-atmos-text: #E8F8F5;
+    --color-badge-dts: #1B5E50;
+    --color-badge-dts-text: #E8F8F5;
+    --color-badge-missing: #791F1F;
+    --color-badge-missing-text: #FCEBEB;
+    --color-badge-problem: #791F1F;
+    --color-badge-problem-text: #FCEBEB;
+
+    --color-primary: #9FE1CB;
+    --color-primary-light: #085041;
+    --color-primary-accent: #5DCAA5;
+    --color-primary-dark: #E1F5EE;
+    --color-primary-badge: #1D9E75;
   }
 }
 
