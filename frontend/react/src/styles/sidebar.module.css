@@ -2,7 +2,7 @@
   min-width: 200px;
   padding: 16px 0;
   border-right: 0.5px solid var(--color-border-secondary);
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-background-primary);
   display: flex;
   align-items: stretch;
   flex-direction: column;

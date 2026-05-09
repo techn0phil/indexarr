@@ -33,9 +33,9 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   if (!movie) return <div style={{ padding: '20px' }}>Film non trouvé</div>;
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ paddingBottom: '24px' }}>
       {/* Hero */}
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '20px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', padding: '24px 24px 20px 24px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         {/* Poster */}
         <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px', overflow: 'hidden' }}>
           {movie.poster && movie.poster.startsWith('http') ? (
@@ -161,7 +161,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
               </a>
             )}
             <a href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png" alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
+              <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-dark.png'} alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
               TMDB
             </a>
           </div>
@@ -169,11 +169,11 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       </div>
 
       {/* Cast */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '24px', padding: '0 24px' }}>
         <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
           Cast principal
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-secondary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
           {movie.cast?.slice(0, 5).map((c) => (
             <div key={c.id} style={{ textAlign: 'center' }}>
               {c.avatar && c.avatar.startsWith('http') ? (
@@ -223,11 +223,11 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
       {/* MediaInfo Table */}
       {movie.mediaInfo && (
-        <div>
+        <div style={{ padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
             Métadonnées du fichier
           </h2>
-          <div style={{ background: 'var(--color-background-tertiary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Video */}
             {(movie.mediaInfo?.videoTracks ?? []).map((videoTrack, index) => (
               <Fragment key={index}>

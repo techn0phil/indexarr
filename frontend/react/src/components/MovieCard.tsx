@@ -17,7 +17,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
   const statusColor = movie.status === 'available' ? '#1D9E75' : movie.status === 'missing' ? '#E24B4A' : '#EF9F27';
 
   return (
-    <div style={{ background: 'var(--color-background-secondary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
+    <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
       <div
         style={{
           width: '100%',

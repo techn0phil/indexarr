@@ -7,8 +7,8 @@
 }
 
 .stat {
-  background-color: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-secondary);
+  background-color: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-lg);
   padding: 12px 14px;
 }
