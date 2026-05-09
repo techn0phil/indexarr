@@ -156,13 +156,12 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
             {appContext?.config?.radarrUrl && (
               <a href={`${appContext.config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M2 7h10M8 4l3 3-3 3"></path>
-                </svg>
-                Ouvrir dans Radarr
+                <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/radarr-light.png" alt="Radarr Light" style={{ width: '12px', height: '12px' }} />
+                Radarr
               </a>
             )}
             <a href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png" alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
               TMDB
             </a>
           </div>
