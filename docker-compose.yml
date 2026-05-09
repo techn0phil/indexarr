@@ -11,6 +11,10 @@ services:
       - ${MOVIES_PATH}:/data/movies:ro
       - ${TV_SHOWS_PATH}:/data/tv-shows:ro
     environment:
+      # User/Group configuration (optional: match your media library owner)
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+
       # API keys (replace with your actual keys or use .env file)
       TMDB_API_KEY: ${TMDB_API_KEY}
       TVDB_API_KEY: ${TVDB_API_KEY}

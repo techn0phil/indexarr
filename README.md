@@ -113,6 +113,70 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
+| `UID` | 1000 | No | User ID inside container (match your media library owner) |
+| `GID` | 1000 | No | Group ID inside container (match your media library owner) |
+
+#### Media Permissions Setup
+
+Indexarr runs as a non-root user inside the container for security. By default, it uses UID 1000 and GID 1000. **If your media library is owned by a different user** (e.g., Radarr, Sonarr, or another service), you must configure `UID` and `GID` to match the owner, or the container won't be able to read your files.
+
+**Why this matters:**
+- Indexarr reads media files from mounted volumes (read-only)
+- If the container user doesn't have read permission on these files, scans will fail
+
+**How to fix it:**
+
+1. **Find your media library owner:**
+   ```bash
+   # Check media library ownership
+   ls -ld /mnt/media/movies
+   # Example output: drwxr-x--- 1220 radarr media-center 77824 May  6 movies
+   
+   # Get UID and GID of the owner
+   id radarr
+   # Example output: uid=1041(radarr) gid=100(users) groups=100(users),65541(media-center)
+   ```
+
+2. **Update `.env` file:**
+   ```bash
+   # For Radarr (UID 1041, GID 65541)
+   UID=1041
+   GID=65541
+   
+   # Or for Sonarr (UID 1042, GID 65541)
+   UID=1042
+   GID=65541
+   ```
+
+3. **Rebuild and restart (dev setup):**
+   ```bash
+   # With docker-compose.dev.yml (local build)
+   docker compose -f docker-compose.dev.yml build --no-cache
+   docker compose -f docker-compose.dev.yml up -d
+   ```
+
+4. **Or restart with pre-built image (production):**
+   ```bash
+   # With docker-compose.yml (pre-built image)
+   # Just restart - env vars apply at runtime
+   docker compose up -d
+   ```
+
+5. **Verify permissions are working:**
+   ```bash
+   # Check if app is running as correct user
+   docker exec indexarr id
+   # Should show: uid=1041(appuser) gid=65541(media-center)
+   
+   # Check if media files are readable
+   docker exec indexarr ls -la /data/movies/
+   # Should show files, not permission denied errors
+   ```
+
+**Note on local builds:**
+- When building locally with `docker-compose.dev.yml`, build args set the initial file ownership at build time
+- At runtime, the container adjusts file ownership to match `UID` and `GID`
+- With pre-built images from ghcr.io, only the runtime environment variables matter
 
 #### Common Operations
 

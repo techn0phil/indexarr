@@ -41,6 +41,10 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -tags musl -ldflags="-s -w -extldflags 
 # =============================================================================
 FROM alpine:latest
 
+# Build arguments for dynamic user/group configuration
+ARG UID=1000
+ARG GID=1000
+
 # Install runtime dependencies
 RUN apk add --no-cache \
     ca-certificates \
@@ -48,35 +52,30 @@ RUN apk add --no-cache \
     mediainfo \
     sqlite-libs \
     tzdata \
-    wget
+    wget \
+    su-exec
 
-# Create app user for security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser
-
-# Create necessary directories
+# Create necessary directories (user will be created at runtime via entrypoint.sh)
 RUN mkdir -p /app/data /app/frontend /var/log/nginx /var/lib/nginx/tmp \
-    && chown -R appuser:appuser /app /var/log/nginx /var/lib/nginx \
-    && mkdir -p /tmp/nginx/{client_body,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
-    && chown -R appuser:appuser /tmp/nginx
+    && mkdir -p /tmp/nginx/{client_body,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp}
 
 WORKDIR /app
 
 # Copy backend binary from builder
-COPY --from=backend-builder --chown=appuser:appuser /indexarr /app/indexarr
+COPY --from=backend-builder /indexarr /app/indexarr
 
 # Copy frontend build from builder
-COPY --from=frontend-builder --chown=appuser:appuser /build/frontend/dist /app/frontend
+COPY --from=frontend-builder /build/frontend/dist /app/frontend
 
 # Copy nginx configuration
-COPY --chown=appuser:appuser nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy entrypoint script
-COPY --chown=appuser:appuser entrypoint.sh /app/entrypoint.sh
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Switch to non-root user
-USER appuser
+# Entrypoint will handle user creation and permission setup at runtime
+# Container runs as root initially, entrypoint.sh creates user and switches to it
 
 # Expose ports
 EXPOSE 8787
