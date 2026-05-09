@@ -145,9 +145,9 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   };
 
   return (
-    <div style={{ padding: '16px 20px' }}>
+    <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
@@ -208,7 +208,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
         <StatCard label="Films" value={stats.total} subLabel={`${stats.available} disponibles`} />
         <StatCard label="Espace" value={`${stats.diskSpace.toFixed(1)} Go`} subLabel="moy. disque" />
         <StatCard label="4K UHD" value={stats.fourK} subLabel={`${stats.total > 0 ? Math.round((stats.fourK / stats.total) * 100) : 0}%`} />
@@ -227,7 +227,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         </div>
       ) : view === 'grid' ? (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px', padding: '0 20px' }}>
             {movies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
             ))}
@@ -245,7 +245,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 20px' }}>
             {movies.map((movie) => (
               <MovieCardList key={movie.id} movie={movie} onClick={() => onSelectMovie(movie.id)} />
             ))}
