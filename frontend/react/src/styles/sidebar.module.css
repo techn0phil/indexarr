@@ -1,9 +1,10 @@
 .sidebar {
-  padding: 16px 18px 14px;
+  min-width: 200px;
+  padding: 16px 0;
   border-right: 0.5px solid var(--color-border-secondary);
   background-color: var(--color-background-primary);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   flex-direction: column;
   gap: 8px;
 }
@@ -86,7 +87,7 @@
 }
 
 .footer {
-  padding: 12px 18px;
+  padding: 12px 18px 0 18px;
   border-top: 0.5px solid var(--color-border-tertiary);
   display: flex;
   align-items: center;

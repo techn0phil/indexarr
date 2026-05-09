@@ -30,7 +30,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
 
   return (
     <div className={styles.sidebar}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 14px' }}>
         <div className={styles['logo-mark']}>
           <svg viewBox="0 0 14 14" style={{ width: '13px', height: '13px', fill: 'white' }}>
             <path d="M2 11L7 3L12 11Z" />
@@ -97,7 +97,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         </div>
       </nav>
 
-      <div>
+      <div style={{ padding: '6px 18px', marginTop: 'auto' }}>
         <button
           onClick={() => setShowPurgeConfirm(true)}
           style={{
