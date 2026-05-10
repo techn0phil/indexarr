@@ -2,13 +2,17 @@ package repository
 
 import (
 	"database/sql"
-	_ "embed"
+	"embed"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//go:embed schema.sql
-var schemaSQL string
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
 
 var db *sql.DB
 
@@ -23,13 +27,35 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Execute embedded schema
-	if _, err := sqlDB.Exec(schemaSQL); err != nil {
+	// Run migrations
+	if err := runMigrations(dbPath); err != nil {
 		return nil, err
 	}
 
 	db = sqlDB
 	return sqlDB, nil
+}
+
+func runMigrations(dbPath string) error {
+	// Open the embedded filesystem for migrations
+	d, err := iofs.New(migrationsFS, "migrations")
+	if err != nil {
+		return err
+	}
+
+	// Create a new migration instance
+	m, err := migrate.NewWithSourceInstance("iofs", d, "sqlite3://"+dbPath)
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+
+	// Run all pending migrations
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	return nil
 }
 
 func GetDB() *sql.DB {
