@@ -13,12 +13,12 @@ docker compose up -d
 
 # Run standalone container
 docker run -d \
-  -p 80:80 \
+  -p 8787:8787 \
   -v indexarr_data:/app/data \
+  -v /mnt/movies:/data/movies \
+  -v /mnt/tv-shows:/data/tv-shows \
   -e TMDB_API_KEY=your_key \
   -e TVDB_API_KEY=your_key \
-  -e MOVIES_PATH=/data/movies \
-  -e TV_SHOWS_PATH=/data/tv-shows \
   -e RADARR_URL=http://radarr:7878 \
   indexarr:latest
 
@@ -93,6 +93,8 @@ indexarr/
 | `SERVER_PORT` | `8080` | Backend server port (internal) |
 | `DB_PATH` | `/app/data/indexarr.db` | SQLite database file path |
 | `MEDIAINFO_PATH` | `/usr/bin/mediainfo` | Path to mediainfo binary |
+| `UID` | `1000` | User ID used to run indexarr |
+| `GID` | `1000` | Group ID used to run indexarr |
 | `TMDB_API_KEY` | - | TMDB API key (required) |
 | `TVDB_API_KEY` | - | TVDB API key (required) |
 | `RADARR_URL` | http://radarr:7878 | Radarr URL (optional) |
