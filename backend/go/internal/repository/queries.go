@@ -260,7 +260,7 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		return nil, 0, err
 	}
 
-	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id FROM series WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
+	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster FROM series WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
@@ -270,7 +270,13 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 	var series []models.Series
 	for rows.Next() {
 		var s models.Series
-		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TVDBId, &s.IMDbId)
+		var poster sql.NullString
+		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TVDBId, &s.IMDbId, &poster)
+		if poster.Valid {
+			s.Poster = &poster.String
+		} else {
+			s.Poster = nil
+		}
 		if err != nil {
 			return nil, 0, err
 		}
@@ -283,11 +289,18 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 
 func GetSeriesByID(db *sql.DB, id int64) (*models.Series, error) {
 	var s models.Series
-	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TVDBId, &s.IMDbId)
+	var poster sql.NullString
+	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TVDBId, &s.IMDbId, &poster)
+	if poster.Valid {
+		s.Poster = &poster.String
+	} else {
+		s.Poster = nil
+	}
 	if err != nil {
 		return nil, err
 	}
-	s.Cast, _ = GetCastForSeries(db, s.ID)
+
+	// s.Cast, _ = GetCastForSeries(db, s.ID)
 	s.Seasons, _ = GetSeasonsForSeries(db, s.ID)
 	return &s, nil
 }
@@ -316,6 +329,7 @@ func GetSeasonsForSeries(db *sql.DB, seriesID int64) ([]models.Season, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var seasons []models.Season
@@ -325,6 +339,7 @@ func GetSeasonsForSeries(db *sql.DB, seriesID int64) ([]models.Season, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		s.Episodes, _ = GetEpisodesForSeason(db, seriesID, s.Number)
 		// Calculate available/missing
 		for _, ep := range s.Episodes {

@@ -31,7 +31,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
   if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
   if (!series) return <div style={{ padding: '20px' }}>Série non trouvée</div>;
 
-  const season = series.seasons[currentSeason];
+  const season = series.seasons?.[currentSeason];
 
   return (
     <div>
@@ -39,13 +39,28 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
       <div style={{ background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)', padding: '24px' }}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
           {/* Poster */}
-          <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ fontSize: '26px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
-              {series.title
-                .split(' ')
-                .map((w) => w[0])
-                .join('')}
-            </div>
+          <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px', overflow: 'hidden' }}>
+            {series.poster ? (
+              <img
+                src={series.poster}
+                alt={series.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  background: 'var(--color-background-secondary)',
+                  display: 'block',
+                  objectPosition: 'center',
+                }}
+              />
+            ) : (
+              <div style={{ fontSize: '26px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                {series.title
+                  .split(' ')
+                  .map((w) => w[0])
+                  .join('')}
+              </div>
+            )}
           </div>
 
           {/* Info */}
@@ -70,7 +85,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-              {series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
                 <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                   4K UHD
                 </span>
@@ -95,7 +110,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
       {/* Season Tabs */}
       <div style={{ display: 'flex', gap: '4px', padding: '0 24px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)', overflowX: 'auto' }}>
-        {series.seasons.map((s, idx) => (
+        {(series.seasons || []).map((s, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSeason(idx)}

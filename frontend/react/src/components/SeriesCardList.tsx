@@ -19,12 +19,30 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
   return (
     <div className={comStyles['card-list']} onClick={onClick}>
       <div className={comStyles['card-list-poster']}>
-        <div className={comStyles['card-list-poster-initial']}>
-          {initials}
-        </div>
-        <div className={comStyles['card-list-poster-title']}>
-          {series.title}
-        </div>
+        {series.poster ? (
+          <img
+            src={series.poster}
+            alt={series.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              background: 'var(--color-background-secondary)',
+              borderRadius: 0,
+              display: 'block',
+              objectPosition: 'center',
+            }}
+          />
+        ) : (
+          <>
+            <div className={comStyles['card-list-poster-initial']}>
+              {initials}
+            </div>
+            <div className={comStyles['card-list-poster-title']}>
+              {series.title}
+            </div>
+          </>
+        )}
         <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
       </div>
 

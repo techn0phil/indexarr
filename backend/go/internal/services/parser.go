@@ -21,8 +21,8 @@ type ParsedFilename struct {
 var (
 	// Series patterns: S01E05, 1x05, Season 1 Episode 5
 	seriesPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`(?i)[.\s_-]S(\d{1,2})E(\d{1,3})[.\s_-]`),                      // S01E05
-		regexp.MustCompile(`(?i)[.\s_-](\d{1,2})x(\d{1,3})[.\s_-]`),                       // 1x05
+		regexp.MustCompile(`(?i)[.\s_-]?S(\d{1,2})E(\d{1,3})[.\s_-]`),                     // S01E05
+		regexp.MustCompile(`(?i)[.\s_-]?(\d{1,2})x(\d{1,3})[.\s_-]`),                      // 1x05
 		regexp.MustCompile(`(?i)Season[.\s_-]?(\d{1,2})[.\s_-]?Episode[.\s_-]?(\d{1,3})`), // Season 1 Episode 5
 	}
 

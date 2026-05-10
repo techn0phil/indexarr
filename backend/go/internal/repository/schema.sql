@@ -34,8 +34,9 @@ CREATE TABLE IF NOT EXISTS series (
   status TEXT DEFAULT 'complete',
   file_size INTEGER,
   date_added TEXT,
-  tvdb_id INTEGER,
-  imdb_id TEXT
+  tvdb_id INTEGER UNIQUE,
+  imdb_id TEXT,
+  poster TEXT
 );
 
 -- Seasons table
@@ -61,7 +62,8 @@ CREATE TABLE IF NOT EXISTS episodes (
   file_path TEXT,
   date_added TEXT,
   last_scanned TEXT,
-  FOREIGN KEY(series_id) REFERENCES series(id)
+  FOREIGN KEY(series_id) REFERENCES series(id),
+  UNIQUE(series_id, season_num, episode_num)
 );
 
 -- Scan status table (tracks scan progress)

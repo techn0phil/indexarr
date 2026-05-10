@@ -170,117 +170,117 @@ func insertSeries(db *sql.DB, s *models.Series) error {
 }
 
 func getMockMovies() []models.Movie {
-	// now := time.Now().Format(time.RFC3339)
+	now := time.Now().Format(time.RFC3339)
 
 	return []models.Movie{
-		// {
-		// 	Title: "Interstellar",
-		// 	Year: 2014,
-		// 	Duration: 169,
-		// 	Synopsis: "Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine.",
-		// 	Genres: "Science-fiction, Aventure",
-		// 	Rating: 8.7,
-		// 	Popularity: 97.4,
-		// 	Status: "available",
-		// 	FileSize: 62500000000, // 62.5 GB
-		// 	FilePath: "/media/films/Interstellar (2014)/",
-		// 	Container: "MKV",
-		// 	DateAdded: now,
-		// 	TMDBId: 157336,
-		// 	IMDbId: "tt0816692",
-		// 	Cast: []models.Cast{
-		// 		{Name: "Matthew McConaughey", Role: "Cooper", Avatar: "MM"},
-		// 		{Name: "Anne Hathaway", Role: "Brand", Avatar: "AH"},
-		// 		{Name: "Jessica Chastain", Role: "Murph", Avatar: "JC"},
-		// 		{Name: "Michael Caine", Role: "Prof. Brand", Avatar: "MC"},
-		// 	},
-		// 	MediaInfo: &models.MediaInfo{
-		// 		VideoTracks: []models.VideoTrack{
-		// 			{Codec: "H.265", Resolution: "3840x2160", FPS: 23.976, Bitrate: "35.2 Mbps", HDR: "Dolby Vision + HDR10", ColorSpace: "BT.2020"},
-		// 		},
-		// 		AudioTracks: []models.AudioTrack{
-		// 			{Codec: "TrueHD Atmos", Channels: "7.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "4.8 Mbps"},
-		// 			{Codec: "AC-3", Channels: "5.1", Language: "French", SampleRate: "48000 Hz", Bitrate: "384 kbps"},
-		// 		},
-		// 		SubtitleTracks: []models.SubtitleTrack{
-		// 			{Language: "French", Format: "SRT"},
-		// 			{Language: "English", Format: "SRT"},
-		// 		},
-		// 	},
-		// },
-		// {
-		// 	Title: "Dune: Part Two",
-		// 	Year: 2024,
-		// 	Duration: 166,
-		// 	Synopsis: "Paul Atreides voyage en Arrakis pour venger la mort de sa famille.",
-		// 	Genres: "Science-fiction, Aventure",
-		// 	Rating: 8.1,
-		// 	Popularity: 156.3,
-		// 	Status: "available",
-		// 	FileSize: 48900000000,
-		// 	FilePath: "/media/films/Dune Part Two (2024)/",
-		// 	Container: "MKV",
-		// 	DateAdded: now,
-		// 	TMDBId: 693134,
-		// 	IMDbId: "tt15239678",
-		// 	Cast: []models.Cast{
-		// 		{Name: "Timothée Chalamet", Role: "Paul", Avatar: "TC"},
-		// 		{Name: "Zendaya", Role: "Chani", Avatar: "Z"},
-		// 	},
-		// 	MediaInfo: &models.MediaInfo{
-		// 		VideoTracks: []models.VideoTrack{
-		// 			{Codec: "AV1", Resolution: "3840x2160", FPS: 23.976, Bitrate: "32.5 Mbps", HDR: "HDR10+", ColorSpace: "BT.2020"},
-		// 		},
-		// 		AudioTracks: []models.AudioTrack{
-		// 			{Codec: "DTS-HD MA", Channels: "5.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "2.5 Mbps"},
-		// 		},
-		// 	},
-		// },
-		// {
-		// 	Title: "Oppenheimer",
-		// 	Year: 2023,
-		// 	Duration: 180,
-		// 	Synopsis: "Le parcours de J. Robert Oppenheimer et son rôle dans le Projet Manhattan.",
-		// 	Genres: "Drame, Histoire",
-		// 	Rating: 8.1,
-		// 	Popularity: 89.2,
-		// 	Status: "available",
-		// 	FileSize: 35700000000,
-		// 	FilePath: "/media/films/Oppenheimer (2023)/",
-		// 	Container: "MKV",
-		// 	DateAdded: now,
-		// 	TMDBId: 872585,
-		// 	IMDbId: "tt15398776",
-		// 	Cast: []models.Cast{
-		// 		{Name: "Cillian Murphy", Role: "Oppenheimer", Avatar: "CM"},
-		// 	},
-		// 	MediaInfo: &models.MediaInfo{
-		// 		VideoTracks: []models.VideoTrack{
-		// 			{Codec: "H.264", Resolution: "1920x1080", FPS: 24.0, Bitrate: "15.2 Mbps", HDR: "none", ColorSpace: "BT.709"},
-		// 		},
-		// 		AudioTracks: []models.AudioTrack{
-		// 			{Codec: "AAC", Channels: "2.0", Language: "English", SampleRate: "48000 Hz", Bitrate: "320 kbps"},
-		// 		},
-		// 	},
-		// },
-		// {
-		// 	Title: "Poor Things",
-		// 	Year: 2023,
-		// 	Duration: 141,
-		// 	Synopsis: "Une jeune femme excentrique se lance dans une série d'aventures surréalistes.",
-		// 	Genres: "Fantastique, Comédie",
-		// 	Rating: 7.5,
-		// 	Popularity: 42.1,
-		// 	Status: "missing",
-		// 	FileSize: 0,
-		// 	FilePath: "",
-		// 	Container: "",
-		// 	DateAdded: now,
-		// 	TMDBId: 771452,
-		// 	IMDbId: "tt14209916",
-		// 	Cast: []models.Cast{},
-		// 	MediaInfo: nil,
-		// },
+		{
+			Title:      "Interstellar",
+			Year:       2014,
+			Duration:   169,
+			Synopsis:   "Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine.",
+			Genres:     "Science-fiction, Aventure",
+			Rating:     8.7,
+			Popularity: 97.4,
+			Status:     "available",
+			FileSize:   62500000000, // 62.5 GB
+			FilePath:   "/media/films/Interstellar (2014)/",
+			Container:  "MKV",
+			DateAdded:  now,
+			TMDBId:     157336,
+			IMDbId:     "tt0816692",
+			Cast: []models.Cast{
+				{Name: "Matthew McConaughey", Role: "Cooper", Avatar: "MM"},
+				{Name: "Anne Hathaway", Role: "Brand", Avatar: "AH"},
+				{Name: "Jessica Chastain", Role: "Murph", Avatar: "JC"},
+				{Name: "Michael Caine", Role: "Prof. Brand", Avatar: "MC"},
+			},
+			MediaInfo: &models.MediaInfo{
+				VideoTracks: []models.VideoTrack{
+					{Codec: "H.265", Resolution: "3840x2160", FPS: 23.976, Bitrate: "35.2 Mbps", HDR: "Dolby Vision + HDR10", ColorSpace: "BT.2020"},
+				},
+				AudioTracks: []models.AudioTrack{
+					{Codec: "TrueHD Atmos", Channels: "7.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "4.8 Mbps"},
+					{Codec: "AC-3", Channels: "5.1", Language: "French", SampleRate: "48000 Hz", Bitrate: "384 kbps"},
+				},
+				SubtitleTracks: []models.SubtitleTrack{
+					{Language: "French", Format: "SRT"},
+					{Language: "English", Format: "SRT"},
+				},
+			},
+		},
+		{
+			Title:      "Dune: Part Two",
+			Year:       2024,
+			Duration:   166,
+			Synopsis:   "Paul Atreides voyage en Arrakis pour venger la mort de sa famille.",
+			Genres:     "Science-fiction, Aventure",
+			Rating:     8.1,
+			Popularity: 156.3,
+			Status:     "available",
+			FileSize:   48900000000,
+			FilePath:   "/media/films/Dune Part Two (2024)/",
+			Container:  "MKV",
+			DateAdded:  now,
+			TMDBId:     693134,
+			IMDbId:     "tt15239678",
+			Cast: []models.Cast{
+				{Name: "Timothée Chalamet", Role: "Paul", Avatar: "TC"},
+				{Name: "Zendaya", Role: "Chani", Avatar: "Z"},
+			},
+			MediaInfo: &models.MediaInfo{
+				VideoTracks: []models.VideoTrack{
+					{Codec: "AV1", Resolution: "3840x2160", FPS: 23.976, Bitrate: "32.5 Mbps", HDR: "HDR10+", ColorSpace: "BT.2020"},
+				},
+				AudioTracks: []models.AudioTrack{
+					{Codec: "DTS-HD MA", Channels: "5.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "2.5 Mbps"},
+				},
+			},
+		},
+		{
+			Title:      "Oppenheimer",
+			Year:       2023,
+			Duration:   180,
+			Synopsis:   "Le parcours de J. Robert Oppenheimer et son rôle dans le Projet Manhattan.",
+			Genres:     "Drame, Histoire",
+			Rating:     8.1,
+			Popularity: 89.2,
+			Status:     "available",
+			FileSize:   35700000000,
+			FilePath:   "/media/films/Oppenheimer (2023)/",
+			Container:  "MKV",
+			DateAdded:  now,
+			TMDBId:     872585,
+			IMDbId:     "tt15398776",
+			Cast: []models.Cast{
+				{Name: "Cillian Murphy", Role: "Oppenheimer", Avatar: "CM"},
+			},
+			MediaInfo: &models.MediaInfo{
+				VideoTracks: []models.VideoTrack{
+					{Codec: "H.264", Resolution: "1920x1080", FPS: 24.0, Bitrate: "15.2 Mbps", HDR: "none", ColorSpace: "BT.709"},
+				},
+				AudioTracks: []models.AudioTrack{
+					{Codec: "AAC", Channels: "2.0", Language: "English", SampleRate: "48000 Hz", Bitrate: "320 kbps"},
+				},
+			},
+		},
+		{
+			Title:      "Poor Things",
+			Year:       2023,
+			Duration:   141,
+			Synopsis:   "Une jeune femme excentrique se lance dans une série d'aventures surréalistes.",
+			Genres:     "Fantastique, Comédie",
+			Rating:     7.5,
+			Popularity: 42.1,
+			Status:     "missing",
+			FileSize:   0,
+			FilePath:   "",
+			Container:  "",
+			DateAdded:  now,
+			TMDBId:     771452,
+			IMDbId:     "tt14209916",
+			Cast:       []models.Cast{},
+			MediaInfo:  nil,
+		},
 	}
 }
 

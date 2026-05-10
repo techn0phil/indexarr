@@ -153,11 +153,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 	defer tx.Rollback()
 
 	result, err := tx.Exec(`
-		INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 		series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-		series.FileSize, series.DateAdded, series.TVDBId, series.IMDbId)
+		series.FileSize, series.DateAdded, series.TVDBId, series.IMDbId, series.Poster)
 	if err != nil {
 		return 0, err
 	}
@@ -197,22 +197,80 @@ func GetOrCreateSeason(db *sql.DB, seriesID int64, seasonNum int) (int64, error)
 	}
 
 	// Create new season
-	result, err := db.Exec(`INSERT INTO seasons (series_id, number) VALUES (?, ?)`, seriesID, seasonNum)
+	result, err := db.Exec(`INSERT INTO seasons (series_id, number, file_size) VALUES (?, ?, 0)`, seriesID, seasonNum)
 	if err != nil {
 		return 0, err
 	}
 	return result.LastInsertId()
 }
 
+// GetEpisodeBySeriesSeasonEpisode finds an episode by series ID, season, and episode number
+func GetEpisodeBySeriesSeasonEpisode(db *sql.DB, seriesID int64, seasonNum, episodeNum int) (*models.Episode, error) {
+	var episode models.Episode
+	err := db.QueryRow(`
+		SELECT id, series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned
+		FROM episodes
+		WHERE series_id = ? AND season_num = ? AND episode_num = ?
+	`, seriesID, seasonNum, episodeNum).Scan(&episode.ID, &episode.SeriesID, &episode.SeasonNum, &episode.EpisodeNum,
+		&episode.Title, &episode.Duration, &episode.Status, &episode.FileSize, &episode.FilePath, &episode.DateAdded, &episode.LastScanned)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &episode, nil
+}
+
+// UpdateEpisode updates an existing episode
+func UpdateEpisode(db *sql.DB, episode *models.Episode) error {
+	_, err := db.Exec(`
+		UPDATE episodes
+		SET title = ?, duration = ?, status = ?, file_size = ?, file_path = ?, last_scanned = ?
+		WHERE id = ?
+	`, episode.Title, episode.Duration, episode.Status, episode.FileSize, episode.FilePath, time.Now().Format(time.RFC3339), episode.ID)
+	return err
+}
+
 // GetSeriesByTitle finds a series by title (case-insensitive)
 func GetSeriesByTitle(db *sql.DB, title string) (*models.Series, error) {
 	var series models.Series
+	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster
 		FROM series WHERE LOWER(title) = LOWER(?)
 	`, title).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TVDBId, &series.IMDbId)
+		&series.FileSize, &series.DateAdded, &series.TVDBId, &series.IMDbId, &poster)
+	if poster.Valid {
+		series.Poster = &poster.String
+	} else {
+		series.Poster = nil
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &series, nil
+}
+
+// GetSeriesByTVDBId finds a series by TVDB ID
+func GetSeriesByTVDBId(db *sql.DB, tvdbID int64) (*models.Series, error) {
+	var series models.Series
+	var poster sql.NullString
+	err := db.QueryRow(`
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster
+		FROM series WHERE tvdb_id = ?
+	`, tvdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
+		&series.FileSize, &series.DateAdded, &series.TVDBId, &series.IMDbId, &poster)
+	if poster.Valid {
+		series.Poster = &poster.String
+	} else {
+		series.Poster = nil
+	}
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

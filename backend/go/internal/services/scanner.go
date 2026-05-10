@@ -272,12 +272,36 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 			log.Printf("TMDB TV enrichment failed for %s: %v", parsed.Title, err)
 		}
 
-		seriesID, err = repository.InsertSeries(s.db, newSeries)
-		if err != nil {
-			return fmt.Errorf("failed to insert series: %w", err)
+		// Check if series with same TVDB ID already exists (prevents duplicates)
+		if newSeries.TVDBId > 0 {
+			existingSeries, err := repository.GetSeriesByTVDBId(s.db, newSeries.TVDBId)
+			if err != nil {
+				return fmt.Errorf("failed to lookup series by TVDB ID: %w", err)
+			}
+			if existingSeries != nil {
+				// Series already exists, reuse it
+				seriesID = existingSeries.ID
+				seriesTMDBID = int(existingSeries.TVDBId)
+				log.Printf("Found existing series: %s (TVDB ID: %d)", existingSeries.Title, newSeries.TVDBId)
+				// Skip the InsertSeries step below
+			} else {
+				// New series, insert it
+				seriesID, err = repository.InsertSeries(s.db, newSeries)
+				if err != nil {
+					return fmt.Errorf("failed to insert series: %w", err)
+				}
+				seriesTMDBID = int(newSeries.TVDBId)
+				log.Printf("Added series: %s (TVDB ID: %d)", newSeries.Title, newSeries.TVDBId)
+			}
+		} else {
+			// No TVDB ID, insert new series anyway
+			seriesID, err = repository.InsertSeries(s.db, newSeries)
+			if err != nil {
+				return fmt.Errorf("failed to insert series: %w", err)
+			}
+			seriesTMDBID = int(newSeries.TVDBId)
+			log.Printf("Added series: %s (no TVDB ID)", newSeries.Title)
 		}
-		seriesTMDBID = int(newSeries.TVDBId) // This is actually TMDB ID from our TV client
-		log.Printf("Added series: %s", newSeries.Title)
 	} else {
 		seriesID = series.ID
 		seriesTMDBID = int(series.TVDBId)
@@ -312,17 +336,36 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 		log.Printf("Failed to create season: %v", err)
 	}
 
-	// Insert episode
-	_, err = repository.InsertEpisode(s.db, episode)
+	// Check if episode already exists
+	existingEpisode, err := repository.GetEpisodeBySeriesSeasonEpisode(s.db, seriesID, parsed.Season, parsed.Episode)
 	if err != nil {
-		return fmt.Errorf("failed to insert episode: %w", err)
+		return fmt.Errorf("failed to lookup episode: %w", err)
+	}
+
+	if existingEpisode != nil {
+		// Episode already exists - update if file path or details changed
+		existingEpisode.Title = episode.Title
+		existingEpisode.Duration = episode.Duration
+		existingEpisode.Status = "available"
+		existingEpisode.FileSize = episode.FileSize
+		existingEpisode.FilePath = filePath
+
+		if err := repository.UpdateEpisode(s.db, existingEpisode); err != nil {
+			return fmt.Errorf("failed to update episode: %w", err)
+		}
+		log.Printf("Updated episode: %s S%02dE%02d - %s", parsed.Title, parsed.Season, parsed.Episode, existingEpisode.Title)
+	} else {
+		// New episode - insert it
+		_, err = repository.InsertEpisode(s.db, episode)
+		if err != nil {
+			return fmt.Errorf("failed to insert episode: %w", err)
+		}
+		log.Printf("Added episode: %s S%02dE%02d - %s", parsed.Title, parsed.Season, parsed.Episode, episode.Title)
+		result.EpisodesAdded++
 	}
 
 	// Update series counts
 	repository.UpdateSeriesCounts(s.db, seriesID)
-
-	result.EpisodesAdded++
-	log.Printf("Added episode: %s S%02dE%02d - %s", parsed.Title, parsed.Season, parsed.Episode, episode.Title)
 	return nil
 }
 

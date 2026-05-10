@@ -16,6 +16,7 @@ type Series struct {
 	DateAdded     string `json:"dateAdded"` // ISO 8601
 	TVDBId        int64  `json:"tvdbId"`
 	IMDbId        string `json:"imdbId"`
+	Poster        *string `json:"poster"` // TMDB poster URL
 	Cast          []Cast `json:"cast"`
 	Seasons       []Season `json:"seasons"`
 }
