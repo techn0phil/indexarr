@@ -38,6 +38,35 @@
   color: var(--color-text-tertiary);
 }
 
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 2px;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  border-radius: 50%;
+  transition: background 0.15s;
+  z-index: 1;
+}
+
+.clear-btn:hover, .clear-btn:focus {
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Ensure search-container is positioned relative for absolute clear-btn */
+.search-container {
+  position: relative;
+}
+
 .breadcrumb span {
   color: var(--color-text-secondary);
 }

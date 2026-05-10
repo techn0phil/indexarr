@@ -67,6 +67,23 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
             if (shortcut && !e.target.value) shortcut.style.display = 'block';
           }}
         />
+        {searchQuery && (
+          <button
+            type="button"
+            className={styles['clear-btn']}
+            aria-label="Effacer la recherche"
+            tabIndex={0}
+            onClick={() => {
+              onSearchChange?.('');
+              searchInputRef.current?.focus();
+            }}
+          >
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+              <line x1="4" y1="4" x2="12" y2="12" />
+              <line x1="12" y1="4" x2="4" y2="12" />
+            </svg>
+          </button>
+        )}
         {!searchQuery && (
           <span className={styles.shortcut} data-shortcut>
             /
