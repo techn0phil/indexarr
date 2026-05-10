@@ -64,7 +64,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && <span className={comStyles['badge-4k']}>4K</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
-          {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && <span className={comStyles['badge-hdr']}>HDR10</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && <span className={comStyles['badge-truehd']}>TrueHD</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && <span className={comStyles['badge-ddplus']}>DD+</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && <span className={comStyles['badge-atmos']}>Atmos</span>}
