@@ -7,10 +7,13 @@ services:
       - 8787:8787
     volumes:
       - data:/app/data
-      # Optional: Mount your media library (read-only recommended)
+      # Optional: Mount as many media library paths as needed (read-only recommended)
       - ${MOVIES_PATH}:/data/movies:ro
       - ${TV_SHOWS_PATH}:/data/tv-shows:ro
     environment:
+      # Media library paths (optional: comma-separated, adjust as needed)
+      MEDIA_LIBRARY_PATHS: /data/movies,/data/tv-shows
+
       # User/Group configuration (optional: match your media library owner)
       UID: ${UID:-1000}
       GID: ${GID:-1000}
