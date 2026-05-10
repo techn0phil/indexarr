@@ -107,8 +107,9 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 |----------|---------|----------|-------------|
 | `TMDB_API_KEY` | - | No | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
 | `TVDB_API_KEY` | - | No | TVDB API key for tv-shows metadata ([get here](https://www.thetvdb.com/api-information)) |
-| `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
-| `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
+| `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
+| `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder on the host (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/tv-shows | No | Comma-separated paths to media on the guest |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
@@ -211,12 +212,13 @@ docker compose up -d
 ```bash
 docker pull ghcr.io/pschmucker/indexarr:latest
 docker run -d -p 8787:8787 \
+      -v indexarr_data:/app/data \
+      -v /mnt/movies:/data/movies \
+      -v /mnt/tv-shows:/data/tv-shows \
       -e TMDB_API_KEY=fffffffffffffffff \
       -e TVDB_API_KEY=fffffffffffffffff \
-      -e MOVIES_PATH=/movies \
-      -e TV_SHOWS_PATH=/tv-shows \
       -e RADARR_URL=http://radarr:7878 \
-      -v indexarr_data:/app/data ghcr.io/pschmucker/indexarr:latest
+      ghcr.io/pschmucker/indexarr:latest
 ```
 
 ### Manual Development Setup
