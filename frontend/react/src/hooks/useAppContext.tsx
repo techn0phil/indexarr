@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { apiClient } from '../api/client';
+import { StatsResponse } from '../types';
 
 export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series';
 
@@ -17,6 +18,9 @@ interface AppContextType {
   toggleTheme: () => void;
   config: AppConfig | null;
   configLoading: boolean;
+  stats: StatsResponse | null;
+  statsLoading: boolean;
+  refreshStats: () => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -31,6 +35,8 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const [history, setHistory] = useState<Page[]>(['list-films']);
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   // Fetch config on mount
   useEffect(() => {
@@ -48,6 +54,24 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     };
 
     fetchConfig();
+  }, []);
+
+  // Fetch stats on mount
+  const refreshStats = async () => {
+    setStatsLoading(true);
+    try {
+      const data = await apiClient.getStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      setStats(null);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshStats();
   }, []);
 
   // Initialize theme from localStorage or system preference
@@ -102,8 +126,16 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme, config, configLoading }}>
+    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme, config, configLoading, stats, statsLoading, refreshStats }}>
       {children}
     </AppContext.Provider>
   );
+};
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within AppContextProvider');
+  }
+  return context;
 };

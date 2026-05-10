@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from '../styles/sidebar.module.css';
 import { Page } from '../hooks/useAppContext';
+import { useAppContext } from '../hooks/useAppContext';
 import { apiClient } from '../api/client';
 
 interface SidebarProps {
@@ -11,6 +12,7 @@ interface SidebarProps {
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
   const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
+  const context = useAppContext();
 
   const handlePurge = async () => {
     setIsPurging(true);
@@ -51,7 +53,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <path d="M5 3v10M11 3v10M2 7h12" />
           </svg>
           Films
-          <span className={styles['nav-badge']}>20</span>
+          <span className={styles['nav-badge']}>{context?.stats?.totalMovies ?? 0}</span>
         </div>
 
         <div
@@ -63,7 +65,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <path d="M2 6h12M6 6v8" />
           </svg>
           Séries
-          <span className={styles['nav-badge']}>10</span>
+          <span className={styles['nav-badge']}>{context?.stats?.totalSeries ?? 0}</span>
         </div>
 
         <div className={styles['nav-item']}>
@@ -92,7 +94,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           </svg>
           Problèmes
           <span className={styles['nav-badge']} style={{ background: 'var(--color-badge-problem)', color: 'var(--color-badge-problem-text)', borderColor: 'var(--color-border-secondary)' }}>
-            4
+            {context?.stats?.problemsCount ?? 0}
           </span>
         </div>
       </nav>

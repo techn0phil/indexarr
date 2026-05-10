@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import { useInfiniteList } from '../hooks/useInfiniteList';
+import { useAppContext } from '../hooks/useAppContext';
 import { MovieCard } from '../components/MovieCard';
 import { MovieCardList } from '../components/MovieCardList';
 import { StatCard } from '../components/StatCard';
@@ -67,6 +68,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
     const saved = localStorage.getItem('films-view');
     return (saved as ViewType) || 'grid';
   });
+  const context = useAppContext();
 
   // Build filter params for API
   const filters = useMemo(() => {
@@ -119,11 +121,12 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   }, [hasMore, loading, loadMore]);
 
   // Calculate stats from loaded movies
-  const stats = useMemo(() => {
+  const loadedStats = useMemo(() => {
     const available = movies.filter((m) => m.status === 'available').length;
     const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
     const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160')).length;
-    return { available, total: movies.length, diskSpace, fourK };
+    const missing = movies.filter((m) => m.status === 'missing' || (m.fileSize || 0) === 0).length;
+    return { available, total: movies.length, diskSpace, fourK, missing };
   }, [movies]);
 
   const handleViewChange = (newView: ViewType) => {
@@ -209,10 +212,10 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
-        <StatCard label="Films" value={stats.total} subLabel={`${stats.available} disponibles`} />
-        <StatCard label="Espace" value={`${stats.diskSpace.toFixed(1)} Go`} subLabel="moy. disque" />
-        <StatCard label="4K UHD" value={stats.fourK} subLabel={`${stats.total > 0 ? Math.round((stats.fourK / stats.total) * 100) : 0}%`} />
-        <StatCard label="Problèmes" value="0" subLabel="fichiers manquants" />
+        <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
+        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${context?.stats?.fourKPercent || 0}%)`]} />
+        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['fichiers manquants', `${context?.stats?.missingMovies || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 

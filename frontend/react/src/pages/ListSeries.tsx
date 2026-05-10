@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Series } from '../types';
 import { apiClient } from '../api/client';
 import { useInfiniteList } from '../hooks/useInfiniteList';
+import { useAppContext } from '../hooks/useAppContext';
 import { SeriesCard } from '../components/SeriesCard';
 import { SeriesCardList } from '../components/SeriesCardList';
 import { StatCard } from '../components/StatCard';
@@ -59,6 +60,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     const saved = localStorage.getItem('series-view');
     return (saved as ViewType) || 'grid';
   });
+  const context = useAppContext();
 
   // Build filter params for API
   const filters = useMemo(() => {
@@ -82,11 +84,25 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   });
 
   // Calculate stats from loaded series
-  const stats = useMemo(() => {
+  const loadedStats = useMemo(() => {
     const complete = series.filter((s) => s.status === 'complete').length;
     const episodes = series.reduce((sum, s) => sum + s.episodeCount, 0);
     const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024 * 1024);
-    return { complete, total: series.length, episodes, diskSpace };
+
+    // -----------------------------------------------------------------------
+    // -------------------------- To review !! -------------------------------
+    // -----------------------------------------------------------------------
+    // This is how to get count of missing episodes per season: const em = series[0].seasons[0].missingEps;
+    // Count missing episodes based on seasons with missingEps > 0 for the whole series
+    // const ms = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + (season.missingEps > 0 ? season.episodes.length : 0), 0), 0);
+    // const missingEpisodes = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + season.missingEps, 0), 0);
+    // TODO fix it later
+    const missingEpisodes = 0; // For now we don't have missingEps data from API, so we'll just show 0
+    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+
+    return { complete, total: series.length, episodes, diskSpace, missingEpisodes };
   }, [series]);
 
   const handleViewChange = (newView: ViewType) => {
@@ -95,8 +111,9 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   };
 
   const handleScanComplete = () => {
-    // Refresh series after scan
+    // Refresh series and stats after scan
     reset();
+    context?.refreshStats();
   };
 
   const handleFilterApply = (filterType: FilterType, values: string[]) => {
@@ -172,10 +189,10 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
-        <StatCard label="Séries" value={stats.total} subLabel={`${stats.complete} complètes`} />
-        <StatCard label="Épisodes" value={stats.episodes} subLabel="total" />
-        <StatCard label="Espace" value={`${stats.diskSpace.toFixed(1)} To`} subLabel="moy. par ep." />
-        <StatCard label="Problèmes" value="0" subLabel="épisodes manquants" />
+        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
+        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} total`, `${context?.stats?.totalEpisodes || 0} total`]} />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[`moy. par ep.`, `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
+        <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
