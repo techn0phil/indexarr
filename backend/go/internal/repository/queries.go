@@ -3,9 +3,37 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"indexarr/internal/models"
 )
+
+// buildOrClause creates an OR condition from comma-separated values
+// Example: "3840,1920" returns "(resolution LIKE '%3840%' OR resolution LIKE '%1920%')"
+func buildOrClause(fieldName, filterValue string) string {
+	if filterValue == "" {
+		return ""
+	}
+
+	values := strings.Split(filterValue, ",")
+	if len(values) == 0 {
+		return ""
+	}
+
+	var conditions []string
+	for _, v := range values {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			conditions = append(conditions, fmt.Sprintf("%s LIKE '%%%s%%'", fieldName, v))
+		}
+	}
+
+	if len(conditions) == 0 {
+		return ""
+	}
+
+	return "(" + strings.Join(conditions, " OR ") + ")"
+}
 
 func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int64, error) {
 	// Default pagination
@@ -27,18 +55,30 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
 	}
 
-	// Filters requiring joins to related tables
+	// Filters requiring joins to related tables - support comma-separated values with OR logic
 	if filters.Resolution != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND resolution LIKE '%%%s%%')", filters.Resolution)
+		resolutionClause := buildOrClause("resolution", filters.Resolution)
+		if resolutionClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND %s)", resolutionClause)
+		}
 	}
 	if filters.Codec != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND codec LIKE '%%%s%%')", filters.Codec)
+		codecClause := buildOrClause("codec", filters.Codec)
+		if codecClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND %s)", codecClause)
+		}
 	}
 	if filters.Audio != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM audio_tracks WHERE movie_id = movies.id AND codec LIKE '%%%s%%')", filters.Audio)
+		audioClause := buildOrClause("codec", filters.Audio)
+		if audioClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM audio_tracks WHERE movie_id = movies.id AND %s)", audioClause)
+		}
 	}
 	if filters.HDR != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND hdr LIKE '%%%s%%')", filters.HDR)
+		hdrClause := buildOrClause("hdr", filters.HDR)
+		if hdrClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND %s)", hdrClause)
+		}
 	}
 
 	// Count total
@@ -188,18 +228,30 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
 	}
 
-	// Filters requiring joins to related tables (episodes -> video/audio tracks)
+	// Filters requiring joins to related tables (episodes -> video/audio tracks) - support comma-separated values with OR logic
 	if filters.Resolution != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.resolution LIKE '%%%s%%')", filters.Resolution)
+		resolutionClause := buildOrClause("vt.resolution", filters.Resolution)
+		if resolutionClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND %s)", resolutionClause)
+		}
 	}
 	if filters.Codec != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.codec LIKE '%%%s%%')", filters.Codec)
+		codecClause := buildOrClause("vt.codec", filters.Codec)
+		if codecClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND %s)", codecClause)
+		}
 	}
 	if filters.Audio != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN audio_tracks at ON e.id = at.episode_id WHERE e.series_id = series.id AND at.codec LIKE '%%%s%%')", filters.Audio)
+		audioClause := buildOrClause("at.codec", filters.Audio)
+		if audioClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN audio_tracks at ON e.id = at.episode_id WHERE e.series_id = series.id AND %s)", audioClause)
+		}
 	}
 	if filters.HDR != "" {
-		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.hdr LIKE '%%%s%%')", filters.HDR)
+		hdrClause := buildOrClause("vt.hdr", filters.HDR)
+		if hdrClause != "" {
+			where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND %s)", hdrClause)
+		}
 	}
 
 	var total int64
