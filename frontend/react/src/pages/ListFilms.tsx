@@ -214,7 +214,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
         <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
         <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${context?.stats?.fourKPercent || 0}%)`]} />
+        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} />
         <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['fichiers manquants', `${context?.stats?.missingMovies || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
