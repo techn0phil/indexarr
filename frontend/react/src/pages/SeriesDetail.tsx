@@ -65,8 +65,28 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
           {/* Info */}
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {series.title}
+            {typeof series.rating === 'number' && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: 'var(--color-badge-rating)',
+                color: 'var(--color-badge-rating-text)',
+                borderRadius: '99px',
+                fontSize: '12px',
+                fontWeight: 500,
+                padding: '2px 10px 2px 7px',
+                border: 'none',
+                lineHeight: 1,
+                minWidth: '36px',
+                height: '22px',
+              }}>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{series.rating?.toFixed(1)}</span>
+              </span>
+            )}
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <span>
