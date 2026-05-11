@@ -62,7 +62,9 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           {series.title}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
+          {/* As we don't have seasons loaded for performance reasons, we won't show badges for now.
+          We could consider fetching seasons/episodes on demand when hovering or clicking on a series card in the future. */}
+          {/* {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
             <span className={comStyles['badge-4k']}>4K</span>
           )}
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.hdr.includes('Dolby') && (
@@ -75,7 +77,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
             <span className={comStyles['badge-codec']}>
               {series.seasonCount * 10 - series.episodeCount} ep. manq.
             </span>
-          )}
+          )} */}
         </div>
       </div>
     </div>
