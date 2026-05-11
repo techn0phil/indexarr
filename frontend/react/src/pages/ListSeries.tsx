@@ -132,7 +132,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
             label="Statut"
             active={activeFilters.status.length > 0}
             count={activeFilters.status.length}
@@ -140,7 +140,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
         
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
             label="Résolution"
             active={activeFilters.resolution.length > 0}
             count={activeFilters.resolution.length}
@@ -148,7 +148,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
           
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
             label="Codec"
             active={activeFilters.codec.length > 0}
             count={activeFilters.codec.length}
@@ -156,7 +156,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
           
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
             label="Audio"
             active={activeFilters.audio.length > 0}
             count={activeFilters.audio.length}
