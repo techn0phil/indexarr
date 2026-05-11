@@ -125,70 +125,70 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   };
 
   return (
-    <div style={{ padding: '16px 20px' }}>
+    <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
           <FilterChip
             label="Statut"
-          active={activeFilters.status.length > 0}
-          count={activeFilters.status.length}
-          onClick={() => setModalFilter('status')}
-        />
-        
-        <FilterChip
-          label="Résolution"
-          active={activeFilters.resolution.length > 0}
-          count={activeFilters.resolution.length}
-          onClick={() => setModalFilter('resolution')}
-        />
-        
-        <FilterChip
-          label="Codec"
-          active={activeFilters.codec.length > 0}
-          count={activeFilters.codec.length}
-          onClick={() => setModalFilter('codec')}
-        />
-        
-        <FilterChip
-          label="Audio"
-          active={activeFilters.audio.length > 0}
-          count={activeFilters.audio.length}
-          onClick={() => setModalFilter('audio')}
-        />
-        
-        <FilterChip
-          label="HDR"
-          active={activeFilters.hdr.length > 0}
-          count={activeFilters.hdr.length}
-          onClick={() => setModalFilter('hdr')}
-        />
+            active={activeFilters.status.length > 0}
+            count={activeFilters.status.length}
+            onClick={() => setModalFilter('status')}
+          />
+          
+          <FilterChip
+            label="Résolution"
+            active={activeFilters.resolution.length > 0}
+            count={activeFilters.resolution.length}
+            onClick={() => setModalFilter('resolution')}
+          />
+          
+          <FilterChip
+            label="Codec"
+            active={activeFilters.codec.length > 0}
+            count={activeFilters.codec.length}
+            onClick={() => setModalFilter('codec')}
+          />
+          
+          <FilterChip
+            label="Audio"
+            active={activeFilters.audio.length > 0}
+            count={activeFilters.audio.length}
+            onClick={() => setModalFilter('audio')}
+          />
+          
+          <FilterChip
+            label="HDR"
+            active={activeFilters.hdr.length > 0}
+            count={activeFilters.hdr.length}
+            onClick={() => setModalFilter('hdr')}
+          />
 
-        {getTotalActiveFilters() > 0 && (
-          <button
-            onClick={() => setActiveFilters({ status: [], resolution: [], codec: [], audio: [], hdr: [] })}
-            style={{
-              fontSize: '11px',
-              color: 'var(--color-text-tertiary)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              marginLeft: '4px',
-            }}
-          >
-            Effacer tout
-          </button>
-        )}
+          {getTotalActiveFilters() > 0 && (
+            <button
+              onClick={() => setActiveFilters({ status: [], resolution: [], codec: [], audio: [], hdr: [] })}
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-text-tertiary)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                marginLeft: '4px',
+              }}
+            >
+              Effacer tout
+            </button>
+          )}
         </div>
 
         <ViewToggle view={view} onViewChange={handleViewChange} />
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
         <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
         <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} total`, `${context?.stats?.totalEpisodes || 0} total`]} />
         <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[`moy. par ep.`, `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
@@ -207,7 +207,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         </div>
       ) : view === 'grid' ? (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px', padding: '0 20px' }}>
             {series.map((s) => (
               <SeriesCard key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
             ))}
@@ -236,7 +236,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 20px' }}>
             {series.map((s) => (
               <SeriesCardList key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
             ))}
