@@ -260,6 +260,26 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                   </div>
                 </div>
 
+                <div style={{ flex: '1', fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                  {(ep.mediaInfo?.videoTracks ?? []).map((track, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '7px', translate: '-3px 0' }}>
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                        <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
+                        <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
+                      </svg>
+                      <span>{track.resolution || 'N/A'} · {track.fps || 'N/A'} fps · {track.bitrate || 'N/A'} · {track.colorSpace || 'N/A'}</span>
+                    </div>
+                  ))}
+                  {(ep.mediaInfo?.audioTracks ?? []).map((track, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                        <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
+                      </svg>
+                      <span>{track.channels || 'N/A'} · {track.language || 'N/A'} · {track.bitrate || 'N/A'} · {track.sampleRate || 'N/A'}</span>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                   {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
