@@ -59,6 +59,16 @@
   accent-color: var(--color-primary);
 }
 
+html[data-theme="dark"] .checkbox {
+  accent-color: var(--color-primary-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .checkbox {
+    accent-color: var(--color-primary-accent);
+  }
+}
+
 .label {
   font-size: 12px;
   color: var(--color-text-primary);
@@ -103,4 +113,22 @@
 
 .applyBtn:hover {
   background: #1a8c69;
+}
+
+html[data-theme="dark"] .applyBtn {
+  background: var(--color-primary-light);
+}
+
+html[data-theme="dark"] .applyBtn:hover {
+  background: #1a8c69;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .applyBtn {
+    background: var(--color-primary-light);
+  }
+
+  html:not([data-theme]) .applyBtn:hover {
+    background: #1a8c69;
+  }
 }

@@ -18,7 +18,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
     series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
 
   return (
-    <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
+    <div className={comStyles['tv-show-card']} onClick={onClick}>
       <div
         style={{
           width: '100%',
@@ -61,7 +61,9 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
         <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px' }}>
           {series.title}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+        {/* As we don't have seasons loaded for performance reasons, we won't show badges for now.
+        We could consider fetching seasons/episodes on demand when hovering or clicking on a series card in the future. */}
+        {/* <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.resolution.includes('3840') && (
             <span className={comStyles['badge-4k']}>4K</span>
           )}
@@ -76,7 +78,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
               {series.seasonCount * 10 - series.episodeCount} ep. manq.
             </span>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

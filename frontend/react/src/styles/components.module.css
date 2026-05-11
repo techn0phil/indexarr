@@ -11,6 +11,19 @@
   border: 0.5px solid #5DCAA5;
 }
 
+.tv-show-card {
+  background-color: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+
+.tv-show-card:hover {
+  border: 0.5px solid #5DCAA5;
+}
+
 .card {
   background-color: var(--color-background-primary);
   border: 0.5px solid var(--color-border-tertiary);
@@ -184,7 +197,7 @@
   border: 0.5px solid var(--color-border-tertiary);
   background: var(--color-background-secondary);
   border-radius: 99px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   font-size: 11px;
   color: var(--color-text-secondary);
   cursor: pointer;

@@ -114,10 +114,15 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  pointer-events: none;
-  font-size: 10px;
-  color: var(--color-text-tertiary);
+  font-size: 12px;
   font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: var(--color-background-tertiary);
+  opacity: 0.5;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 6px;
+  padding: 2px 5px;
+  pointer-events: none;
 }
 
 .theme-toggle {
