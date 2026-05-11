@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Series } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
+import { AppContext } from '../hooks/useAppContext';
 
 interface SeriesDetailProps {
   seriesId: number;
@@ -11,6 +12,18 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
   const [series, setSeries] = useState<Series | null>(null);
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
+  const appContext = useContext(AppContext);
+
+  // Slugify function to create URL-friendly strings
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .normalize('NFD') // Normalize accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -165,13 +178,18 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               {series.synopsis}
             </p>
 
+            {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-              <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-                + Rechercher épisodes
-              </button>
-              <button style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>
-                Ouvrir dans Sonarr
-              </button>
+              {appContext?.config?.sonarrUrl && (
+                <a href={`${appContext.config.sonarrUrl}/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/sonarr-light.png" alt="Sonarr Light" style={{ width: '12px', height: '12px' }} />
+                  Sonarr
+                </a>
+              )}
+              <a href={`https://thetvdb.com/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-dark.png'} alt="TVDB Light" style={{ width: '12px', height: '12px' }} />
+                TVDB
+              </a>
             </div>
           </div>
         </div>

@@ -40,7 +40,10 @@ export const apiClient = {
 
   getConfig: async () => {
     const response = await fetch(`${API_BASE}/config`);
-    return response.json() as Promise<{ radarrUrl: string }>;
+    return response.json() as Promise<{
+      radarrUrl: string;
+      sonarrUrl: string;
+    }>;
   },
 
   // Scan endpoints

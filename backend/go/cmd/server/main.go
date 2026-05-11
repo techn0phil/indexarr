@@ -70,6 +70,7 @@ func main() {
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("🎬 Indexarr server running on http://localhost:%s", cfg.ServerPort)
 	log.Printf("📡 Radarr URL: %s", cfg.RadarrURL)
+	log.Printf("🔊 Sonarr URL: %s", cfg.SonarrURL)
 	log.Printf("📁 Database: %s", cfg.DBPath)
 	if len(cfg.MediaLibraryPaths) > 0 {
 		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)

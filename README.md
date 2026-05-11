@@ -111,6 +111,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder on the host (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/tv-shows | No | Comma-separated paths to media on the guest |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
+| `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
@@ -218,6 +219,7 @@ docker run -d -p 8787:8787 \
       -e TMDB_API_KEY=fffffffffffffffff \
       -e TVDB_API_KEY=fffffffffffffffff \
       -e RADARR_URL=http://radarr:7878 \
+      -e SONARR_URL=http://sonarr:8989 \
       ghcr.io/pschmucker/indexarr:latest
 ```
 

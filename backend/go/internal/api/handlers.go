@@ -142,6 +142,7 @@ func GetConfig(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		respond(w, map[string]interface{}{
 			"radarrUrl": cfg.RadarrURL,
+			"sonarrUrl": cfg.SonarrURL,
 		})
 	}
 }

@@ -5,7 +5,8 @@ import { StatsResponse } from '../types';
 export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series';
 
 interface AppConfig {
-  radarrUrl: string;
+  radarrUrl?: string;
+  sonarrUrl?: string;
 }
 
 interface AppContextType {
@@ -47,7 +48,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
       } catch (error) {
         console.error('Failed to fetch config:', error);
         // Fallback to default config
-        setConfig({ radarrUrl: '' });
+        setConfig({ radarrUrl: '', sonarrUrl: '' });
       } finally {
         setConfigLoading(false);
       }

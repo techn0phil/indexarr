@@ -20,6 +20,7 @@ docker run -d \
   -e TMDB_API_KEY=your_key \
   -e TVDB_API_KEY=your_key \
   -e RADARR_URL=http://radarr:7878 \
+  -e SONARR_URL=http://sonarr:8989 \
   indexarr:latest
 
 # Pull from GitHub Container Registry
@@ -98,6 +99,7 @@ indexarr/
 | `TMDB_API_KEY` | - | TMDB API key (required) |
 | `TVDB_API_KEY` | - | TVDB API key (required) |
 | `RADARR_URL` | http://radarr:7878 | Radarr URL (optional) |
+| `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
 | `MEDIA_LIBRARY_PATHS` | - | Comma-separated media folder paths |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |

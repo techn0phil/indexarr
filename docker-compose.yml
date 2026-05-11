@@ -24,6 +24,7 @@ services:
       
       # External services
       RADARR_URL: ${RADARR_URL:-http://radarr:7878}
+      SONARR_URL: ${SONARR_URL:-http://sonarr:8989}
       
       # Scan configuration
       SCAN_INTERVAL: ${SCAN_INTERVAL:-24}

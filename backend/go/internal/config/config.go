@@ -12,6 +12,7 @@ type Config struct {
 	TMDBAPIKey        string
 	TVDBAPIKey        string
 	RadarrURL         string
+	SonarrURL         string
 	ScanInterval      int      // hours between scans (0 = disabled)
 	MediaLibraryPaths []string // directories to scan for media files
 	MediainfoPath     string   // path to mediainfo binary
@@ -25,6 +26,7 @@ func Load() *Config {
 		TMDBAPIKey:        getEnv("TMDB_API_KEY", ""),
 		TVDBAPIKey:        getEnv("TVDB_API_KEY", ""),
 		RadarrURL:         getEnv("RADARR_URL", ""),
+		SonarrURL:         getEnv("SONARR_URL", ""),
 		ScanInterval:      getEnvInt("SCAN_INTERVAL", 24),
 		MediaLibraryPaths: getEnvList("MEDIA_LIBRARY_PATHS", []string{}),
 		MediainfoPath:     getEnv("MEDIAINFO_PATH", "mediainfo"),
