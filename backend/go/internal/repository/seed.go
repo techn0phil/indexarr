@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"indexarr/internal/models"
 )
@@ -170,247 +169,247 @@ func insertSeries(db *sql.DB, s *models.Series) error {
 }
 
 func getMockMovies() []models.Movie {
-	now := time.Now().Format(time.RFC3339)
+	// now := time.Now().Format(time.RFC3339)
 
 	return []models.Movie{
-		{
-			Title:      "Interstellar",
-			Year:       2014,
-			Duration:   169,
-			Synopsis:   "Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine.",
-			Genres:     "Science-fiction, Aventure",
-			Rating:     8.7,
-			Popularity: 97.4,
-			Status:     "available",
-			FileSize:   62500000000, // 62.5 GB
-			FilePath:   "/media/films/Interstellar (2014)/",
-			Container:  "MKV",
-			DateAdded:  now,
-			TMDBId:     157336,
-			IMDbId:     "tt0816692",
-			Cast: []models.Cast{
-				{Name: "Matthew McConaughey", Role: "Cooper", Avatar: "MM"},
-				{Name: "Anne Hathaway", Role: "Brand", Avatar: "AH"},
-				{Name: "Jessica Chastain", Role: "Murph", Avatar: "JC"},
-				{Name: "Michael Caine", Role: "Prof. Brand", Avatar: "MC"},
-			},
-			MediaInfo: &models.MediaInfo{
-				VideoTracks: []models.VideoTrack{
-					{Codec: "H.265", Resolution: "3840x2160", FPS: 23.976, Bitrate: "35.2 Mbps", HDR: "Dolby Vision + HDR10", ColorSpace: "BT.2020"},
-				},
-				AudioTracks: []models.AudioTrack{
-					{Codec: "TrueHD Atmos", Channels: "7.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "4.8 Mbps"},
-					{Codec: "AC-3", Channels: "5.1", Language: "French", SampleRate: "48000 Hz", Bitrate: "384 kbps"},
-				},
-				SubtitleTracks: []models.SubtitleTrack{
-					{Language: "French", Format: "SRT"},
-					{Language: "English", Format: "SRT"},
-				},
-			},
-		},
-		{
-			Title:      "Dune: Part Two",
-			Year:       2024,
-			Duration:   166,
-			Synopsis:   "Paul Atreides voyage en Arrakis pour venger la mort de sa famille.",
-			Genres:     "Science-fiction, Aventure",
-			Rating:     8.1,
-			Popularity: 156.3,
-			Status:     "available",
-			FileSize:   48900000000,
-			FilePath:   "/media/films/Dune Part Two (2024)/",
-			Container:  "MKV",
-			DateAdded:  now,
-			TMDBId:     693134,
-			IMDbId:     "tt15239678",
-			Cast: []models.Cast{
-				{Name: "Timothée Chalamet", Role: "Paul", Avatar: "TC"},
-				{Name: "Zendaya", Role: "Chani", Avatar: "Z"},
-			},
-			MediaInfo: &models.MediaInfo{
-				VideoTracks: []models.VideoTrack{
-					{Codec: "AV1", Resolution: "3840x2160", FPS: 23.976, Bitrate: "32.5 Mbps", HDR: "HDR10+", ColorSpace: "BT.2020"},
-				},
-				AudioTracks: []models.AudioTrack{
-					{Codec: "DTS-HD MA", Channels: "5.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "2.5 Mbps"},
-				},
-			},
-		},
-		{
-			Title:      "Oppenheimer",
-			Year:       2023,
-			Duration:   180,
-			Synopsis:   "Le parcours de J. Robert Oppenheimer et son rôle dans le Projet Manhattan.",
-			Genres:     "Drame, Histoire",
-			Rating:     8.1,
-			Popularity: 89.2,
-			Status:     "available",
-			FileSize:   35700000000,
-			FilePath:   "/media/films/Oppenheimer (2023)/",
-			Container:  "MKV",
-			DateAdded:  now,
-			TMDBId:     872585,
-			IMDbId:     "tt15398776",
-			Cast: []models.Cast{
-				{Name: "Cillian Murphy", Role: "Oppenheimer", Avatar: "CM"},
-			},
-			MediaInfo: &models.MediaInfo{
-				VideoTracks: []models.VideoTrack{
-					{Codec: "H.264", Resolution: "1920x1080", FPS: 24.0, Bitrate: "15.2 Mbps", HDR: "none", ColorSpace: "BT.709"},
-				},
-				AudioTracks: []models.AudioTrack{
-					{Codec: "AAC", Channels: "2.0", Language: "English", SampleRate: "48000 Hz", Bitrate: "320 kbps"},
-				},
-			},
-		},
-		{
-			Title:      "Poor Things",
-			Year:       2023,
-			Duration:   141,
-			Synopsis:   "Une jeune femme excentrique se lance dans une série d'aventures surréalistes.",
-			Genres:     "Fantastique, Comédie",
-			Rating:     7.5,
-			Popularity: 42.1,
-			Status:     "missing",
-			FileSize:   0,
-			FilePath:   "",
-			Container:  "",
-			DateAdded:  now,
-			TMDBId:     771452,
-			IMDbId:     "tt14209916",
-			Cast:       []models.Cast{},
-			MediaInfo:  nil,
-		},
+		// {
+		// 	Title:      "Interstellar",
+		// 	Year:       2014,
+		// 	Duration:   169,
+		// 	Synopsis:   "Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine.",
+		// 	Genres:     "Science-fiction, Aventure",
+		// 	Rating:     8.7,
+		// 	Popularity: 97.4,
+		// 	Status:     "available",
+		// 	FileSize:   62500000000, // 62.5 GB
+		// 	FilePath:   "/media/films/Interstellar (2014)/",
+		// 	Container:  "MKV",
+		// 	DateAdded:  now,
+		// 	TMDBId:     157336,
+		// 	IMDbId:     "tt0816692",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Matthew McConaughey", Role: "Cooper", Avatar: "MM"},
+		// 		{Name: "Anne Hathaway", Role: "Brand", Avatar: "AH"},
+		// 		{Name: "Jessica Chastain", Role: "Murph", Avatar: "JC"},
+		// 		{Name: "Michael Caine", Role: "Prof. Brand", Avatar: "MC"},
+		// 	},
+		// 	MediaInfo: &models.MediaInfo{
+		// 		VideoTracks: []models.VideoTrack{
+		// 			{Codec: "H.265", Resolution: "3840x2160", FPS: 23.976, Bitrate: "35.2 Mbps", HDR: "Dolby Vision + HDR10", ColorSpace: "BT.2020"},
+		// 		},
+		// 		AudioTracks: []models.AudioTrack{
+		// 			{Codec: "TrueHD Atmos", Channels: "7.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "4.8 Mbps"},
+		// 			{Codec: "AC-3", Channels: "5.1", Language: "French", SampleRate: "48000 Hz", Bitrate: "384 kbps"},
+		// 		},
+		// 		SubtitleTracks: []models.SubtitleTrack{
+		// 			{Language: "French", Format: "SRT"},
+		// 			{Language: "English", Format: "SRT"},
+		// 		},
+		// 	},
+		// },
+		// {
+		// 	Title:      "Dune: Part Two",
+		// 	Year:       2024,
+		// 	Duration:   166,
+		// 	Synopsis:   "Paul Atreides voyage en Arrakis pour venger la mort de sa famille.",
+		// 	Genres:     "Science-fiction, Aventure",
+		// 	Rating:     8.1,
+		// 	Popularity: 156.3,
+		// 	Status:     "available",
+		// 	FileSize:   48900000000,
+		// 	FilePath:   "/media/films/Dune Part Two (2024)/",
+		// 	Container:  "MKV",
+		// 	DateAdded:  now,
+		// 	TMDBId:     693134,
+		// 	IMDbId:     "tt15239678",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Timothée Chalamet", Role: "Paul", Avatar: "TC"},
+		// 		{Name: "Zendaya", Role: "Chani", Avatar: "Z"},
+		// 	},
+		// 	MediaInfo: &models.MediaInfo{
+		// 		VideoTracks: []models.VideoTrack{
+		// 			{Codec: "AV1", Resolution: "3840x2160", FPS: 23.976, Bitrate: "32.5 Mbps", HDR: "HDR10+", ColorSpace: "BT.2020"},
+		// 		},
+		// 		AudioTracks: []models.AudioTrack{
+		// 			{Codec: "DTS-HD MA", Channels: "5.1", Language: "English", SampleRate: "48000 Hz", Bitrate: "2.5 Mbps"},
+		// 		},
+		// 	},
+		// },
+		// {
+		// 	Title:      "Oppenheimer",
+		// 	Year:       2023,
+		// 	Duration:   180,
+		// 	Synopsis:   "Le parcours de J. Robert Oppenheimer et son rôle dans le Projet Manhattan.",
+		// 	Genres:     "Drame, Histoire",
+		// 	Rating:     8.1,
+		// 	Popularity: 89.2,
+		// 	Status:     "available",
+		// 	FileSize:   35700000000,
+		// 	FilePath:   "/media/films/Oppenheimer (2023)/",
+		// 	Container:  "MKV",
+		// 	DateAdded:  now,
+		// 	TMDBId:     872585,
+		// 	IMDbId:     "tt15398776",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Cillian Murphy", Role: "Oppenheimer", Avatar: "CM"},
+		// 	},
+		// 	MediaInfo: &models.MediaInfo{
+		// 		VideoTracks: []models.VideoTrack{
+		// 			{Codec: "H.264", Resolution: "1920x1080", FPS: 24.0, Bitrate: "15.2 Mbps", HDR: "none", ColorSpace: "BT.709"},
+		// 		},
+		// 		AudioTracks: []models.AudioTrack{
+		// 			{Codec: "AAC", Channels: "2.0", Language: "English", SampleRate: "48000 Hz", Bitrate: "320 kbps"},
+		// 		},
+		// 	},
+		// },
+		// {
+		// 	Title:      "Poor Things",
+		// 	Year:       2023,
+		// 	Duration:   141,
+		// 	Synopsis:   "Une jeune femme excentrique se lance dans une série d'aventures surréalistes.",
+		// 	Genres:     "Fantastique, Comédie",
+		// 	Rating:     7.5,
+		// 	Popularity: 42.1,
+		// 	Status:     "missing",
+		// 	FileSize:   0,
+		// 	FilePath:   "",
+		// 	Container:  "",
+		// 	DateAdded:  now,
+		// 	TMDBId:     771452,
+		// 	IMDbId:     "tt14209916",
+		// 	Cast:       []models.Cast{},
+		// 	MediaInfo:  nil,
+		// },
 	}
 }
 
 func getMockSeries() []models.Series {
-	now := time.Now().Format(time.RFC3339)
+	// now := time.Now().Format(time.RFC3339)
 
 	return []models.Series{
-		{
-			Title:        "Breaking Bad",
-			YearStart:    2008,
-			YearEnd:      2013,
-			SeasonCount:  5,
-			EpisodeCount: 62,
-			Synopsis:     "Walter White, professeur de chimie, fabrique et vend de la méthamphétamine.",
-			Genres:       "Drame, Crime",
-			Rating:       9.5,
-			Popularity:   425.8,
-			Status:       "complete",
-			FileSize:     142000000000, // 142 GB
-			DateAdded:    now,
-			TVDBId:       81189,
-			IMDbId:       "tt0903747",
-			Cast: []models.Cast{
-				{Name: "Bryan Cranston", Role: "Walter White", Avatar: "BC"},
-				{Name: "Aaron Paul", Role: "Jesse Pinkman", Avatar: "AP"},
-			},
-			Seasons: []models.Season{
-				{
-					Number:       1,
-					FileSize:     25000000000,
-					AvailableEps: 7,
-					MissingEps:   0,
-					Episodes:     getBreakingBadSeason1(),
-				},
-				{
-					Number:       2,
-					FileSize:     30000000000,
-					AvailableEps: 4, // 1 missing
-					MissingEps:   1,
-					Episodes:     getBreakingBadSeason2(),
-				},
-				{
-					Number:       3,
-					FileSize:     28000000000,
-					AvailableEps: 2,
-					MissingEps:   0,
-					Episodes:     getBreakingBadSeason3(),
-				},
-				{
-					Number:       4,
-					FileSize:     29000000000,
-					AvailableEps: 2,
-					MissingEps:   0,
-					Episodes:     getBreakingBadSeason4(),
-				},
-				{
-					Number:       5,
-					FileSize:     30000000000,
-					AvailableEps: 3,
-					MissingEps:   0,
-					Episodes:     getBreakingBadSeason5(),
-				},
-			},
-		},
-		{
-			Title:        "Severance",
-			YearStart:    2022,
-			YearEnd:      2024,
-			SeasonCount:  2,
-			EpisodeCount: 10,
-			Synopsis:     "Les employés acceptent une procédure chirurgicale pour séparer complètement leur mémoire professionnelle.",
-			Genres:       "Science-fiction, Thriller",
-			Rating:       8.7,
-			Popularity:   134.2,
-			Status:       "complete",
-			FileSize:     125000000000,
-			DateAdded:    now,
-			TVDBId:       372310,
-			IMDbId:       "tt11280740",
-			Cast: []models.Cast{
-				{Name: "Adam Scott", Role: "Mark Scout", Avatar: "AS"},
-			},
-			Seasons: []models.Season{
-				{Number: 1, FileSize: 62000000000, AvailableEps: 9, MissingEps: 0, Episodes: getMockEpisodes(2, 1, 9, "available")},
-				{Number: 2, FileSize: 63000000000, AvailableEps: 1, MissingEps: 0, Episodes: getMockEpisodes(2, 2, 1, "available")},
-			},
-		},
-		{
-			Title:        "Shōgun",
-			YearStart:    2024,
-			YearEnd:      2024,
-			SeasonCount:  1,
-			EpisodeCount: 10,
-			Synopsis:     "Un navire anglais échoue au Japon au 17ème siècle.",
-			Genres:       "Drame, Histoire",
-			Rating:       8.5,
-			Popularity:   156.4,
-			Status:       "partial",
-			FileSize:     98000000000,
-			DateAdded:    now,
-			TVDBId:       407855,
-			IMDbId:       "tt13949816",
-			Cast:         []models.Cast{},
-			Seasons: []models.Season{
-				{Number: 1, FileSize: 98000000000, AvailableEps: 7, MissingEps: 3, Episodes: getShogonSeason1()},
-			},
-		},
-		{
-			Title:        "The Last of Us",
-			YearStart:    2023,
-			YearEnd:      2023,
-			SeasonCount:  1,
-			EpisodeCount: 9,
-			Synopsis:     "Un contrebandier cynique est engagé pour escorter une jeune fille à travers un monde infesté de champignons.",
-			Genres:       "Drame, Thriller",
-			Rating:       8.3,
-			Popularity:   187.3,
-			Status:       "complete",
-			FileSize:     110000000000,
-			DateAdded:    now,
-			TVDBId:       412410,
-			IMDbId:       "tt6468322",
-			Cast: []models.Cast{
-				{Name: "Pedro Pascal", Role: "Joel", Avatar: "PP"},
-				{Name: "Bella Ramsey", Role: "Ellie", Avatar: "BR"},
-			},
-			Seasons: []models.Season{
-				{Number: 1, FileSize: 110000000000, AvailableEps: 9, MissingEps: 0, Episodes: getMockEpisodes(4, 1, 9, "available")},
-			},
-		},
+		// {
+		// 	Title:        "Breaking Bad",
+		// 	YearStart:    2008,
+		// 	YearEnd:      2013,
+		// 	SeasonCount:  5,
+		// 	EpisodeCount: 62,
+		// 	Synopsis:     "Walter White, professeur de chimie, fabrique et vend de la méthamphétamine.",
+		// 	Genres:       "Drame, Crime",
+		// 	Rating:       9.5,
+		// 	Popularity:   425.8,
+		// 	Status:       "complete",
+		// 	FileSize:     142000000000, // 142 GB
+		// 	DateAdded:    now,
+		// 	TVDBId:       81189,
+		// 	IMDbId:       "tt0903747",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Bryan Cranston", Role: "Walter White", Avatar: "BC"},
+		// 		{Name: "Aaron Paul", Role: "Jesse Pinkman", Avatar: "AP"},
+		// 	},
+		// 	Seasons: []models.Season{
+		// 		{
+		// 			Number:       1,
+		// 			FileSize:     25000000000,
+		// 			AvailableEps: 7,
+		// 			MissingEps:   0,
+		// 			Episodes:     getBreakingBadSeason1(),
+		// 		},
+		// 		{
+		// 			Number:       2,
+		// 			FileSize:     30000000000,
+		// 			AvailableEps: 4, // 1 missing
+		// 			MissingEps:   1,
+		// 			Episodes:     getBreakingBadSeason2(),
+		// 		},
+		// 		{
+		// 			Number:       3,
+		// 			FileSize:     28000000000,
+		// 			AvailableEps: 2,
+		// 			MissingEps:   0,
+		// 			Episodes:     getBreakingBadSeason3(),
+		// 		},
+		// 		{
+		// 			Number:       4,
+		// 			FileSize:     29000000000,
+		// 			AvailableEps: 2,
+		// 			MissingEps:   0,
+		// 			Episodes:     getBreakingBadSeason4(),
+		// 		},
+		// 		{
+		// 			Number:       5,
+		// 			FileSize:     30000000000,
+		// 			AvailableEps: 3,
+		// 			MissingEps:   0,
+		// 			Episodes:     getBreakingBadSeason5(),
+		// 		},
+		// 	},
+		// },
+		// {
+		// 	Title:        "Severance",
+		// 	YearStart:    2022,
+		// 	YearEnd:      2024,
+		// 	SeasonCount:  2,
+		// 	EpisodeCount: 10,
+		// 	Synopsis:     "Les employés acceptent une procédure chirurgicale pour séparer complètement leur mémoire professionnelle.",
+		// 	Genres:       "Science-fiction, Thriller",
+		// 	Rating:       8.7,
+		// 	Popularity:   134.2,
+		// 	Status:       "complete",
+		// 	FileSize:     125000000000,
+		// 	DateAdded:    now,
+		// 	TVDBId:       372310,
+		// 	IMDbId:       "tt11280740",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Adam Scott", Role: "Mark Scout", Avatar: "AS"},
+		// 	},
+		// 	Seasons: []models.Season{
+		// 		{Number: 1, FileSize: 62000000000, AvailableEps: 9, MissingEps: 0, Episodes: getMockEpisodes(2, 1, 9, "available")},
+		// 		{Number: 2, FileSize: 63000000000, AvailableEps: 1, MissingEps: 0, Episodes: getMockEpisodes(2, 2, 1, "available")},
+		// 	},
+		// },
+		// {
+		// 	Title:        "Shōgun",
+		// 	YearStart:    2024,
+		// 	YearEnd:      2024,
+		// 	SeasonCount:  1,
+		// 	EpisodeCount: 10,
+		// 	Synopsis:     "Un navire anglais échoue au Japon au 17ème siècle.",
+		// 	Genres:       "Drame, Histoire",
+		// 	Rating:       8.5,
+		// 	Popularity:   156.4,
+		// 	Status:       "partial",
+		// 	FileSize:     98000000000,
+		// 	DateAdded:    now,
+		// 	TVDBId:       407855,
+		// 	IMDbId:       "tt13949816",
+		// 	Cast:         []models.Cast{},
+		// 	Seasons: []models.Season{
+		// 		{Number: 1, FileSize: 98000000000, AvailableEps: 7, MissingEps: 3, Episodes: getShogonSeason1()},
+		// 	},
+		// },
+		// {
+		// 	Title:        "The Last of Us",
+		// 	YearStart:    2023,
+		// 	YearEnd:      2023,
+		// 	SeasonCount:  1,
+		// 	EpisodeCount: 9,
+		// 	Synopsis:     "Un contrebandier cynique est engagé pour escorter une jeune fille à travers un monde infesté de champignons.",
+		// 	Genres:       "Drame, Thriller",
+		// 	Rating:       8.3,
+		// 	Popularity:   187.3,
+		// 	Status:       "complete",
+		// 	FileSize:     110000000000,
+		// 	DateAdded:    now,
+		// 	TVDBId:       412410,
+		// 	IMDbId:       "tt6468322",
+		// 	Cast: []models.Cast{
+		// 		{Name: "Pedro Pascal", Role: "Joel", Avatar: "PP"},
+		// 		{Name: "Bella Ramsey", Role: "Ellie", Avatar: "BR"},
+		// 	},
+		// 	Seasons: []models.Season{
+		// 		{Number: 1, FileSize: 110000000000, AvailableEps: 9, MissingEps: 0, Episodes: getMockEpisodes(4, 1, 9, "available")},
+		// 	},
+		// },
 	}
 }
 

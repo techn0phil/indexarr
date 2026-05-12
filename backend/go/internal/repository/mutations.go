@@ -2,206 +2,278 @@ package repository
 
 import (
 	"database/sql"
+	"log"
+	"strings"
 	"time"
 
 	"indexarr/internal/models"
 )
 
+// retryOnLock retries a function up to 3 times if database is locked
+func retryOnLock(fn func() error) error {
+	var lastErr error
+	backoffs := []time.Duration{100 * time.Millisecond, 300 * time.Millisecond, 1 * time.Second}
+
+	for attempt := 0; attempt < len(backoffs)+1; attempt++ {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+
+		// Check if it's a "database is locked" error
+		if strings.Contains(err.Error(), "database is locked") {
+			lastErr = err
+			if attempt < len(backoffs) {
+				log.Printf("Database locked, retrying in %v (attempt %d/3)", backoffs[attempt], attempt+1)
+				time.Sleep(backoffs[attempt])
+				continue
+			}
+		}
+
+		// Non-lock error or max retries reached
+		return err
+	}
+
+	return lastErr
+}
+
 // InsertMovie inserts a movie with its cast and media info in a transaction
 func InsertMovie(db *sql.DB, movie *models.Movie) (int64, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback()
+	var movieID int64
 
-	// Insert movie
-	result, err := tx.Exec(`
-		       INSERT INTO movies (title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, last_scanned, tmdb_id, imdb_id, poster)
-		       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	       `, movie.Title, movie.Year, movie.Duration, movie.Synopsis, movie.Genres, movie.Rating, movie.Popularity,
-		movie.Status, movie.FileSize, movie.FilePath, movie.Container, movie.DateAdded, time.Now().Format(time.RFC3339),
-		movie.TMDBId, movie.IMDbId, movie.Poster)
-	if err != nil {
-		return 0, err
-	}
-
-	movieID, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	// Insert cast
-	for _, cast := range movie.Cast {
-		_, err := tx.Exec(`
-			INSERT INTO cast (movie_id, name, role, avatar)
-			VALUES (?, ?, ?, ?)
-		`, movieID, cast.Name, cast.Role, cast.Avatar)
+	err := retryOnLock(func() error {
+		tx, err := db.Begin()
 		if err != nil {
-			return 0, err
+			return err
 		}
-	}
+		defer tx.Rollback()
 
-	// Insert media info
-	if movie.MediaInfo != nil {
-		for _, vt := range movie.MediaInfo.VideoTracks {
+		// Insert movie
+		result, err := tx.Exec(`
+			       INSERT INTO movies (title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, last_scanned, tmdb_id, imdb_id, poster)
+			       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		       `, movie.Title, movie.Year, movie.Duration, movie.Synopsis, movie.Genres, movie.Rating, movie.Popularity,
+			movie.Status, movie.FileSize, movie.FilePath, movie.Container, movie.DateAdded, time.Now().Format(time.RFC3339),
+			movie.TMDBId, movie.IMDbId, movie.Poster)
+		if err != nil {
+			return err
+		}
+
+		id, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		movieID = id
+
+		// Insert cast
+		for _, cast := range movie.Cast {
 			_, err := tx.Exec(`
-				INSERT INTO video_tracks (movie_id, codec, resolution, fps, bitrate, hdr, color_space)
-				VALUES (?, ?, ?, ?, ?, ?, ?)
-			`, movieID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				INSERT INTO cast (movie_id, name, role, avatar)
+				VALUES (?, ?, ?, ?)
+			`, movieID, cast.Name, cast.Role, cast.Avatar)
 			if err != nil {
-				return 0, err
+				return err
 			}
 		}
 
-		for _, at := range movie.MediaInfo.AudioTracks {
-			_, err := tx.Exec(`
-				INSERT INTO audio_tracks (movie_id, codec, channels, language, sample_rate, bitrate)
-				VALUES (?, ?, ?, ?, ?, ?)
-			`, movieID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
-			if err != nil {
-				return 0, err
+		// Insert media info
+		if movie.MediaInfo != nil {
+			for _, vt := range movie.MediaInfo.VideoTracks {
+				_, err := tx.Exec(`
+					INSERT INTO video_tracks (movie_id, codec, resolution, fps, bitrate, hdr, color_space)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				`, movieID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, at := range movie.MediaInfo.AudioTracks {
+				_, err := tx.Exec(`
+					INSERT INTO audio_tracks (movie_id, codec, channels, language, sample_rate, bitrate)
+					VALUES (?, ?, ?, ?, ?, ?)
+				`, movieID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, st := range movie.MediaInfo.SubtitleTracks {
+				_, err := tx.Exec(`
+					INSERT INTO subtitle_tracks (movie_id, language, format)
+					VALUES (?, ?, ?)
+				`, movieID, st.Language, st.Format)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
-		for _, st := range movie.MediaInfo.SubtitleTracks {
-			_, err := tx.Exec(`
-				INSERT INTO subtitle_tracks (movie_id, language, format)
-				VALUES (?, ?, ?)
-			`, movieID, st.Language, st.Format)
-			if err != nil {
-				return 0, err
-			}
-		}
-	}
+		return tx.Commit()
+	})
 
-	if err := tx.Commit(); err != nil {
-		return 0, err
-	}
-
-	return movieID, nil
+	return movieID, err
 }
 
 // InsertEpisode inserts an episode with its media info
 func InsertEpisode(db *sql.DB, episode *models.Episode) (int64, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback()
+	var episodeID int64
 
-	result, err := tx.Exec(`
-		INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, episode.SeriesID, episode.SeasonNum, episode.EpisodeNum, episode.Title, episode.Duration,
-		episode.Status, episode.FileSize, episode.FilePath, episode.DateAdded, time.Now().Format(time.RFC3339))
-	if err != nil {
-		return 0, err
-	}
+	err := retryOnLock(func() error {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
 
-	episodeID, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
+		result, err := tx.Exec(`
+			INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, episode.SeriesID, episode.SeasonNum, episode.EpisodeNum, episode.Title, episode.Duration,
+			episode.Status, episode.FileSize, episode.FilePath, episode.DateAdded, time.Now().Format(time.RFC3339))
+		if err != nil {
+			return err
+		}
 
-	// Insert media info
-	if episode.MediaInfo != nil {
-		for _, vt := range episode.MediaInfo.VideoTracks {
-			_, err := tx.Exec(`
-				INSERT INTO video_tracks (episode_id, codec, resolution, fps, bitrate, hdr, color_space)
-				VALUES (?, ?, ?, ?, ?, ?, ?)
-			`, episodeID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
-			if err != nil {
-				return 0, err
+		id, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		episodeID = id
+
+		// Insert media info
+		if episode.MediaInfo != nil {
+			for _, vt := range episode.MediaInfo.VideoTracks {
+				_, err := tx.Exec(`
+					INSERT INTO video_tracks (episode_id, codec, resolution, fps, bitrate, hdr, color_space)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				`, episodeID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, at := range episode.MediaInfo.AudioTracks {
+				_, err := tx.Exec(`
+					INSERT INTO audio_tracks (episode_id, codec, channels, language, sample_rate, bitrate)
+					VALUES (?, ?, ?, ?, ?, ?)
+				`, episodeID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, st := range episode.MediaInfo.SubtitleTracks {
+				_, err := tx.Exec(`
+					INSERT INTO subtitle_tracks (episode_id, language, format)
+					VALUES (?, ?, ?)
+				`, episodeID, st.Language, st.Format)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
-		for _, at := range episode.MediaInfo.AudioTracks {
-			_, err := tx.Exec(`
-				INSERT INTO audio_tracks (episode_id, codec, channels, language, sample_rate, bitrate)
-				VALUES (?, ?, ?, ?, ?, ?)
-			`, episodeID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
-			if err != nil {
-				return 0, err
-			}
-		}
+		return tx.Commit()
+	})
 
-		for _, st := range episode.MediaInfo.SubtitleTracks {
-			_, err := tx.Exec(`
-				INSERT INTO subtitle_tracks (episode_id, language, format)
-				VALUES (?, ?, ?)
-			`, episodeID, st.Language, st.Format)
-			if err != nil {
-				return 0, err
-			}
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return 0, err
-	}
-
-	return episodeID, nil
+	return episodeID, err
 }
 
 // InsertSeries inserts a series (without episodes)
 func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback()
+	var seriesID int64
 
-	result, err := tx.Exec(`
-		INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
-		series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-		series.FileSize, series.DateAdded, series.TVDBId, series.IMDbId, series.Poster)
-	if err != nil {
-		return 0, err
-	}
-
-	seriesID, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	// Insert cast
-	for _, cast := range series.Cast {
-		_, err := tx.Exec(`
-			INSERT INTO cast (series_id, name, role, avatar)
-			VALUES (?, ?, ?, ?)
-		`, seriesID, cast.Name, cast.Role, cast.Avatar)
+	err := retryOnLock(func() error {
+		tx, err := db.Begin()
 		if err != nil {
-			return 0, err
+			return err
 		}
-	}
+		defer tx.Rollback()
 
-	if err := tx.Commit(); err != nil {
-		return 0, err
-	}
+		result, err := tx.Exec(`
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
+			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
+			series.FileSize, series.DateAdded, series.TVDBId, series.IMDbId, series.Poster)
+		if err != nil {
+			return err
+		}
 
-	return seriesID, nil
+		id, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		seriesID = id
+
+		// Insert cast
+		for _, cast := range series.Cast {
+			_, err := tx.Exec(`
+				INSERT INTO cast (series_id, name, role, avatar)
+				VALUES (?, ?, ?, ?)
+			`, seriesID, cast.Name, cast.Role, cast.Avatar)
+			if err != nil {
+				return err
+			}
+		}
+
+		return tx.Commit()
+	})
+
+	return seriesID, err
 }
 
-// GetOrCreateSeason returns existing season or creates a new one
+// GetOrCreateSeason returns existing season or creates a new one (race-condition safe)
 func GetOrCreateSeason(db *sql.DB, seriesID int64, seasonNum int) (int64, error) {
 	var seasonID int64
-	err := db.QueryRow(`SELECT id FROM seasons WHERE series_id = ? AND number = ?`, seriesID, seasonNum).Scan(&seasonID)
-	if err == nil {
-		return seasonID, nil
-	}
-	if err != sql.ErrNoRows {
-		return 0, err
-	}
 
-	// Create new season
-	result, err := db.Exec(`INSERT INTO seasons (series_id, number, file_size) VALUES (?, ?, 0)`, seriesID, seasonNum)
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
+	err := retryOnLock(func() error {
+		// First, try to get existing season without transaction
+		var id int64
+		scanErr := db.QueryRow(`SELECT id FROM seasons WHERE series_id = ? AND number = ?`, seriesID, seasonNum).Scan(&id)
+		if scanErr == nil {
+			seasonID = id
+			return nil
+		}
+		if scanErr != sql.ErrNoRows {
+			return scanErr
+		}
+
+		// Season doesn't exist, use transaction to ensure we don't create duplicates
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		// Check again inside transaction (another goroutine might have created it)
+		var existingID int64
+		txErr := tx.QueryRow(`SELECT id FROM seasons WHERE series_id = ? AND number = ?`, seriesID, seasonNum).Scan(&existingID)
+		if txErr == nil {
+			seasonID = existingID
+			return tx.Commit()
+		}
+		if txErr != sql.ErrNoRows {
+			return txErr
+		}
+
+		// Create new season
+		result, err := tx.Exec(`INSERT INTO seasons (series_id, number, file_size) VALUES (?, ?, 0)`, seriesID, seasonNum)
+		if err != nil {
+			return err
+		}
+
+		insertID, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		seasonID = insertID
+
+		return tx.Commit()
+	})
+
+	return seasonID, err
 }
 
 // GetEpisodeBySeriesSeasonEpisode finds an episode by series ID, season, and episode number
@@ -224,12 +296,14 @@ func GetEpisodeBySeriesSeasonEpisode(db *sql.DB, seriesID int64, seasonNum, epis
 
 // UpdateEpisode updates an existing episode
 func UpdateEpisode(db *sql.DB, episode *models.Episode) error {
-	_, err := db.Exec(`
-		UPDATE episodes
-		SET title = ?, duration = ?, status = ?, file_size = ?, file_path = ?, last_scanned = ?
-		WHERE id = ?
-	`, episode.Title, episode.Duration, episode.Status, episode.FileSize, episode.FilePath, time.Now().Format(time.RFC3339), episode.ID)
-	return err
+	return retryOnLock(func() error {
+		_, err := db.Exec(`
+			UPDATE episodes
+			SET title = ?, duration = ?, status = ?, file_size = ?, file_path = ?, last_scanned = ?
+			WHERE id = ?
+		`, episode.Title, episode.Duration, episode.Status, episode.FileSize, episode.FilePath, time.Now().Format(time.RFC3339), episode.ID)
+		return err
+	})
 }
 
 // GetSeriesByTitle finds a series by title (case-insensitive)
@@ -282,13 +356,15 @@ func GetSeriesByTVDBId(db *sql.DB, tvdbID int64) (*models.Series, error) {
 
 // UpdateSeriesCounts updates season_count and episode_count for a series
 func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
-	_, err := db.Exec(`
-		UPDATE series SET
-			season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-			episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?)
-		WHERE id = ?
-	`, seriesID, seriesID, seriesID)
-	return err
+	return retryOnLock(func() error {
+		_, err := db.Exec(`
+			UPDATE series SET
+				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?)
+			WHERE id = ?
+		`, seriesID, seriesID, seriesID)
+		return err
+	})
 }
 
 // Scan status operations
@@ -328,11 +404,13 @@ func GetScanStatus(db *sql.DB) (*models.ScanStatus, error) {
 
 // UpdateScanStatus updates the scan status
 func UpdateScanStatus(db *sql.DB, status *models.ScanStatus) error {
-	_, err := db.Exec(`
-		UPDATE scan_status SET status = ?, started_at = ?, completed_at = ?, files_found = ?, files_processed = ?, error_message = ?
-		WHERE id = 1
-	`, status.Status, nullString(status.StartedAt), nullString(status.CompletedAt), status.FilesFound, status.FilesProcessed, nullString(status.ErrorMessage))
-	return err
+	return retryOnLock(func() error {
+		_, err := db.Exec(`
+			UPDATE scan_status SET status = ?, started_at = ?, completed_at = ?, files_found = ?, files_processed = ?, error_message = ?
+			WHERE id = 1
+		`, status.Status, nullString(status.StartedAt), nullString(status.CompletedAt), status.FilesFound, status.FilesProcessed, nullString(status.ErrorMessage))
+		return err
+	})
 }
 
 func nullString(s string) sql.NullString {
