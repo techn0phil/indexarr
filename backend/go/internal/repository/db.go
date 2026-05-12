@@ -53,11 +53,6 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Configure connection pool - SQLite prefers 1-2 connections
-	sqlDB.SetMaxOpenConns(2)
-	sqlDB.SetMaxIdleConns(1)
-	sqlDB.SetConnMaxLifetime(30 * time.Minute)
-
 	// Run migrations
 	if err := runMigrations(dbPath); err != nil {
 		return nil, err
