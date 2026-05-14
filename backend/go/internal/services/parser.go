@@ -26,8 +26,12 @@ var (
 		regexp.MustCompile(`(?i)Season[.\s_-]?(\d{1,2})[.\s_-]?Episode[.\s_-]?(\d{1,3})`), // Season 1 Episode 5
 	}
 
-	// Year pattern: (2024), 2024, .2024.
-	yearPattern = regexp.MustCompile(`[.\s_(-](\d{4})[.\s_)-]`)
+	// Year patterns: (2024), 2024, .2024.
+	yearPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`\((\d{4})\)`),       // (2024)
+		regexp.MustCompile(`[._-](\d{4})[._-]`), // .2024., -2024-, _2024_
+		regexp.MustCompile(`\b(\d{4})\b`),       // 2024
+	}
 
 	// Resolution patterns
 	resolutionPatterns = map[string]*regexp.Regexp{
@@ -81,10 +85,14 @@ func ParseFilename(filename string) *ParsedFilename {
 	}
 
 	// Extract year
-	if matches := yearPattern.FindStringSubmatch(basename); len(matches) >= 2 {
-		year, _ := strconv.Atoi(matches[1])
-		if year >= 1900 && year <= 2100 {
-			result.Year = year
+	for _, yearPattern := range yearPatterns {
+		matches := yearPattern.FindStringSubmatch(basename)
+		if len(matches) >= 2 {
+			year, _ := strconv.Atoi(matches[1])
+			if year >= 1900 && year <= 2100 {
+				result.Year = year
+				break
+			}
 		}
 	}
 
