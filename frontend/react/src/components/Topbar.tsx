@@ -49,7 +49,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
       <div className={styles['search-container']}>
         <svg className={styles['search-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="7" cy="7" r="4.5" />
-          <path d="M10.5 10.5l2.5 2.5" />
+          <path d="M10.5 10.5l4.5 4.5" />
         </svg>
         <input
           ref={searchInputRef}
@@ -58,14 +58,6 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
           placeholder="Rechercher…"
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
-          onFocus={(e) => {
-            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]') as HTMLElement;
-            if (shortcut) shortcut.style.display = 'none';
-          }}
-          onBlur={(e) => {
-            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]') as HTMLElement;
-            if (shortcut && !e.target.value) shortcut.style.display = 'block';
-          }}
         />
         {searchQuery && (
           <button

@@ -44,7 +44,7 @@
   top: 50%;
   transform: translateY(-50%);
   background: none;
-  border: none;
+  border: 0.5px solid var(--color-border-tertiary);
   padding: 2px;
   margin: 0;
   cursor: pointer;
@@ -77,12 +77,12 @@
 }
 
 .search-input {
-  width: 200px;
+  width: 300px;
   height: 36px;
   background-color: var(--color-background-secondary);
   border: none;
   border-radius: var(--border-radius-full);
-  padding: 0 14px 0 38px;
+  padding: 0 38px;
   font-size: 12px;
   color: var(--color-text-primary);
   outline: none;
@@ -90,7 +90,6 @@
 }
 
 .search-input:focus {
-  background-color: var(--color-background-primary);
   box-shadow: 0 0 0 1.5px var(--color-primary);
 }
 
