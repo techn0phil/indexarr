@@ -103,4 +103,23 @@
   border-radius: 50%;
   background-color: #1D9E75;
   flex-shrink: 0;
+  animation: none;
+}
+
+.status-dot.connecting {
+  background-color: #EF9F27;
+  animation: pulse 1.5s infinite;
+}
+
+.status-dot.disconnected {
+  background-color: #E24B4A;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }

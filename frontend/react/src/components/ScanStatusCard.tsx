@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScanStatus as ScanStatusType } from '../types';
 import { apiClient } from '../api/client';
+import { useAppContext } from '../hooks/useAppContext';
 import comStyles from '../styles/components.module.css';
 
 interface ScanStatusProps {
@@ -8,46 +9,38 @@ interface ScanStatusProps {
 }
 
 export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
+  const { scanStatus: wsStatus } = useAppContext();
   const [status, setStatus] = useState<ScanStatusType | null>(null);
   const [triggering, setTriggering] = useState(false);
   const onScanCompleteRef = useRef(onScanComplete);
+  const previousStatusRef = useRef<string | undefined>(undefined);
 
   // Keep ref in sync with latest callback
   useEffect(() => {
     onScanCompleteRef.current = onScanComplete;
   }, [onScanComplete]);
 
-  // Memoized fetch status function
-  const fetchStatus = useCallback(async () => {
-    try {
-      const data = await apiClient.getScanStatus();
-      setStatus(data);
+  // Update status from WebSocket
+  useEffect(() => {
+    if (wsStatus) {
+      setStatus(wsStatus);
       
-      // Notify parent when scan completes
-      if (data.status === 'completed' && onScanCompleteRef.current) {
+      // Notify parent when scan completes (status transitions to 'completed')
+      if (wsStatus.status === 'completed' && 
+          previousStatusRef.current === 'running' && 
+          onScanCompleteRef.current) {
         onScanCompleteRef.current();
       }
-    } catch (error) {
-      console.error('Failed to fetch scan status:', error);
+      
+      previousStatusRef.current = wsStatus.status;
     }
-  }, []);
-
-  useEffect(() => {
-    fetchStatus();
-    
-    // Poll while scanning
-    const interval = setInterval(() => {
-      fetchStatus();
-    }, status?.status === 'running' ? 2000 : 3600000);
-
-    return () => clearInterval(interval);
-  }, [status?.status, fetchStatus]);
+  }, [wsStatus]);
 
   const handleTriggerScan = async () => {
     setTriggering(true);
     try {
       await apiClient.triggerScan();
-      fetchStatus();
+      // Status will be updated via WebSocket
     } catch (error) {
       console.error('Failed to trigger scan:', error);
     } finally {
@@ -58,7 +51,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
   const handleStopScan = async () => {
     try {
       await apiClient.stopScan();
-      fetchStatus();
+      // Status will be updated via WebSocket
     } catch (error) {
       console.error('Failed to stop scan:', error);
     }

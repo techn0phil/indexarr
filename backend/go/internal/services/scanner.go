@@ -18,25 +18,27 @@ import (
 
 // Scanner handles media library scanning
 type Scanner struct {
-	db        *sql.DB
-	config    *config.Config
-	extractor *Extractor
-	tmdb      *TMDBClient
-	tv        *TVClient
-	running   bool
-	stopChan  chan struct{}
-	mu        sync.Mutex
+	db          *sql.DB
+	config      *config.Config
+	extractor   *Extractor
+	tmdb        *TMDBClient
+	tv          *TVClient
+	broadcaster *Broadcaster
+	running     bool
+	stopChan    chan struct{}
+	mu          sync.Mutex
 }
 
 // NewScanner creates a new scanner service
-func NewScanner(db *sql.DB, cfg *config.Config) *Scanner {
+func NewScanner(db *sql.DB, cfg *config.Config, broadcaster *Broadcaster) *Scanner {
 	return &Scanner{
-		db:        db,
-		config:    cfg,
-		extractor: NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
-		tmdb:      NewTMDBClient(cfg.TMDBAPIKey),
-		tv:        NewTVClient(cfg.TMDBAPIKey), // Uses TMDB for TV shows
-		stopChan:  make(chan struct{}),
+		db:          db,
+		config:      cfg,
+		extractor:   NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
+		tmdb:        NewTMDBClient(cfg.TMDBAPIKey),
+		tv:          NewTVClient(cfg.TMDBAPIKey), // Uses TMDB for TV shows
+		broadcaster: broadcaster,
+		stopChan:    make(chan struct{}),
 	}
 }
 
@@ -79,8 +81,9 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 
 	// Update scan status to running
 	status := &models.ScanStatus{
-		Status:    "running",
-		StartedAt: time.Now().Format(time.RFC3339),
+		Status:     "running",
+		StartedAt:  time.Now().Format(time.RFC3339),
+		FilesFound: 0,
 	}
 	if err := repository.UpdateScanStatus(s.db, status); err != nil {
 		log.Printf("Failed to update scan status: %v", err)
@@ -142,6 +145,11 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 	status.FilesFound = result.FilesFound
 	repository.UpdateScanStatus(s.db, status)
 
+	// Broadcast scan start to WebSocket clients
+	if s.broadcaster != nil {
+		s.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+	}
+
 	// Process each file sequentially
 	for i, filePath := range files {
 		// Check for stop signal
@@ -151,6 +159,10 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 			status.CompletedAt = time.Now().Format(time.RFC3339)
 			status.ErrorMessage = "Scan stopped by user"
 			repository.UpdateScanStatus(s.db, status)
+			// Broadcast stopped event to WebSocket clients
+			if s.broadcaster != nil {
+				s.broadcaster.BroadcastScanStopped()
+			}
 			return result, fmt.Errorf("scan stopped by user")
 		default:
 		}
@@ -166,6 +178,10 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 		if i%10 == 0 || i == len(files)-1 {
 			status.FilesProcessed = result.FilesProcessed
 			repository.UpdateScanStatus(s.db, status)
+			// Broadcast progress to WebSocket clients
+			if s.broadcaster != nil {
+				s.broadcaster.BroadcastScanProgress(result.FilesProcessed, result.FilesFound)
+			}
 		}
 	}
 
@@ -177,6 +193,11 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 		status.ErrorMessage = fmt.Sprintf("%d errors during scan", len(result.Errors))
 	}
 	repository.UpdateScanStatus(s.db, status)
+
+	// Broadcast completion to WebSocket clients
+	if s.broadcaster != nil {
+		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+	}
 
 	log.Printf("Scan completed: %d files processed, %d movies added, %d episodes added, %d errors",
 		result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))

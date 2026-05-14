@@ -35,10 +35,15 @@ func main() {
 		log.Fatalf("Failed to seed mock data: %v", err)
 	}
 
+	// Initialize WebSocket broadcaster
+	broadcaster := services.NewBroadcaster()
+	go broadcaster.Run()
+	log.Println("WebSocket broadcaster started")
+
 	// Initialize scanner and scheduler
 	var scheduler *services.Scheduler
 	if len(cfg.MediaLibraryPaths) > 0 {
-		scanner := services.NewScanner(db, cfg)
+		scanner := services.NewScanner(db, cfg, broadcaster)
 		scheduler = services.NewScheduler(scanner, cfg.ScanInterval)
 
 		// Start scheduler if interval is configured
@@ -51,7 +56,7 @@ func main() {
 	}
 
 	// Setup API router
-	router := api.SetupRoutes(db, cfg, scheduler)
+	router := api.SetupRoutes(db, cfg, scheduler, broadcaster)
 
 	// Handle graceful shutdown
 	go func() {
