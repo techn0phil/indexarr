@@ -24,6 +24,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           aspectRatio: '2/3', // Typical poster ratio
           background: 'var(--color-background-secondary)',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
@@ -51,6 +52,9 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
             </div>
             <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
               {movie.title}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+              {movie.year ? `${movie.year}` : 'Année inconnue'}
             </div>
           </>
         )}

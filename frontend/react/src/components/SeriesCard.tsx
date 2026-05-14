@@ -25,6 +25,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           aspectRatio: '2 / 3',
           background: 'var(--color-background-secondary)',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
@@ -47,11 +48,14 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           />
         ) : (
           <>
-            <div style={{ fontSize: '26px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+            <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
               {initials}
             </div>
             <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
               {series.title}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+              {`${series.yearStart || '?'} - ${series.yearEnd || '?'}`}
             </div>
           </>
         )}
