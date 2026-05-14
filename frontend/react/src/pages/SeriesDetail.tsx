@@ -111,7 +111,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <span>
-                {series.yearStart}–{series.yearEnd}
+                {series.yearStart} – {series.yearEnd}
               </span>
               <span>·</span>
               <span>
@@ -125,7 +125,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               <span>{series.genres}</span>
               <span>·</span>
               <span style={{ color: '#1D9E75', fontWeight: 500 }}>
-                {series.status === 'complete' ? 'Complète' : 'Ongoing'}
+                {series.status === 'complete' ? 'Complète' : 'En cours'}
               </span>
             </div>
 
