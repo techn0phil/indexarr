@@ -405,6 +405,8 @@ Use CSS custom properties for light/dark mode compatibility. Define in `:root`:
 
 ### Backend (Go)
 
+Always run go commands from `backend/go` folder.
+
 ```bash
 # Navigate to backend
 cd backend/go

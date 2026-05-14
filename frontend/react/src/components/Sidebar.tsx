@@ -193,8 +193,18 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         )}
       </div>
       <div className={styles.footer}>
-        <div className={styles['status-dot']} />
-        <span>Système opérationnel</span>
+        {context.wsConnected ? (
+          <>
+            <div className={styles['status-dot']} />
+            <span>Connecté</span>
+          </>
+        ) : (
+          <>
+            {/* Display dot according to reconnecting or disconnected status */}
+            <div className={`${styles['status-dot']} ${context.wsReconnecting ? styles['connecting'] : styles['disconnected']}`} />
+            <span>{context.wsReconnecting ? 'Reconnexion...' : 'Déconnecté'}</span>
+          </>
+        )}
       </div>
     </div>
   );

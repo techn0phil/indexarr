@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler) *chi.Mux {
+func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, broadcaster *services.Broadcaster) *chi.Mux {
 	r := chi.NewRouter()
 
 	// CORS middleware
@@ -55,6 +55,11 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler) 
 			r.Post("/scan", TriggerScan(scheduler))
 			r.Get("/scan/status", GetScanStatus(scheduler))
 			r.Post("/scan/stop", StopScan(scheduler))
+			
+			// WebSocket endpoint for real-time scan updates
+			if broadcaster != nil {
+				r.Get("/scan/ws", HandleWebSocket(db, broadcaster))
+			}
 		}
 	})
 
