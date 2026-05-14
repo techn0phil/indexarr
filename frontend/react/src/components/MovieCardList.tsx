@@ -80,11 +80,12 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
         </div>
         <div className={comStyles['card-list-badges']}>
           {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && <span className={comStyles['badge-4k']}>4K</span>}
-          {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && <span className={comStyles['badge-1080p']}>1080p</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>Dolby Vision</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && <span className={comStyles['badge-truehd']}>TrueHD</span>}
-          {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && <span className={comStyles['badge-ddplus']}>DD+</span>}
+          {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && <span className={comStyles['badge-ddplus']}>Dolby Digital Plus</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && <span className={comStyles['badge-atmos']}>Atmos</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && <span className={comStyles['badge-dts']}>DTS</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks?.[0]?.codec}</span>}

@@ -95,12 +95,12 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Badges */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
               <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 4K
               </span>
             )}
-            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
               <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 1080p
               </span>
@@ -115,7 +115,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 HDR10+
               </span>
             )}
-            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+            {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
               <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 HDR10
               </span>

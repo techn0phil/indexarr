@@ -127,7 +127,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                   4K
                 </span>
               )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1080') && (
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
                 <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                   1080p
                 </span>
@@ -142,7 +142,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                   HDR10+
                 </span>
               )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
                 <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                   HDR10
                 </span>
@@ -282,12 +282,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
                 {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
                     <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                       4K
                     </span>
                   )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
                     <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                       1080p
                     </span>
@@ -302,7 +302,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       HDR10+
                     </span>
                   )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
                     <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                       HDR10
                     </span>
