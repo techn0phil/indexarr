@@ -169,60 +169,62 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       </div>
 
       {/* Cast */}
-      <div style={{ marginBottom: '24px', padding: '0 24px' }}>
-        <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
-          Cast principal
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
-          {movie.cast?.slice(0, 5).map((c) => (
-            <div key={c.id} style={{ textAlign: 'center' }}>
-              {c.avatar && c.avatar.startsWith('http') ? (
-                <img
-                  src={c.avatar}
-                  alt={c.name}
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '0.5px solid var(--color-border-tertiary)',
-                    margin: '0 auto 6px',
-                    display: 'block',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    background: 'var(--color-background-tertiary)',
-                    border: '0.5px solid var(--color-border-tertiary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: 'var(--color-text-tertiary)',
-                    margin: '0 auto 6px',
-                  }}
-                >
-                  {c.name ? c.name[0] : '?'}
+      {movie.cast?.length && (
+        <div style={{ marginBottom: '24px', padding: '0 24px' }}>
+          <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
+            Cast principal
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
+            {movie.cast.map((c) => (
+              <div key={c.id} style={{ textAlign: 'center' }}>
+                {c.avatar && c.avatar.startsWith('http') ? (
+                  <img
+                    src={c.avatar}
+                    alt={c.name}
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '0.5px solid var(--color-border-tertiary)',
+                      margin: '0 auto 6px',
+                      display: 'block',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      background: 'var(--color-background-tertiary)',
+                      border: '0.5px solid var(--color-border-tertiary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: 'var(--color-text-tertiary)',
+                      margin: '0 auto 6px',
+                    }}
+                  >
+                    {c.name ? c.name[0] : '?'}
+                  </div>
+                )}
+                <div style={{ fontSize: '10px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                  {c.name}
                 </div>
-              )}
-              <div style={{ fontSize: '10px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                {c.name}
+                <div style={{ fontSize: '9px', color: 'var(--color-text-tertiary)' }}>
+                  {c.role}
+                </div>
               </div>
-              <div style={{ fontSize: '9px', color: 'var(--color-text-tertiary)' }}>
-                {c.role}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* MediaInfo Table */}
-      {movie.mediaInfo && (
+      {(movie.mediaInfo?.videoTracks || movie.mediaInfo?.audioTracks || movie.mediaInfo?.subtitleTracks) && (
         <div style={{ padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
             Métadonnées du fichier
