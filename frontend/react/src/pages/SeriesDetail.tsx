@@ -275,7 +275,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                         <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
                       </svg>
-                      <span>{track.resolution || 'N/A'} · {track.fps || 'N/A'} fps · {track.bitrate || 'N/A'} · {track.colorSpace || 'N/A'}</span>
+                      <span>{track.resolution || 'N/A'} · {track.bitrate || 'N/A'} · {track.fps || 'N/A'} fps · {track.colorSpace || 'N/A'}</span>
                     </div>
                   ))}
                   {(ep.mediaInfo?.audioTracks ?? []).map((track, idx) => (
