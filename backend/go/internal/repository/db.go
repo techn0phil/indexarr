@@ -19,7 +19,7 @@ var migrationsFS embed.FS
 var db *sql.DB
 
 func InitDB(dbPath string) (*sql.DB, error) {
-	sqlDB, err := sql.Open("sqlite3", dbPath)
+	sqlDB, err := sql.Open("sqlite3", "file:"+dbPath+"?_foreign_keys=on")
 	if err != nil {
 		return nil, err
 	}
