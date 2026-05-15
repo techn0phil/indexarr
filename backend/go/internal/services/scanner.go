@@ -234,6 +234,16 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	return result, nil
 }
 
+// ScanMovie scans a single movie file (used for manual refresh via API)
+func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
+	movie, err := repository.GetMovieByID(s.db, movieID)
+	if err != nil {
+		return nil, fmt.Errorf("movie not found: %w", err)
+	}
+
+	return s.ScanPaths([]string{movie.FilePath})
+}
+
 // processFile handles a single media file
 func (s *Scanner) processFile(filePath string, result *models.ScanResult) error {
 	// Parse filename
