@@ -12,6 +12,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
   const [series, setSeries] = useState<Series | null>(null);
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const appContext = useContext(AppContext);
 
   // Slugify function to create URL-friendly strings
@@ -25,20 +26,27 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
       .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
       .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 
-  useEffect(() => {
-    const fetchSeries = async () => {
-      setLoading(true);
-      try {
-        const data = await apiClient.getSeriesById(seriesId);
-        setSeries(data);
-      } catch (error) {
-        console.error('Failed to fetch series:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSeries = async () => {
+    setLoading(true);
+    try {
+      const data = await apiClient.getSeriesById(seriesId);
+      setSeries(data);
+    } catch (error) {
+      console.error('Failed to fetch series:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Refresh handler for menu
+  const handleRefresh = async () => {
+    await apiClient.refreshSeries(seriesId);
     fetchSeries();
+  };
+
+  useEffect(() => {
+    fetchSeries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seriesId]);
 
   if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
@@ -88,26 +96,100 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
           <div style={{ flex: 1 }}>
             <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {series.title}
-            {typeof series.rating === 'number' && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                background: 'var(--color-badge-rating)',
-                color: 'var(--color-badge-rating-text)',
-                borderRadius: '99px',
-                fontSize: '12px',
-                fontWeight: 500,
-                padding: '2px 10px 2px 7px',
-                border: 'none',
-                lineHeight: 1,
-                minWidth: '36px',
-                height: '22px',
-              }}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
-                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{series.rating?.toFixed(1)}</span>
-              </span>
-            )}
+              {typeof series.rating === 'number' && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  background: 'var(--color-badge-rating)',
+                  color: 'var(--color-badge-rating-text)',
+                  borderRadius: '99px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  padding: '2px 10px 2px 7px',
+                  border: 'none',
+                  lineHeight: 1,
+                  minWidth: '36px',
+                  height: '22px',
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{series.rating?.toFixed(1)}</span>
+                </span>
+              )}
+
+              {/* Popup contextual menu */}
+              <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+                <button
+                  style={{
+                    background: 'var(--color-background-primary)',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    padding: 0,
+                    position: 'relative',
+                  }}
+                  aria-label="Menu"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((open) => !open);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setMenuOpen(false), 120);
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ verticalAlign: 'middle' }}>
+                    <line x1="2" y1="4" x2="14" y2="4" />
+                    <line x1="2" y1="8" x2="14" y2="8" />
+                    <line x1="2" y1="12" x2="14" y2="12" />
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '36px',
+                      right: 0,
+                      background: 'var(--color-background-secondary)',
+                      border: '0.5px solid var(--color-border-tertiary)',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                      zIndex: 10,
+                      minWidth: '120px',
+                    }}
+                    tabIndex={-1}
+                  >
+                    <button
+                      style={{
+                        width: '100%',
+                        background: 'none',
+                        border: 'none',
+                        padding: '10px 16px',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: 'var(--color-text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                      }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleRefresh();
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: 7, verticalAlign: 'center' }}>
+                        <path d="M2.5 8A5.5 5.5 0 018 2.5c1.5 0 2.9.6 3.9 1.6M13.5 8A5.5 5.5 0 018 13.5c-1.5 0-2.9-.6-3.9-1.6" />
+                        <path d="M12 2.5v2.5H9.5" />
+                        <path d="M4 13.5v-2.5H6.5" />
+                      </svg>
+                      Rafraîchir
+                    </button>
+                  </div>
+                )}
+              </div>
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <span>
