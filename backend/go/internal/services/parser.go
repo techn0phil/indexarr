@@ -86,7 +86,7 @@ func ParseFilename(filename string) *ParsedFilename {
 
 	// Extract year
 	for _, yearPattern := range yearPatterns {
-		matches := yearPattern.FindStringSubmatch(basename)
+		matches := yearPattern.FindStringSubmatch(filename)
 		if len(matches) >= 2 {
 			year, _ := strconv.Atoi(matches[1])
 			if year >= 1900 && year <= 2100 {
@@ -113,21 +113,21 @@ func ParseFilename(filename string) *ParsedFilename {
 	}
 
 	// Extract title
-	result.Title = extractTitle(basename, result.Year)
+	result.Title = extractTitle(filename, result.Year)
 
 	return result
 }
 
 // extractTitle cleans up the filename to extract just the title
-func extractTitle(basename string, year int) string {
-	title := basename
+func extractTitle(filename string, year int) string {
+	title := filename
 
 	// Remove year and everything after if we found a year
 	if year > 0 {
 		yearStr := strconv.Itoa(year)
 		idx := strings.Index(title, yearStr)
 		if idx > 0 {
-			title = title[:idx]
+			title = title[:idx-1]
 		}
 	}
 
@@ -146,6 +146,9 @@ func extractTitle(basename string, year int) string {
 
 	// Trim and clean
 	title = strings.TrimSpace(title)
+
+	// Remove folder path
+	title = filepath.Base(title)
 
 	return title
 }
