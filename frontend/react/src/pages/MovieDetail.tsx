@@ -227,7 +227,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       )}
 
       {/* MediaInfo Table */}
-      {(movie.mediaInfo?.videoTracks || movie.mediaInfo?.audioTracks || movie.mediaInfo?.subtitleTracks) && (
+      {movie.mediaInfo && (
         <div style={{ padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
             Métadonnées du fichier
@@ -256,7 +256,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     Taille
                   </td>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                  {movie.fileSize ? (movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
+                  {movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`}
                   </td>
                 </tr>
               </tbody>
