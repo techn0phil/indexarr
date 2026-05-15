@@ -69,11 +69,11 @@ export const apiClient = {
 
   refreshMovie: async (id: number) => {
     const response = await fetch(`${API_BASE}/movies/${id}/refresh`, { method: 'POST' });
-    return response.json() as Promise<{ success: boolean; message?: string; error?: string }>;
+    return response.json() as Promise<{ success: boolean; message?: string; result?: { filesFound: number } }>;
   },
 
   refreshSeries: async (id: number) => {
     const response = await fetch(`${API_BASE}/series/${id}/refresh`, { method: 'POST' });
-    return response.json() as Promise<{ success: boolean; message?: string; error?: string }>;
+    return response.json() as Promise<{ success: boolean; message?: string; result?: { filesFound: number } }>;
   },
 };

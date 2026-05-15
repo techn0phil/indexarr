@@ -40,8 +40,14 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
   // Refresh handler for menu
   const handleRefresh = async () => {
-    await apiClient.refreshSeries(seriesId);
-    fetchSeries();
+    const response = await apiClient.refreshSeries(seriesId);
+        
+    if (response.result?.filesFound) {
+      fetchSeries();
+    }
+    else {
+      window.location.reload();
+    }
   };
 
   useEffect(() => {

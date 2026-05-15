@@ -29,8 +29,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
   // Refresh handler for menu
   const handleRefresh = async () => {
-    await apiClient.refreshMovie(movieId);
-    fetchMovie();
+    const response = await apiClient.refreshMovie(movieId);
+    
+    if (response.result?.filesFound) {
+      fetchMovie();
+    }
+    else {
+      window.location.reload();
+    }
   };
 
   useEffect(() => {
