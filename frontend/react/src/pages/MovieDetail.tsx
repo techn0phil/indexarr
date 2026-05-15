@@ -233,6 +233,35 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             Métadonnées du fichier
           </h2>
           <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
+            {/* File */}
+            <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                <path d="M4.5 2h5l3 3v9a1 1 0 01-1 1h-7a1 1 0 01-1-1V3a1 1 0 011-1z"></path>
+                <path d="M9.5 2v3h3"></path>
+              </svg>
+              Fichier
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                  <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                    Chemin
+                  </td>
+                  <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                    {movie.filePath}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+                  <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
+                    Taille
+                  </td>
+                  <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
+                  {movie.fileSize ? (movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
             {/* Video */}
             {(movie.mediaInfo?.videoTracks ?? []).map((videoTrack, index) => (
               <Fragment key={index}>

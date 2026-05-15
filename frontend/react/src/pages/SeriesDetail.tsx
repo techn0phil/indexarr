@@ -264,7 +264,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     {ep.title}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
-                    {Math.round(ep.duration / 60)} min · {ep.mediaInfo?.videoTracks?.[0]?.codec || 'N/A'}
+                    {Math.round(ep.duration / 60)} min
                   </div>
                 </div>
 
@@ -345,7 +345,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                   {ep.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right' }}>
+                <div title={ep.filePath} style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right' }}>
                   {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
                 </div>
                 <div
