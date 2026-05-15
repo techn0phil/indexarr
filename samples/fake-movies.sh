@@ -200,3 +200,12 @@ touch "Harry.Potter.et.la.Coupe.de.feu.(2005).MULTI.4k.10Bits.UHDLight.x265.KiRA
 touch "Harry.Potter.et.le.Prince.de.sang-mêlé.(2009).MULTI.4k.10Bits.UHDLight.x265.KiRA.mkv"
 touch "Harry.Potter.et.l’Ordre.du.phénix.(2007).MULTI.4k.10Bits.UHDLight.x265.KiRA.mkv"
 touch "Harry.Potter.à.l’école.des.sorciers.(2001).MULTI.4k.10Bits.UHDLight.x265.KiRA.mkv"
+
+mkdir "2012 (2009)"
+touch "2012 (2009)/2012 2009 MULTi VF2 1080p BluRay AC3 x265-Winks.mkv"
+
+mkdir "Alice in Wonderland (2010)"
+touch "Alice in Wonderland (2010)/Alice Au Pays Des Merveilles 1080p HDLight.mkv"
+
+mkdir "Alice Through the Looking Glass (2016)"
+touch "Alice Through the Looking Glass (2016)/Alice Through The Looking Glass 1080p HDlight.mkv"

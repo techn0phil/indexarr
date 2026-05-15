@@ -1,7 +1,9 @@
 #!/bin/sh
 
 
-# Generate fake TV shows:
+# Generate fake TV shows
+
+## The Wire
 mkdir -p "The Wire (2002)"
 touch "The Wire (2002)/The Wire (2002) S01E01 - The Target.mkv"
 touch "The Wire (2002)/The Wire (2002) S01E02 - The Detail.mkv"
@@ -18,7 +20,8 @@ touch "The Wire (2002)/The Wire (2002) S01E12 - Cleaning Up.mkv"
 touch "The Wire (2002)/The Wire (2002) S01E13 - Sentencing.mkv"
 touch "The Wire (2002)/The Wire (2002) S01E14 - Ebb Tide.mkv"
 
-# Westworld
+
+## Westworld
 mkdir -p "Westworld (2016)"
 touch "Westworld (2016)/Westworld (2016) S01E01 - The Original.mkv"
 touch "Westworld (2016)/Westworld (2016) S01E02 - Chestnut.mkv"
@@ -31,7 +34,7 @@ touch "Westworld (2016)/Westworld (2016) S01E08 - Trace Decay.mkv"
 touch "Westworld (2016)/Westworld (2016) S01E09 - The Well-Tempered Clavier.mkv"
 touch "Westworld (2016)/Westworld (2016) S01E10 - The Bicameral Mind.mkv"
 
-# Season 2
+### Season 2
 touch "Westworld (2016)/Westworld (2016) S02E01 - Journey Into Night.mkv"
 touch "Westworld (2016)/Westworld (2016) S02E02 - Reunion.mkv"
 touch "Westworld (2016)/Westworld (2016) S02E03 - Virtù e Fortuna.mkv"
@@ -43,7 +46,7 @@ touch "Westworld (2016)/Westworld (2016) S02E08 - Kiksuya.mkv"
 touch "Westworld (2016)/Westworld (2016) S02E09 - Vanishing Point.mkv"
 touch "Westworld (2016)/Westworld (2016) S02E10 - The Passenger.mkv"
 
-# Season 3 and 4
+### Season 3 and 4
 touch "Westworld (2016)/Westworld (2016) S03E01 - Parce Domine.mkv"
 touch "Westworld (2016)/Westworld (2016) S03E02 - The Winter Line.mkv"
 touch "Westworld (2016)/Westworld (2016) S03E03 - The Absence of Field.mkv"
@@ -66,9 +69,7 @@ touch "Westworld (2016)/Westworld (2016) S04E09 - The Mother of Exiles.mkv"
 touch "Westworld (2016)/Westworld (2016) S04E10 - Que Será, Será.mkv"
 
 
-
-
-# Dune Prophecy
+## Dune Prophecy
 mkdir -p "Dune Prophecy (2024)"
 touch "Dune Prophecy (2024)/Dune Prophecy (2024) S01E01 - The Desert Awakens.mkv"
 touch "Dune Prophecy (2024)/Dune Prophecy (2024) S01E02 - Sand and Secrets.mkv"
@@ -82,8 +83,7 @@ touch "Dune Prophecy (2024)/Dune Prophecy (2024) S01E09 - The Spice War.mkv"
 touch "Dune Prophecy (2024)/Dune Prophecy (2024) S01E10 - The Prophecy Fulfilled.mkv"
 
 
-
-# Game of Thrones
+## Game of Thrones
 mkdir -p "Game of Thrones (2011)"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S01E01 - Winter Is Coming.mkv"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S01E02 - The Kingsroad.mkv"
@@ -96,7 +96,7 @@ touch "Game of Thrones (2011)/Game of Thrones (2011) S01E08 - The Pointy End.mkv
 touch "Game of Thrones (2011)/Game of Thrones (2011) S01E09 - Baelor.mkv"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S01E10 - Fire and Blood.mkv"
 
-# other seasons
+### Other seasons
 touch "Game of Thrones (2011)/Game of Thrones (2011) S02E01 - The North Remembers.mkv"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S02E02 - The Night Lands.mkv"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S02E03 - What Is Dead May Never Die.mkv"
@@ -108,3 +108,132 @@ touch "Game of Thrones (2011)/Game of Thrones (2011) S02E08 - The Prince of Wint
 touch "Game of Thrones (2011)/Game of Thrones (2011) S02E09 - Blackwater.mkv"
 touch "Game of Thrones (2011)/Game of Thrones (2011) S02E10 - Valar Morghulis.mkv"
 
+
+## Supernatural
+mkdir -p "Supernatural (2005)/S01/Other/Deleted Scenes"
+mkdir -p "Supernatural (2005)/S01/Other/The Devil’s Road Map"
+mkdir -p "Supernatural (2005)/S01/Other/The Journal"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E01.Pilot.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E02.Wendigo.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E03.Dead in the Water.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E04.Phantom Traveler.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E05.Bloody Mary.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E06.Skin.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E07.Hook Man.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E08.Bugs.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E09.Home.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E10.Asylum.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E11.Scarecrow.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E12.Faith.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E13.Route 666.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E14.Nightmare.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E15.The Benders.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E16.Shadow.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E17.Hell House.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E18.Something Wicked.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E19.Provenance.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E20.Dead Man's Blood.Bluray-1080p.Remux.h264-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E21.Salvation.Bluray-1080p.Remux.VC1-Retr0.mkv"
+touch "Supernatural (2005)/S01/Supernatural.(2005).S01E22.Devil's Trap.Bluray-1080p.Remux.VC1-Retr0.mkv"
+
+touch "Supernatural (2005)/S01/Other/A Day in the Life of Jared and Jensen.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes"
+touch "Supernatural (2005)/S01/Other/Gag reel.mkv"
+touch "Supernatural (2005)/S01/Other/Menu Art.mkv"
+touch "Supernatural (2005)/S01/Other/Museum of Television & Radio’s Paley Television Festival Q&A.mkv"
+touch "Supernatural (2005)/S01/Other/Supernatural Tales from the Edge of Darkness.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map"
+touch "Supernatural (2005)/S01/Other/The Journal"
+
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Faith - SC 7-8.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Home - SC 19.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Home - SC 23.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Hookman - SC 32.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Hookman - SC 4-8.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Hookman - SC 9.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Nightmare - SC 23A.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Nightmare - SC 23.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Phantom Traveler - SC 34.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Pilot - SC 13.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Pilot - SC 89.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Pilot - SC AA94A.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Scarecrow - SC 24.mkv"
+touch "Supernatural (2005)/S01/Other/Deleted Scenes/Wendigo - SC 28.mkv"
+
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Behind the Scenes.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Bender Family.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Complex Relationship.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Crew Favorite Episode.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Fight with the Network.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Ghostfacers.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Happy Accidents.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Hawaiian Legend.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Insects.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Introduction by series creator Eric Kripke.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Journal Inside Roosevelt Asylum.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Mysterious Past.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Nightmare.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Noir Influences.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Phantom Traveler’s Unique Place.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Pilot Script.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Reapers.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Second Episode.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Tackling an Urban Legend.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/The Dorian Gray Aspect.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/The Legend of the Hook Man.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/The Wind-up.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Touchstone Chemistry.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Vampire Lore.mkv"
+touch "Supernatural (2005)/S01/Other/The Devil’s Road Map/Writing Skin.mkv"
+
+touch "Supernatural (2005)/S01/Other/The Journal/The Journal - Dad’s Voice.mkv"
+touch "Supernatural (2005)/S01/Other/The Journal/The Journal - Design.mkv"
+touch "Supernatural (2005)/S01/Other/The Journal/The Journal - Fighting a Wendigo.mkv"
+touch "Supernatural (2005)/S01/Other/The Journal/The Journal - Origins.mkv"
+touch "Supernatural (2005)/S01/Other/The Journal/The Journal - The Ritual Romano.mkv"
+
+## Season 14
+mkdir -p Supernatural\ \(2005\)/S14/BONUS
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E01.Stranger in a Strange Land.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E02.Gods and Monsters.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E03.The Scar.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E04.Mint Condition.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E05.Nightmare Logic.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E06.Optimism.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E07.Unhuman Nature.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E08.Byzantium.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E09.The Spear.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E10.Nihilism.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E11.Damaged Goods.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E12.Prophet and Loss.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E13.Lebanon.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E14.Ouroboros.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E15.Peace of Mind.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E16.Don't Go in the Woods.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E17.Game Night.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E18.Absence.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E19.Jack in the Box.Bluray-1080p.Remux.x264-Retr0.mkv"
+touch "Supernatural (2005)/S14/Supernatural.(2005).S14E20.Moriah.Bluray-1080p.Remux.x264-Retr0.mkv"
+
+touch "Supernatural (2005)/S14/BONUS/Comic-Con Panel.mkv"
+touch "Supernatural (2005)/S14/BONUS/Deleted Scene E06.mkv"
+touch "Supernatural (2005)/S14/BONUS/Deleted Scene E11.mkv"
+touch "Supernatural (2005)/S14/BONUS/Deleted Scene E13.mkv"
+touch "Supernatural (2005)/S14/BONUS/Deleted Scene E19.mkv"
+touch "Supernatural (2005)/S14/BONUS/Gag Reel.mkv"
+touch "Supernatural (2005)/S14/BONUS/Supernatural Homecoming Exploring Episode 300.mkv"
+touch "Supernatural (2005)/S14/BONUS/The Winchester Mythology The.Choices We Make.mkv"
+
+
+## La Casa de Papel / Money Heist
+mkdir -p "Money Heist (2017)/Season 5"
+touch "Money Heist (2017)/Season 5/LA.CASA.DE.PAPEL.S05.01.MULTI.1080P.WEB-DL-FROSTIES.mkv"
+touch "Money Heist (2017)/Season 5/LA.CASA.DE.PAPEL.S05.02.MULTI.1080P.WEB-DL-FROSTIES.mkv"
+touch "Money Heist (2017)/Season 5/LA.CASA.DE.PAPEL.S05.03.MULTI.1080P.WEB-DL-FROSTIES.mkv"
+touch "Money Heist (2017)/Season 5/LA.CASA.DE.PAPEL.S05.04.MULTI.1080P.WEB-DL-FROSTIES.mkv"
+touch "Money Heist (2017)/Season 5/LA.CASA.DE.PAPEL.S05.05.MULTI.1080P.WEB-DL-FROSTIES.mkv"
+touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E06 - Escape Valve - WEBRip-1080p x264 EAC3-6.0.mkv"
+touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E07 - Wishful Thinking - WEBRip-1080p x264 EAC3-6.0.mkv"
+touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E08 - The Elegance Theory - WEBRip-1080p x264 EAC3-6.0.mkv"
+touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E09 - Pillow Talk - WEBRip-1080p x264 EAC3-6.0.mkv"
+touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E10 - A Family Tradition - WEBRip-1080p x264 EAC3-6.0.mkv"
