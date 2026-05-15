@@ -28,9 +28,9 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   };
 
   // Refresh handler for menu
-  const handleRefresh = () => {
-    apiClient.refreshMovie(movieId);
-    // fetchMovie();
+  const handleRefresh = async () => {
+    await apiClient.refreshMovie(movieId);
+    fetchMovie();
   };
 
   useEffect(() => {
