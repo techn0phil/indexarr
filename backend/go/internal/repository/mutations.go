@@ -625,3 +625,37 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		return tx.Commit()
 	})
 }
+
+// GetTVDBToken retrieves the stored TVDB bearer token (if exists and not expired)
+func GetTVDBToken(db *sql.DB) (string, time.Time, error) {
+	var token string
+	var expiresAt string
+
+	err := db.QueryRow(`SELECT token, expires_at FROM tvdb_tokens WHERE id = 1`).Scan(&token, &expiresAt)
+	if err == sql.ErrNoRows {
+		return "", time.Time{}, nil // No token stored
+	}
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	// Parse expiry time
+	expiry, err := time.Parse(time.RFC3339, expiresAt)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return token, expiry, nil
+}
+
+// SaveTVDBToken stores the TVDB bearer token with expiry time
+func SaveTVDBToken(db *sql.DB, token string, expiresAt time.Time) error {
+	return retryOnLock(func() error {
+		// Use INSERT OR REPLACE to ensure only one token exists
+		_, err := db.Exec(`
+			INSERT OR REPLACE INTO tvdb_tokens (id, token, expires_at, created_at)
+			VALUES (1, ?, ?, ?)
+		`, token, expiresAt.Format(time.RFC3339), time.Now().Format(time.RFC3339))
+		return err
+	})
+}
