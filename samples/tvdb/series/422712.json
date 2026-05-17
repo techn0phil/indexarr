@@ -1,0 +1,1152 @@
+{
+  "status": "success",
+  "data": {
+    "id": 422712,
+    "name": "Daredevil: Born Again",
+    "slug": "daredevil-born-again",
+    "image": "https://artworks.thetvdb.com/banners/v4/series/422712/posters/67be532c6fb77.jpg",
+    "nameTranslations": [
+      "eng",
+      "fra",
+      "pt",
+      "srp",
+      "ita",
+      "nld",
+      "pol",
+      "por",
+      "hun",
+      "spa",
+      "deu",
+      "swe",
+      "ces",
+      "heb",
+      "rus",
+      "ukr",
+      "zho",
+      "ell",
+      "fin",
+      "tur",
+      "kor",
+      "ara",
+      "zhtw",
+      "ind"
+    ],
+    "overviewTranslations": [
+      "eng",
+      "fra",
+      "pt",
+      "srp",
+      "ita",
+      "nld",
+      "pol",
+      "por",
+      "hun",
+      "spa",
+      "deu",
+      "swe",
+      "ces",
+      "heb",
+      "rus",
+      "ukr",
+      "zho",
+      "ell",
+      "fin",
+      "tur",
+      "kor",
+      "ara",
+      "zhtw",
+      "ind"
+    ],
+    "aliases": [
+      {
+        "language": "ita",
+        "name": "Marvel's Daredevil: Rinascita"
+      },
+      {
+        "language": "ell",
+        "name": "Daredevil: Born Again, από τη Marvel Television"
+      },
+      {
+        "language": "fra",
+        "name": "Daredevil : Renaître"
+      },
+      {
+        "language": "fra",
+        "name": "Daredevil : Renaître de Marvel Television"
+      },
+      {
+        "language": "fra",
+        "name": "Daredevil - Born Again"
+      },
+      {
+        "language": "deu",
+        "name": "Daredevil - Born Again"
+      },
+      {
+        "language": "eng",
+        "name": "Marvel Studios' Daredevil: Born Again"
+      },
+      {
+        "language": "eng",
+        "name": "Marvel Television's Daredevil: Born Again"
+      },
+      {
+        "language": "eng",
+        "name": "Marvel's Daredevil: Born Again"
+      }
+    ],
+    "firstAired": "2025-03-04",
+    "lastAired": "2026-05-05",
+    "nextAired": "",
+    "score": 331674,
+    "status": {
+      "id": 1,
+      "name": "Continuing",
+      "recordType": "series",
+      "keepUpdated": true
+    },
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "defaultSeasonType": 1,
+    "isOrderRandomized": false,
+    "lastUpdated": "2026-05-15 19:21:39",
+    "averageRuntime": 48,
+    "episodes": null,
+    "overview": "Matt Murdock finds himself on a collision course with Wilson Fisk when their past identities begin to emerge.",
+    "year": "2025",
+    "artworks": null,
+    "companies": [
+      {
+        "id": 1293,
+        "name": "Disney+",
+        "slug": "disney-plus",
+        "nameTranslations": [
+          "ara",
+          "eng",
+          "fra",
+          "heb",
+          "hun",
+          "nld",
+          "spa"
+        ],
+        "overviewTranslations": [
+          "eng",
+          "fra",
+          "hun",
+          "spa"
+        ],
+        "aliases": [
+          {
+            "language": "spa",
+            "name": "Disney Plus"
+          },
+          {
+            "language": "heb",
+            "name": "דיסני פלוס"
+          },
+          {
+            "language": "ara",
+            "name": "ديزني بلس"
+          },
+          {
+            "language": "eng",
+            "name": "Disney Plus"
+          },
+          {
+            "language": "eng",
+            "name": "DSNP"
+          },
+          {
+            "language": "eng",
+            "name": "Disney+ Star"
+          },
+          {
+            "language": "eng",
+            "name": "Star"
+          },
+          {
+            "language": "eng",
+            "name": "Disney+ Hulu"
+          },
+          {
+            "language": "eng",
+            "name": "Hulu"
+          }
+        ],
+        "country": "usa",
+        "primaryCompanyType": 1,
+        "activeDate": "2019-11-12",
+        "inactiveDate": null,
+        "companyType": {
+          "companyTypeId": 1,
+          "companyTypeName": "Network"
+        },
+        "parentCompany": {
+          "id": 45764,
+          "name": "Walt Disney Company",
+          "relation": {
+            "id": null,
+            "typeName": null
+          }
+        },
+        "tagOptions": null
+      },
+      {
+        "id": 2151,
+        "name": "Marvel Studios",
+        "slug": "marvel-studios",
+        "nameTranslations": [
+          "eng",
+          "spa"
+        ],
+        "overviewTranslations": [
+          "spa"
+        ],
+        "aliases": [
+          {
+            "language": "spa",
+            "name": "Marvel Films"
+          },
+          {
+            "language": "eng",
+            "name": "Marvel Spotlight"
+          },
+          {
+            "language": "eng",
+            "name": "Marvel Animation"
+          },
+          {
+            "language": "eng",
+            "name": "Marvel Television"
+          }
+        ],
+        "country": "usa",
+        "primaryCompanyType": 2,
+        "activeDate": null,
+        "inactiveDate": null,
+        "companyType": {
+          "companyTypeId": 2,
+          "companyTypeName": "Studio"
+        },
+        "parentCompany": {
+          "id": null,
+          "name": null,
+          "relation": {
+            "id": null,
+            "typeName": null
+          }
+        },
+        "tagOptions": null
+      },
+      {
+        "id": 49689,
+        "name": "Marvel Television",
+        "slug": "marvel-television",
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [],
+        "aliases": [],
+        "country": "usa",
+        "primaryCompanyType": null,
+        "activeDate": null,
+        "inactiveDate": null,
+        "companyType": {
+          "companyTypeId": 3,
+          "companyTypeName": "Production Company"
+        },
+        "parentCompany": {
+          "id": 2151,
+          "name": "Marvel Studios",
+          "relation": {
+            "id": 1,
+            "typeName": "Acquired By"
+          }
+        },
+        "tagOptions": null
+      }
+    ],
+    "originalNetwork": {
+      "id": 1293,
+      "name": "Disney+",
+      "slug": "disney-plus",
+      "nameTranslations": [
+        "ara",
+        "eng",
+        "fra",
+        "heb",
+        "hun",
+        "nld",
+        "spa"
+      ],
+      "overviewTranslations": [
+        "eng",
+        "fra",
+        "hun",
+        "spa"
+      ],
+      "aliases": [
+        {
+          "language": "spa",
+          "name": "Disney Plus"
+        },
+        {
+          "language": "heb",
+          "name": "דיסני פלוס"
+        },
+        {
+          "language": "ara",
+          "name": "ديزني بلس"
+        },
+        {
+          "language": "eng",
+          "name": "Disney Plus"
+        },
+        {
+          "language": "eng",
+          "name": "DSNP"
+        },
+        {
+          "language": "eng",
+          "name": "Disney+ Star"
+        },
+        {
+          "language": "eng",
+          "name": "Star"
+        },
+        {
+          "language": "eng",
+          "name": "Disney+ Hulu"
+        },
+        {
+          "language": "eng",
+          "name": "Hulu"
+        }
+      ],
+      "country": "usa",
+      "primaryCompanyType": 1,
+      "activeDate": "2019-11-12",
+      "inactiveDate": null,
+      "companyType": {
+        "companyTypeId": 1,
+        "companyTypeName": "Network"
+      },
+      "parentCompany": {
+        "id": 45764,
+        "name": "Walt Disney Company",
+        "relation": {
+          "id": null,
+          "typeName": null
+        }
+      },
+      "tagOptions": [
+        {
+          "id": 489,
+          "tag": 24,
+          "tagName": "Company Type",
+          "name": "SVOD",
+          "helpText": "Subscription video on demand. Examples: Netflix Amazon Prime Video, Disney+."
+        }
+      ]
+    },
+    "latestNetwork": {
+      "id": 1293,
+      "name": "Disney+",
+      "slug": "disney-plus",
+      "nameTranslations": [
+        "ara",
+        "eng",
+        "fra",
+        "heb",
+        "hun",
+        "nld",
+        "spa"
+      ],
+      "overviewTranslations": [
+        "eng",
+        "fra",
+        "hun",
+        "spa"
+      ],
+      "aliases": [
+        {
+          "language": "spa",
+          "name": "Disney Plus"
+        },
+        {
+          "language": "heb",
+          "name": "דיסני פלוס"
+        },
+        {
+          "language": "ara",
+          "name": "ديزني بلس"
+        },
+        {
+          "language": "eng",
+          "name": "Disney Plus"
+        },
+        {
+          "language": "eng",
+          "name": "DSNP"
+        },
+        {
+          "language": "eng",
+          "name": "Disney+ Star"
+        },
+        {
+          "language": "eng",
+          "name": "Star"
+        },
+        {
+          "language": "eng",
+          "name": "Disney+ Hulu"
+        },
+        {
+          "language": "eng",
+          "name": "Hulu"
+        }
+      ],
+      "country": "usa",
+      "primaryCompanyType": 1,
+      "activeDate": "2019-11-12",
+      "inactiveDate": null,
+      "companyType": {
+        "companyTypeId": 1,
+        "companyTypeName": "Network"
+      },
+      "parentCompany": {
+        "id": 45764,
+        "name": "Walt Disney Company",
+        "relation": {
+          "id": null,
+          "typeName": null
+        }
+      },
+      "tagOptions": [
+        {
+          "id": 489,
+          "tag": 24,
+          "tagName": "Company Type",
+          "name": "SVOD",
+          "helpText": "Subscription video on demand. Examples: Netflix Amazon Prime Video, Disney+."
+        }
+      ]
+    },
+    "genres": [
+      {
+        "id": 12,
+        "name": "Drama",
+        "slug": "drama"
+      },
+      {
+        "id": 19,
+        "name": "Action",
+        "slug": "action"
+      }
+    ],
+    "trailers": [],
+    "lists": [
+      {
+        "id": 13834,
+        "name": "Marvel's Daredevil Franchise",
+        "overview": "",
+        "url": "marvel-daredevil",
+        "isOfficial": true,
+        "nameTranslations": [
+          "eng",
+          "spa"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 0,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 4,
+        "name": "Marvel Cinematic Universe",
+        "overview": "The Marvel Cinematic Universe is an American media franchise and shared universe centered on a series of superhero films, independently produced by Marvel Studios and based on characters that appear in American comic books published by Marvel Comics.",
+        "url": "marvel-cinematic-universe",
+        "isOfficial": true,
+        "nameTranslations": [
+          "arg",
+          "deu",
+          "ell",
+          "eng",
+          "fra",
+          "ita",
+          "por",
+          "pt",
+          "rus",
+          "spa",
+          "tha",
+          "tur",
+          "ukr"
+        ],
+        "overviewTranslations": [
+          "arg",
+          "deu",
+          "eng",
+          "ita",
+          "pt",
+          "spa",
+          "tha",
+          "tur",
+          "ukr"
+        ],
+        "aliases": [
+          {
+            "language": "spa",
+            "name": "UCM"
+          },
+          {
+            "language": "spa",
+            "name": "MCU"
+          },
+          {
+            "language": "deu",
+            "name": "MCU"
+          },
+          {
+            "language": "por",
+            "name": "UCM"
+          },
+          {
+            "language": "por",
+            "name": "Saga do Infinito"
+          },
+          {
+            "language": "por",
+            "name": "Saga do Multiverso"
+          },
+          {
+            "language": "fra",
+            "name": "La saga du multivers"
+          },
+          {
+            "language": "fra",
+            "name": "La saga de l'infini"
+          },
+          {
+            "language": "fra",
+            "name": "MCU"
+          },
+          {
+            "language": "eng",
+            "name": "MCU"
+          },
+          {
+            "language": "eng",
+            "name": "The Infinity Saga"
+          },
+          {
+            "language": "eng",
+            "name": "The Multiverse Saga"
+          },
+          {
+            "language": "arg",
+            "name": "الكون السينمائي لمارڤل"
+          },
+          {
+            "language": "arg",
+            "name": "عالم مارڤل السينمائي"
+          }
+        ],
+        "score": 88492502,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 13561,
+        "name": "Johnnybebad1972",
+        "overview": "",
+        "url": "13561",
+        "isOfficial": false,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 0,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 16378,
+        "name": "MCU Phase 5",
+        "overview": "Phase Five is the fifth part of the Marvel Cinematic Universe and the second part of The Multiverse Saga. ",
+        "url": "16378",
+        "isOfficial": false,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 3762682,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 16444,
+        "name": "Marvel Studios",
+        "overview": "TV Shows produced by Marvel Studios for Disney+",
+        "url": "16444",
+        "isOfficial": false,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 9831207,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 14033,
+        "name": "zSeen That - Done That",
+        "overview": "Ended & Watched in Full",
+        "url": "14033",
+        "isOfficial": false,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 0,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 17367,
+        "name": "TV Shows ",
+        "overview": "",
+        "url": "17367",
+        "isOfficial": false,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 0,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      },
+      {
+        "id": 17340,
+        "name": "Marvel's The Punisher",
+        "overview": "",
+        "url": "marvels-the-punisher",
+        "isOfficial": true,
+        "nameTranslations": [
+          "eng"
+        ],
+        "overviewTranslations": [
+          "eng"
+        ],
+        "aliases": [],
+        "score": 3836808,
+        "image": "",
+        "imageIsFallback": false,
+        "remoteIds": null,
+        "tags": null
+      }
+    ],
+    "remoteIds": [
+      {
+        "id": "10.5240/A9B5-F93A-ED1A-E10E-0BDD-1",
+        "type": 13,
+        "sourceName": "EIDR"
+      },
+      {
+        "id": "tt18923754",
+        "type": 2,
+        "sourceName": "IMDB"
+      },
+      {
+        "id": "202555",
+        "type": 12,
+        "sourceName": "TheMovieDB.com"
+      }
+    ],
+    "characters": null,
+    "airsDays": {
+      "sunday": false,
+      "monday": false,
+      "tuesday": true,
+      "wednesday": false,
+      "thursday": false,
+      "friday": false,
+      "saturday": false
+    },
+    "airsTime": "21:00",
+    "seasons": [
+      {
+        "id": 2011290,
+        "seriesId": 422712,
+        "type": {
+          "id": 1,
+          "name": "Aired Order",
+          "type": "official",
+          "alternateName": null
+        },
+        "number": 0,
+        "nameTranslations": [],
+        "overviewTranslations": [],
+        "image": "https://artworks.thetvdb.com/banners/v4/season/2011290/posters/67c8ab8412a9b.jpg",
+        "imageType": 7,
+        "companies": {
+          "studio": null,
+          "network": null,
+          "production": null,
+          "distributor": null,
+          "special_effects": null
+        },
+        "lastUpdated": "2025-03-05 19:52:37"
+      },
+      {
+        "id": 2011291,
+        "seriesId": 422712,
+        "type": {
+          "id": 1,
+          "name": "Aired Order",
+          "type": "official",
+          "alternateName": null
+        },
+        "number": 1,
+        "nameTranslations": [
+          "ind"
+        ],
+        "overviewTranslations": [
+          "rus,eng,nld,deu,ita,spa,ind"
+        ],
+        "image": "https://artworks.thetvdb.com/banners/v4/season/2011291/posters/67c7c57a91f29.jpg",
+        "imageType": 6,
+        "companies": {
+          "studio": null,
+          "network": null,
+          "production": null,
+          "distributor": null,
+          "special_effects": null
+        },
+        "lastUpdated": "2026-05-15 17:14:02"
+      },
+      {
+        "id": 2011292,
+        "seriesId": 422712,
+        "type": {
+          "id": 3,
+          "name": "Absolute Order",
+          "type": "absolute",
+          "alternateName": null
+        },
+        "number": 1,
+        "nameTranslations": [],
+        "overviewTranslations": [],
+        "companies": {
+          "studio": null,
+          "network": null,
+          "production": null,
+          "distributor": null,
+          "special_effects": null
+        },
+        "lastUpdated": "2022-07-24 01:34:18"
+      },
+      {
+        "id": 2211562,
+        "seriesId": 422712,
+        "type": {
+          "id": 1,
+          "name": "Aired Order",
+          "type": "official",
+          "alternateName": null
+        },
+        "number": 2,
+        "nameTranslations": [
+          "deu"
+        ],
+        "overviewTranslations": [
+          "eng,ita,deu,spa,ind"
+        ],
+        "image": "https://artworks.thetvdb.com/banners/v4/season/2211562/posters/69b2e41f6d02c.jpg",
+        "imageType": 7,
+        "companies": {
+          "studio": null,
+          "network": null,
+          "production": null,
+          "distributor": null,
+          "special_effects": null
+        },
+        "lastUpdated": "2026-05-15 17:15:45"
+      }
+    ],
+    "translations": {
+      "nameTranslations": [
+        {
+          "name": "Daredevil: Born Again",
+          "language": "eng",
+          "isPrimary": true
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "fra"
+        },
+        {
+          "name": "Demolidor: Renascido",
+          "language": "pt"
+        },
+        {
+          "name": "Дердевил: Поново рођен",
+          "language": "srp"
+        },
+        {
+          "name": "Daredevil: Rinascita",
+          "language": "ita"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "nld"
+        },
+        {
+          "name": "Daredevil: Odrodzenie",
+          "language": "pol"
+        },
+        {
+          "name": "Marvel's Daredevil: Rinascita",
+          "isAlias": true,
+          "language": "ita"
+        },
+        {
+          "name": "Demolidor: Nascer de Novo",
+          "language": "por"
+        },
+        {
+          "name": "Daredevil: Újjászületés",
+          "language": "hun"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "spa"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "deu"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "swe"
+        },
+        {
+          "name": "Daredevil: Znovuzrození",
+          "language": "ces"
+        },
+        {
+          "name": "דרדוויל – נולד מחדש",
+          "language": "heb"
+        },
+        {
+          "name": "Сорвиголова: Рождённый заново",
+          "language": "rus"
+        },
+        {
+          "name": "Шибайголова: Народжений заново",
+          "language": "ukr"
+        },
+        {
+          "name": "夜魔侠：重生",
+          "language": "zho"
+        },
+        {
+          "name": "Daredevil: Born Again, από τη Marvel Television",
+          "isAlias": true,
+          "language": "ell"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "ell"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "fin"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "tur"
+        },
+        {
+          "name": "데어데블 본 어게인",
+          "language": "kor"
+        },
+        {
+          "name": "ديرديفل: يولد من جديد",
+          "language": "ara"
+        },
+        {
+          "name": "Daredevil : Renaître",
+          "isAlias": true,
+          "language": "fra"
+        },
+        {
+          "name": "Daredevil : Renaître de Marvel Television",
+          "isAlias": true,
+          "language": "fra"
+        },
+        {
+          "name": "Daredevil - Born Again",
+          "isAlias": true,
+          "language": "fra"
+        },
+        {
+          "name": "夜魔俠：重生",
+          "language": "zhtw"
+        },
+        {
+          "name": "Daredevil - Born Again",
+          "isAlias": true,
+          "language": "deu"
+        },
+        {
+          "name": "Daredevil: Born Again",
+          "language": "ind"
+        },
+        {
+          "name": "Marvel Studios' Daredevil: Born Again",
+          "isAlias": true,
+          "language": "eng"
+        },
+        {
+          "name": "Marvel Television's Daredevil: Born Again",
+          "isAlias": true,
+          "language": "eng"
+        },
+        {
+          "name": "Marvel's Daredevil: Born Again",
+          "isAlias": true,
+          "language": "eng"
+        }
+      ],
+      "overviewTranslations": [
+        {
+          "overview": "Matt Murdock finds himself on a collision course with Wilson Fisk when their past identities begin to emerge.",
+          "language": "eng",
+          "isPrimary": true
+        },
+        {
+          "overview": "Aveugle depuis ses neuf ans à la suite d'un accident, Matt Murdock bénéficie d'une acuité extraordinaire de ses autres sens. Avocat le jour, il devient le super-héros Daredevil lorsque la nuit tombe, afin de lutter contre l’injustice à New York, plus particulièrement dans le quartier de Hell's Kitchen, corrompu par la criminalité depuis sa reconstruction après l'attaque des Chitauris (lors des événements du film Avengers).",
+          "language": "fra"
+        },
+        {
+          "overview": "Matt Murdock (Charlie Cox), um advogado cego com habilidades elevadas, está lutando por justiça por meio de seu movimentado escritório de advocacia, enquanto o ex-chefe da máfia Wilson Fisk (Vincent D'Onofrio) persegue seus próprios empreendimentos políticos na cidade de Nova York. Quando suas identidades passadas começam a emergir, ambos os homens se encontram em um curso de colisão inevitável.",
+          "language": "pt"
+        },
+        {
+          "overview": "Серије прати адвоката Мета Мердока који је као дечак изгубио вид због изложености радиоактивној супстанци и која му је појачала остала чула изнад људских способности. Он ове моћи користи како би се ноћу борио против криминалаца на улицама Њујорка, те открива криминалну заверу иза које стоји Вилсон Фиск, њујоршки тајкун.",
+          "language": "srp"
+        },
+        {
+          "overview": "Matt Murdock, un avvocato cieco con capacità elevate, sta lottando per la giustizia attraverso il suo vivace studio legale, mentre l'ex boss della mafia Wilson Fisk persegue i propri sforzi politici a New York. Quando le loro identità passate cominciano ad emergere, entrambi gli uomini si ritrovano in inevitabile rotta di collisione.",
+          "language": "ita"
+        },
+        {
+          "overview": "Matt Murdock, een blinde advocaat met meer vaardigheden, vecht voor gerechtigheid via zijn bruisende advocatenkantoor, terwijl voormalig maffiabaas Wilson Fisk zijn eigen politieke inspanningen voortzet in New York. Wanneer hun vroegere identiteiten naar boven komen, bevinden beide mannen zich op een onvermijdelijke ramkoers.",
+          "language": "nld"
+        },
+        {
+          "overview": "Matt Murdock, niewidomy prawnik o niezwykłych umiejętnościach, prowadzi kancelarię, walcząc o sprawiedliwość, podczas gdy były szef mafii Wilson Fisk angażuje się w karierę polityczną. Ale od przeszłości nie da się uciec i wkrótce dochodzi między nimi do konfrontacji.",
+          "language": "pol"
+        },
+        {
+          "overview": "Matt Murdock, um advogado cego com capacidades melhoradas, luta pela justiça através da sua popular firma de advogados, enquanto o antigo líder da máfia Wilson Fisk persegue os seus próprios objetivos políticos em Nova Iorque. Quando as identidades passadas de ambos começam a emergir, os dois homens acabam numa inevitável rota de colisão.",
+          "language": "por"
+        },
+        {
+          "overview": "Matt Murdock, a különleges képességekkel rendelkező vak ügyvéd folyton az igazság oldalán harcol az ügyvédi irodájában, miközben Wilson Fisk, a volt maffiafőnök politikai karrierbe kezd New Yorkban. Amikor újra a felszínre tör a korábbi énjük, rá kell jönniük, hogy muszáj lesz megküzdeniük egymással.",
+          "language": "hun"
+        },
+        {
+          "overview": "Matt Murdock se encuentra en un rumbo de colisión con Wilson Fisk cuando sus identidades pasadas empiezan a salir a la luz.",
+          "language": "spa"
+        },
+        {
+          "overview": "Matt Murdock, ein blinder Anwalt mit besonderen Fähigkeiten, kämpft in seiner geschäftigen Anwaltskanzlei für Gerechtigkeit, während der ehemalige Mafiaboss Wilson Fisk seine eigenen politischen Ziele in New York verfolgt. Als ihre früheren Identitäten sich ihren Weg an die Oberfläche bahnen, befinden sich beide Männer unausweichlich auf Kollisionskurs.",
+          "language": "deu"
+        },
+        {
+          "overview": "Matt Murdock, en blind advokat med förhöjda sinnen, kämpar för rättvisa på sin jäktiga advokatbyrå, medan den tidigare maffiabossen Wilson Fisk eftersträvar sina egna politiska mål i New York. När deras forna identiteter börjar framträda hamnar de två männen snart på en oundviklig kollisionskurs.",
+          "language": "swe"
+        },
+        {
+          "overview": "V původním seriálu MARVEL TELEVISION „Daredevil: Znovuzrození“ bojuje nevidomý advokát se zostřenými smysly Matt Murdock (Charlie Cox) za spravedlnost a vede novou rušnou právní praxi, zatímco bývalý mafiánský boss Wilson Fisk (Vincent D'Onofrio) sleduje své vlastní politické cíle v New Yorku. Identity obou mužů se začínají odhalovat, což vede k nevyhnutelnému střetu obou hlavních postav. (disney+)",
+          "language": "ces"
+        },
+        {
+          "overview": "סדרת פעולה מבית מארוול. מאט מרדוק – עורך הדין העיוור, ו-ווילסון פיסק – ראש המאפיה לשעבר, נמצאים במסלול התנגשות בלתי נמנעת.",
+          "language": "heb"
+        },
+        {
+          "overview": "Прошли годы, Нью-Йорк по-прежнему остается городом теней и тайных войн. Днем Мэтт Мердок ведет дела в суде, защищая тех, кому больше некуда обратиться. Ночью он скрывается под маской, выходя на улицы, где правосудие достигается не словами, а действием. В это время Уилсон Фиск стремится закрепить свою власть, скрывая истинные намерения за громкими лозунгами. Его влияние проникает во все сферы, переписывая правила игры. Под предлогом борьбы с хаосом он начинает зачистку мегаполиса, превращая его в поле битвы, заставляя героев становиться изгоями. Но тьма всегда встречает сопротивление. Сорвиголова вновь оказывается на «передовой», готовый бросить вызов силам, стремящимся подчинить себе каждый угол в центре небоскребов. В этой игре ставки высоки, а ошибки недопустимы.",
+          "language": "rus"
+        },
+        {
+          "overview": "Сліпий адвокат Метт Мердок процвітає, але його альтер его не забуто. Вілсон Фіск обійняв посаду мера і лише Шибайголова знає, хто ховається за маскою добродушного та чесного політика. Давні вороги, здається, забули про минуле і намагаються не повертатися до супергеройської діяльності. Та чи довго триватиме їх мир чи вони повернуться до ворогів?",
+          "language": "ukr"
+        },
+        {
+          "overview": "在Marvel Television《夜魔侠：重生》，失明律师马特·默多克的力量得到提升，继续以经营律师楼来主持正义。前犯罪集团首脑威尔逊菲斯克在纽约染指政坛，当他们过去的身份开始浮现时，两人发现彼此注定对立。",
+          "language": "zho"
+        },
+        {
+          "overview": "Στο \"Daredevil: Born Again\" της Marvel Television, o τυφλός δικηγόρος με αυξημένες ικανότητες Ματ Μέρντοκ(Τσάρλι Κοξ) παλεύει για δικαιοσύνη μέσα από το πολύβουο δικηγορικό γραφείο του, την ώρα που ο τέως αρχηγός της μαφίας Γουίλσον Φισκ(Βίνσεντ Ντ'Ονόφριο) προωθεί τη δική του πολιτική ατζέντα στη Νέα Υόρκη. Όταν οι προηγούμενες ιδιότητές τους αρχίζουν να έρχονται στο προσκήνιο, οι δυο τους βρίσκονται σε μια τροχιά αναπόφευκτης σύγκρουσης.",
+          "language": "ell"
+        },
+        {
+          "overview": "Matt Murdock, yliluonnollisilla kyvyillä varustettu sokea lakimies puolustaa oikeudenmukaisuutta vireässä lakifirmassaan. Entinen mafiapomo Wilson Fisk edistää poliittista uraansa New Yorkissa. Kun molempien edelliset identiteetit alkavat tulla näkyviin, miehet huomaavat olevansa törmäyskurssilla.",
+          "language": "fin"
+        },
+        {
+          "overview": "Gelişmiş yeteneklere sahip kör bir avukat olan Matt Murdock, yoğun iş temposuna sahip hukuk bürosunda adalet için savaşırken, eski mafya babası Wilson Fisk New York'ta kendi siyasi hedeflerini takip eder. Geçmişteki kimlikleri ortaya çıkmaya başladığında, her iki adam da kaçınılmaz bir şekilde çarpışma rotasına girer.",
+          "language": "tur"
+        },
+        {
+          "overview": "더 큰 악을 잡기 위해, 더 강력한 어둠으로 돌아온 마블의 다크 히어로\r\n본능을 깨운 '데어데블'의 거침없는 수위 파괴 참교육 액션이 쏟아진다!\r\n\r\n사고로 시각을 잃었지만 뛰어난 감각을 지닌 변호사 '맷 머독(데어데블)'은 과거 히어로였던 삶을 뒤로하고 로펌을 운영하며 법으로 정의를 위해 싸운다. 한편, 암흑가의 거물이었던 '윌슨 피스크(킹핀)'는 잔악한 본성을 숨긴 채 뉴욕 시장으로 당선되어 세력을 키워 나간다.\r\n\r\n뉴욕시 전체를 장악한 '윌슨 피스크'는 더 큰 권력을 위해 음모를 꾸미고, '맷 머독'은 범죄에 잠식당한 도시를 구하기 위해 다시 한번 '데어데블'의 정체성을 깨운다.\r\n\r\n윌슨 피스크'와 맞서게 된 '맷 머독'은 정의와 복수의 경계 사이에서 깊은 갈등에 빠지고, 모두의 목숨을 위협하는 정체불명의 미치광이 살인마 '뮤즈'까지 등장하며 도시는 걷잡을 수 없는 혼돈에 빠져든다.\r\n\r\n어둠에 잠식된 도시의 낮과 밤\r\n이 곳을 구원할 진정한 히어로는 누구인가?",
+          "language": "kor"
+        },
+        {
+          "overview": "مات موردوك، محامٍ كفيف ذو قدرات فائقة، يُناضل من أجل العدالة من خلال شركته القانونية المزدهرة، بينما يواصل زعيم المافيا السابق ويلسون فيسك مساعيه السياسية في نيويورك. عندما تبدأ هوياتهما السابقة بالظهور، يجد الرجلان نفسيهما في مسار تصادمي حتمي",
+          "language": "ara"
+        },
+        {
+          "overview": "在漫威電視的《夜魔俠：重生》中，擁有獨特能力的盲眼律師麥特梅鐸透過忙碌的律師事務所伸張正義，而前黑幫老大威爾遜費斯克則在紐約追求自己的政治生涯。當他們過去的身分開始揭露，兩人都發覺自己捲入不可避免的衝突。",
+          "language": "zhtw"
+        },
+        {
+          "overview": "Matt Murdock, pengacara tunanetra berkemampuan luar biasa, berjuang menegakkan keadilan melalui firma hukumnya yang sibuk. Sementara itu, mantan bos mafia, Wilson Fisk, merintis karier politiknya sendiri di New York. Saat identitas masa lalu mereka mulai terkuak, keduanya pun berhadapan dalam pertarungan yang tak terhindarkan.",
+          "language": "ind"
+        }
+      ],
+      "aliases": [
+        "Marvel's Daredevil: Rinascita",
+        "Daredevil: Born Again, από τη Marvel Television",
+        "Daredevil : Renaître",
+        "Daredevil : Renaître de Marvel Television",
+        "Daredevil - Born Again",
+        "Daredevil - Born Again",
+        "Marvel Studios' Daredevil: Born Again",
+        "Marvel Television's Daredevil: Born Again",
+        "Marvel's Daredevil: Born Again"
+      ]
+    },
+    "tags": [
+      {
+        "id": 182,
+        "tag": 31,
+        "tagName": "Geographic Location",
+        "name": "America / United States",
+        "helpText": null
+      },
+      {
+        "id": 194,
+        "tag": 31,
+        "tagName": "Geographic Location",
+        "name": "New York City",
+        "helpText": null
+      },
+      {
+        "id": 185,
+        "tag": 11,
+        "tagName": "Setting",
+        "name": "Big City",
+        "helpText": null
+      },
+      {
+        "id": 1,
+        "tag": 1,
+        "tagName": "Sub-Genre",
+        "name": "Adaptation",
+        "helpText": null
+      },
+      {
+        "id": 63,
+        "tag": 3,
+        "tagName": "TV Type or Format",
+        "name": "Story-based Drama",
+        "helpText": "Drama series where you must watch all episodes in order. Ex: Game of Thrones, The Walking Dead, Killing Eve"
+      },
+      {
+        "id": 103,
+        "tag": 4,
+        "tagName": "Time Period",
+        "name": "2020s",
+        "helpText": null
+      }
+    ],
+    "contentRatings": [
+      {
+        "id": 28,
+        "name": "18",
+        "country": "bra",
+        "description": "Suitable for viewers over the age of 18",
+        "contentType": "",
+        "order": 0,
+        "fullname": null
+      },
+      {
+        "id": 78,
+        "name": "18+",
+        "country": "deu",
+        "description": "Restricted to ages 18 and older",
+        "contentType": "",
+        "order": 0,
+        "fullname": null
+      },
+      {
+        "id": 247,
+        "name": "TV-MA",
+        "country": "usa",
+        "description": "Not suitable for children and teens under 17",
+        "contentType": "",
+        "order": 0,
+        "fullname": null
+      }
+    ],
+    "seasonTypes": [
+      {
+        "id": 1,
+        "name": "Aired Order",
+        "type": "official",
+        "alternateName": null
+      },
+      {
+        "id": 3,
+        "name": "Absolute Order",
+        "type": "absolute",
+        "alternateName": null
+      }
+    ]
+  }
+}
