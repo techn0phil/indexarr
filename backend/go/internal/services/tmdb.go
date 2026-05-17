@@ -174,7 +174,7 @@ func (c *TMDBClient) SearchTV(title string) (*TMDBTVSearchResult, error) {
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("query", title)
-	params.Set("language", "fr-FR")
+	params.Set("language", "en-US")
 
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/search/tv?%s", tmdbBaseURL, params.Encode()))
 	if err != nil {
@@ -234,7 +234,7 @@ func (c *TMDBClient) GetTVDetails(tmdbID int) (*TMDBTVDetails, error) {
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("language", "fr-FR")
-	params.Set("append_to_response", "credits,external_ids")
+	params.Set("append_to_response", "external_ids")
 
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/tv/%d?%s", tmdbBaseURL, tmdbID, params.Encode()))
 	if err != nil {
