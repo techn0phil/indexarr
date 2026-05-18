@@ -122,6 +122,11 @@ type TVDBSeriesExtended struct {
 		Seasons []struct {
 			ID     int `json:"id"`
 			Number int `json:"number"`
+			Type   struct {
+				ID   int    `json:"id"`   // 1 = Aired order, 2 = DVD order, 3 = Absolute order, 4 = Alternate order, etc.
+				Name string `json:"name"` // "Aired order", "DVD order", etc.
+				Type string `json:"type"` // "official", "alternate", etc.
+			} `json:"type"`
 		} `json:"seasons"`
 	} `json:"data"`
 }
@@ -163,6 +168,35 @@ type TVDBSeasonExtended struct {
 			Aired        string `json:"aired"`
 		} `json:"episodes"`
 	} `json:"data"`
+}
+
+// TVDBBulkEpisode represents an episode from bulk episodes endpoint
+type TVDBBulkEpisode struct {
+	ID           int    `json:"id"`
+	SeriesID     int    `json:"seriesId"`
+	Name         string `json:"name"`
+	Aired        string `json:"aired"`
+	Runtime      int    `json:"runtime"` // minutes
+	Overview     string `json:"overview"`
+	SeasonNumber int    `json:"seasonNumber"`
+	Number       int    `json:"number"` // episode number
+	Image        string `json:"image"`
+	Year         string `json:"year"`
+}
+
+// TVDBAllEpisodesResponse represents bulk episodes response
+type TVDBAllEpisodesResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		Episodes []TVDBBulkEpisode `json:"episodes"`
+	} `json:"data"`
+	Links struct {
+		Prev       interface{} `json:"prev"`
+		Self       string      `json:"self"`
+		Next       interface{} `json:"next"`
+		TotalItems int         `json:"total_items"`
+		PageSize   int         `json:"page_size"`
+	} `json:"links"`
 }
 
 // ensureValidToken checks token validity and refreshes if needed
@@ -277,7 +311,7 @@ func (c *TVClient) makeAuthenticatedRequest(method, path string, params url.Valu
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("TVDB API Response: %s %s - %d (%d ms)", method, reqURL, resp.StatusCode, duration.Milliseconds())
+	log.Printf("[TVDB] API Response: %s %s - %d (%d ms)", method, reqURL, resp.StatusCode, duration.Milliseconds())
 
 	// Handle 401 (token expired) - reactive refresh
 	if resp.StatusCode == http.StatusUnauthorized {
@@ -415,6 +449,48 @@ func (c *TVClient) GetEpisodeDetails(episodeID int) (*TVDBEpisodeExtended, error
 	var result TVDBEpisodeExtended
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode episode details: %w", err)
+	}
+
+	return &result, nil
+}
+
+// GetAllEpisodes gets all episodes for a series in bulk (optimized endpoint)
+func (c *TVClient) GetAllEpisodes(tvdbID int, language string) (*TVDBAllEpisodesResponse, error) {
+	if c.apiKey == "" {
+		return nil, fmt.Errorf("TVDB API key not configured")
+	}
+
+	// Default to French if no language specified
+	if language == "" {
+		language = "fra"
+	}
+
+	params := url.Values{}
+	params.Set("page", "0")
+
+	resp, err := c.makeAuthenticatedRequest("GET", fmt.Sprintf("/series/%d/episodes/default/%s", tvdbID, language), params)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("TVDB bulk episodes failed: %s - %s", resp.Status, string(body))
+	}
+
+	var result TVDBAllEpisodesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode bulk episodes: %w", err)
+	}
+
+	log.Printf("Fetched %d episodes for series %d (page size: %d, total: %d)",
+		len(result.Data.Episodes), tvdbID, result.Links.PageSize, result.Links.TotalItems)
+
+	// TODO: Handle pagination if total_items > page_size (rare for most series)
+	if result.Links.TotalItems > result.Links.PageSize {
+		log.Printf("Warning: Series %d has %d total episodes but only fetched %d (pagination not yet implemented)",
+			tvdbID, result.Links.TotalItems, len(result.Data.Episodes))
 	}
 
 	return &result, nil
