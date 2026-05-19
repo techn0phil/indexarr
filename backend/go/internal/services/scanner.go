@@ -79,18 +79,6 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 
 // ScanPaths performs a scan on specified paths (used for manual scans via API)
 func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
-	// Initialize per-scan cache for API call optimization
-	s.cache = &scanCache{
-		seriesByTitle: make(map[string]*models.Series),
-		// seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
-		// episodesByTVDBId:    make(map[int][]TVDBBulkEpisode),
-		episodesByTVDBId:    make(map[int]TVDBAllEpisodesResponse),
-		failedSeriesByTitle: make(map[string]error),
-	}
-
-	log.Println("Starting scan")
-	start := time.Now()
-
 	s.mu.Lock()
 	if s.running {
 		s.mu.Unlock()
@@ -98,14 +86,35 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	}
 	s.running = true
 	s.stopChan = make(chan struct{})
+
+	// Initialize per-scan cache for API call optimization
+	s.cache = &scanCache{
+		seriesByTitle: make(map[string]*models.Series),
+		// seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
+		// episodesByTVDBId:    make(map[int][]TVDBBulkEpisode),
+		episodesByTVDBId:    make(map[int]*TVDBAllEpisodesResponse),
+		failedSeriesByTitle: make(map[string]error),
+	}
+
 	s.mu.Unlock()
+
+	log.Println("Starting scan")
+	start := time.Now()
 
 	defer func() {
 		s.mu.Lock()
 		s.running = false
-		s.mu.Unlock()
+
+		select {
+		case <-s.stopChan:
+			// Already closed, do nothing
+		default:
+			close(s.stopChan)
+		}
+
 		// Clear per-scan cache
 		s.cache = nil
+		s.mu.Unlock()
 	}()
 
 	result := &models.ScanResult{
