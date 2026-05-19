@@ -591,27 +591,15 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 	// Get time before processing for performance logging
 	mediainfoStart := time.Now()
 
-	// Extract media info
-	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
-	if err != nil {
-		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
-		// Continue with minimal info
-		mediaInfo = &models.MediaInfo{
-			VideoTracks:    []models.VideoTrack{},
-			AudioTracks:    []models.AudioTrack{},
-			SubtitleTracks: []models.SubtitleTrack{},
-		}
-	}
-
 	mediainfoDuration := time.Since(mediainfoStart)
 	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
 
 	var processError error
 
 	if parsed.IsSeries {
-		processError = s.processEpisode(filePath, parsed, mediaInfo, fileSize, duration, result)
+		processError = s.processEpisode(filePath, parsed, result)
 	} else {
-		processError = s.processMovie(filePath, parsed, mediaInfo, fileSize, duration, result)
+		processError = s.processMovie(filePath, parsed, result)
 	}
 
 	// Total processing time for the file
@@ -622,7 +610,7 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 }
 
 // processMovie handles a movie file
-func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
+func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
 	// Check if movie already exists by file path
 	exists, err := repository.MovieExistsByFilePath(s.db, filePath)
 	if err != nil {
@@ -631,6 +619,18 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInf
 	if exists {
 		log.Printf("Movie already exists for file: %s", filePath)
 		return nil
+	}
+
+	// Extract media info
+	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
+	if err != nil {
+		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		// Continue with minimal info
+		mediaInfo = &models.MediaInfo{
+			VideoTracks:    []models.VideoTrack{},
+			AudioTracks:    []models.AudioTrack{},
+			SubtitleTracks: []models.SubtitleTrack{},
+		}
 	}
 
 	movie := &models.Movie{
@@ -697,7 +697,17 @@ func slugify(title string) string {
 }
 
 // processEpisode handles a TV episode file
-func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
+func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
+	// Check if episode already exists by file path
+	exists, err := repository.EpisodeExistsByFilePath(s.db, filePath)
+	if err != nil {
+		return fmt.Errorf("failed to check for existing episode: %w", err)
+	}
+	if exists {
+		log.Printf("Episode already exists for file: %s", filePath)
+		return nil
+	}
+
 	// Get current time
 	processStart := time.Now()
 
@@ -706,7 +716,6 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 
 	// Check cache for series by normalized title first
 	var series *models.Series
-	var err error
 
 	if s.cache.seriesByTitle != nil {
 		if cached, ok := s.cache.seriesByTitle[normalizedTitle]; ok {
@@ -900,6 +909,18 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 					}
 				}
 			}
+		}
+	}
+
+	// Extract media info
+	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
+	if err != nil {
+		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		// Continue with minimal info
+		mediaInfo = &models.MediaInfo{
+			VideoTracks:    []models.VideoTrack{},
+			AudioTracks:    []models.AudioTrack{},
+			SubtitleTracks: []models.SubtitleTrack{},
 		}
 	}
 
