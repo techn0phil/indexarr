@@ -24,7 +24,7 @@ type scanCache struct {
 	// seriesExtendedByTVDBId map[int]*TVDBSeriesExtended
 	// All episodes by series TVDB ID (from bulk episodes endpoint)
 	// episodesByTVDBId map[int][]TVDBBulkEpisode
-	episodesByTVDBId map[int]TVDBAllEpisodesResponse
+	episodesByTVDBId map[int]*TVDBAllEpisodesResponse
 	// Failed enrichment tracking (prevents retry loops)
 	failedSeriesByTitle map[string]error
 }
@@ -534,7 +534,7 @@ func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 		return fmt.Errorf("failed to fetch bulk episodes: %w", err)
 	}
 	// s.cache.episodesByTVDBId[tvdbID] = allEpisodes.Data.Episodes
-	s.cache.episodesByTVDBId[tvdbID] = *allEpisodes
+	s.cache.episodesByTVDBId[tvdbID] = allEpisodes
 
 	// log.Printf("[Cache] Successfully cached episodes data: %d episodes, %d seasons",
 	// 	len(allEpisodes.Data.Episodes), len(seriesExtended.Data.Seasons))
