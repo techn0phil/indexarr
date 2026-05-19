@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -79,6 +80,9 @@ func NewExtractor(mediainfoPath string, timeoutSeconds int) *Extractor {
 
 // Extract runs mediainfo on a file and returns parsed MediaInfo
 func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, error) {
+	// Get time before processing for performance logging
+	mediainfoStart := time.Now()
+
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
 	defer cancel()
 
@@ -105,7 +109,12 @@ func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, err
 		return nil, 0, 0, fmt.Errorf("failed to parse mediainfo JSON: %w", err)
 	}
 
-	return e.parseMediaInfo(&mi)
+	info, fileSize, duration, _ := e.parseMediaInfo(&mi)
+
+	mediainfoDuration := time.Since(mediainfoStart)
+	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
+
+	return info, fileSize, duration, nil
 }
 
 // parseMediaInfo converts MediainfoOutput to models.MediaInfo

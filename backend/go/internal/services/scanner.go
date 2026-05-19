@@ -588,12 +588,6 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 	// Parse filename
 	parsed := ParseFilename(filePath)
 
-	// Get time before processing for performance logging
-	mediainfoStart := time.Now()
-
-	mediainfoDuration := time.Since(mediainfoStart)
-	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
-
 	var processError error
 
 	if parsed.IsSeries {
