@@ -279,11 +279,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 		defer tx.Rollback()
 
 		result, err := tx.Exec(`
-			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster)
+			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug)
 		if err != nil {
 			return err
 		}
@@ -398,11 +398,11 @@ func GetSeriesByTitle(db *sql.DB, title string) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
 		FROM series WHERE LOWER(title) = LOWER(?)
 	`, title).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster)
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
 	if poster.Valid {
 		series.Poster = &poster.String
 	} else {
@@ -422,11 +422,11 @@ func GetSeriesByTMDBId(db *sql.DB, tmdbID int64) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
 		FROM series WHERE tmdb_id = ?
 	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster)
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
 	if poster.Valid {
 		series.Poster = &poster.String
 	} else {
@@ -597,10 +597,10 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		// Update series
 		_, err = tx.Exec(`
 			UPDATE series
-			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?
 			WHERE id = ?
 		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
-			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.ID)
+			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.ID)
 		if err != nil {
 			return err
 		}

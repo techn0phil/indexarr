@@ -22,6 +22,7 @@ export interface Movie {
 export interface Series {
   id: number;
   title: string;
+  slug: string;
   yearStart: number;
   yearEnd: number;
   seasonCount: number;

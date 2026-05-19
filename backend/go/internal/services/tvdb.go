@@ -188,6 +188,10 @@ type TVDBBulkEpisode struct {
 type TVDBAllEpisodesResponse struct {
 	Status string `json:"status"`
 	Data   struct {
+		ID       int               `json:"id"`
+		Name     string            `json:"name"`
+		Slug     string            `json:"slug"`
+		Image    string            `json:"image"`
 		Episodes []TVDBBulkEpisode `json:"episodes"`
 	} `json:"data"`
 	Links struct {
