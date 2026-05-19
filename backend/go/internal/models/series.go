@@ -3,6 +3,7 @@ package models
 type Series struct {
 	ID           int64    `json:"id"`
 	Title        string   `json:"title"`
+	Slug         string   `json:"slug"`
 	YearStart    int      `json:"yearStart"`
 	YearEnd      int      `json:"yearEnd"`
 	SeasonCount  int      `json:"seasonCount"`

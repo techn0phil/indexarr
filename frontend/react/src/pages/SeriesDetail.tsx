@@ -284,7 +284,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                   Sonarr
                 </a>
               )}
-              <a href={`https://thetvdb.com/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <a href={`https://thetvdb.com/series/${series.slug || slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-dark.png'} alt="TVDB Light" style={{ width: '12px', height: '12px' }} />
                 TVDB
               </a>

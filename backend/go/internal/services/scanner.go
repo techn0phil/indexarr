@@ -613,6 +613,40 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInf
 	return nil
 }
 
+func slugify(title string) string {
+	slug := title
+
+	// Normalize accented characters
+	slug = strings.ToValidUTF8(slug, "")
+
+	// Remove accents
+	slug = strings.Map(func(r rune) rune {
+		if r >= 0x0300 && r <= 0x036f {
+			return -1
+		}
+		return r
+	}, slug)
+
+	// Convert to lowercase
+	slug = strings.ToLower(slug)
+
+	// Trim whitespace
+	slug = strings.TrimSpace(slug)
+
+	// Replace non-alphanumeric characters with hyphens
+	slug = strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return '-'
+	}, slug)
+
+	// Remove leading/trailing hyphens
+	slug = strings.Trim(slug, "-")
+
+	return slug
+}
+
 // processEpisode handles a TV episode file
 func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
 	normalizedTitle := strings.ToLower(strings.TrimSpace(parsed.Title))
@@ -655,6 +689,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 		// Create new series
 		newSeries := &models.Series{
 			Title:     parsed.Title,
+			Slug:      slugify(parsed.Title),
 			Status:    "ongoing",
 			DateAdded: time.Now().Format(time.RFC3339),
 		}
