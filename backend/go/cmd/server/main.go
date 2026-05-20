@@ -40,19 +40,42 @@ func main() {
 	go broadcaster.Run()
 	log.Println("WebSocket broadcaster started")
 
-	// Initialize scanner and scheduler
+	// Initialize scheduler based on configuration mode
 	var scheduler *services.Scheduler
-	if len(cfg.MediaLibraryPaths) > 0 {
+
+	if cfg.HasRadarrConfig() {
+		// Radarr import mode
+		log.Println("🎬 Radarr mode: Using Radarr API for movie imports")
+
+		radarrClient := services.NewRadarrClient(cfg.RadarrURL, cfg.RadarrAPIKey)
+
+		// Test connection to Radarr
+		if err := radarrClient.TestConnection(); err != nil {
+			log.Printf("⚠️  Warning: Could not connect to Radarr: %v", err)
+		} else {
+			log.Println("✅ Connected to Radarr successfully")
+		}
+
+		radarrImporter := services.NewRadarrImporter(db, cfg, radarrClient, broadcaster)
+		scheduler = services.NewSchedulerWithImporter(radarrImporter, cfg.ScanInterval)
+
+		if cfg.ScanInterval > 0 {
+			scheduler.Start()
+			log.Printf("⏱️  Scheduler started with %d hour interval (Radarr import)", cfg.ScanInterval)
+		}
+	} else if len(cfg.MediaLibraryPaths) > 0 {
+		// Filesystem scan mode
+		log.Println("📁 Filesystem mode: Scanning media library paths")
+
 		scanner := services.NewScanner(db, cfg, broadcaster)
 		scheduler = services.NewScheduler(scanner, cfg.ScanInterval)
 
-		// Start scheduler if interval is configured
 		if cfg.ScanInterval > 0 {
 			scheduler.Start()
-			log.Printf("⏱️  Scheduler started with %d hour interval", cfg.ScanInterval)
+			log.Printf("⏱️  Scheduler started with %d hour interval (filesystem scan)", cfg.ScanInterval)
 		}
 	} else {
-		log.Println("⚠️  No MEDIA_LIBRARY_PATHS configured, scanning disabled")
+		log.Println("⚠️  No RADARR_API_KEY or MEDIA_LIBRARY_PATHS configured, scanning disabled")
 	}
 
 	// Setup API router

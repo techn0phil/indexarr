@@ -659,3 +659,54 @@ func SaveTVDBToken(db *sql.DB, token string, expiresAt time.Time) error {
 		return err
 	})
 }
+
+// GetMovieByTMDBId finds a movie by TMDB ID
+func GetMovieByTMDBId(db *sql.DB, tmdbID int64) (*models.Movie, error) {
+	var m models.Movie
+	var poster sql.NullString
+	err := db.QueryRow(`
+		SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster
+		FROM movies WHERE tmdb_id = ?
+	`, tmdbID).Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId, &poster)
+	if poster.Valid {
+		m.Poster = &poster.String
+	} else {
+		m.Poster = nil
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	m.Cast, _ = GetCastForMovie(db, m.ID)
+	m.MediaInfo, _ = GetMediaInfoForMovie(db, m.ID)
+	return &m, nil
+}
+
+// GetAllMovieTMDBIds returns all TMDB IDs of movies in the database
+func GetAllMovieTMDBIds(db *sql.DB) ([]int64, error) {
+	rows, err := db.Query(`SELECT tmdb_id FROM movies WHERE tmdb_id > 0`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// DeleteMovieByTMDBId deletes a movie by its TMDB ID
+func DeleteMovieByTMDBId(db *sql.DB, tmdbID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM movies WHERE tmdb_id = ?`, tmdbID)
+		return err
+	})
+}
