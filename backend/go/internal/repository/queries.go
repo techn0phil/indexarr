@@ -260,7 +260,7 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		return nil, 0, err
 	}
 
-	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug FROM series WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
+	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
@@ -271,11 +271,19 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 	for rows.Next() {
 		var s models.Series
 		var poster sql.NullString
-		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug)
+		var sonarrID sql.NullInt64
+		var titleSlug sql.NullString
+		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug)
 		if poster.Valid {
 			s.Poster = &poster.String
 		} else {
 			s.Poster = nil
+		}
+		if sonarrID.Valid {
+			s.SonarrID = sonarrID.Int64
+		}
+		if titleSlug.Valid {
+			s.TitleSlug = titleSlug.String
 		}
 		if err != nil {
 			return nil, 0, err
@@ -290,11 +298,19 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 func GetSeriesByID(db *sql.DB, id int64) (*models.Series, error) {
 	var s models.Series
 	var poster sql.NullString
-	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug)
+	var sonarrID sql.NullInt64
+	var titleSlug sql.NullString
+	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug)
 	if poster.Valid {
 		s.Poster = &poster.String
 	} else {
 		s.Poster = nil
+	}
+	if sonarrID.Valid {
+		s.SonarrID = sonarrID.Int64
+	}
+	if titleSlug.Valid {
+		s.TitleSlug = titleSlug.String
 	}
 	if err != nil {
 		return nil, err
