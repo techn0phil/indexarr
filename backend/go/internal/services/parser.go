@@ -53,14 +53,14 @@ var (
 
 	// Cleanup patterns - things to remove from title
 	cleanupPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`(?i)\.(mkv|mp4|avi|mov|m4v|webm|flv|wmv)$`),                              // file extensions
-		regexp.MustCompile(`(?i)(2160p|1080p|720p|480p)`),                                            // resolutions
-		regexp.MustCompile(`(?i)(BluRay|Blu-Ray|BDRip|BRRip|WEB-DL|WEBDL|WEBRip|HDTV|DVDRip|Remux)`), // sources
-		regexp.MustCompile(`(?i)(x264|x265|H\.?264|H\.?265|HEVC|AVC|AAC|AC3|DTS|TrueHD|Atmos)`),      // codecs
-		regexp.MustCompile(`(?i)(HDR10\+?|Dolby\.?Vision|DV|DoVi)`),                                  // HDR formats
-		regexp.MustCompile(`(?i)(PROPER|REPACK|EXTENDED|UNRATED|DIRECTORS\.?CUT)`),                   // release tags
-		regexp.MustCompile(`(?i)(\[.*?\]|\(.*?\))`),                                                  // bracketed content
-		regexp.MustCompile(`-[A-Za-z0-9]+$`),                                                         // release group
+		regexp.MustCompile(`(?i)\.(mkv|mp4|avi|mov|m4v|webm|flv|wmv)$`),                                  // file extensions
+		regexp.MustCompile(`(?i)\b(2160p|1080p|720p|480p)\b`),                                            // resolutions
+		regexp.MustCompile(`(?i)\b(BluRay|Blu-Ray|BDRip|BRRip|WEB-DL|WEBDL|WEBRip|HDTV|DVDRip|Remux)\b`), // sources
+		regexp.MustCompile(`(?i)\b(x264|x265|H\.?264|H\.?265|HEVC|AVC|AAC|AC3|DTS|TrueHD|Atmos)\b`),      // codecs
+		regexp.MustCompile(`(?i)\b(HDR10\+?|Dolby\.?Vision|DV|DoVi)\b`),                                  // HDR formats
+		regexp.MustCompile(`(?i)\b(PROPER|REPACK|EXTENDED|UNRATED|DIRECTORS\.?CUT)\b`),                   // release tags
+		regexp.MustCompile(`-[A-Za-z0-9]+$`),                                                             // release group
+		// regexp.MustCompile(`(?i)(\[.*?\]|\(.*?\))`),                                                      // bracketed content
 	}
 )
 
@@ -136,7 +136,7 @@ func extractTitle(filename string, year int) string {
 		title = pattern.ReplaceAllString(title, "")
 	}
 
-	// Replace dots and underscores with spaces
+	// Replace dots, underscores, and hyphens with spaces
 	title = strings.ReplaceAll(title, ".", " ")
 	title = strings.ReplaceAll(title, "_", " ")
 	title = strings.ReplaceAll(title, "-", " ")
