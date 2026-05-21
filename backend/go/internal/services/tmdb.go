@@ -142,9 +142,9 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("query", title)
-	params.Set("language", "fr-FR")
+	params.Set("language", "en-US")
 	if year > 0 {
-		params.Set("year", strconv.Itoa(year))
+		params.Set("primary_release_year", strconv.Itoa(year))
 	}
 
 	// Get time before request for logging
@@ -159,9 +159,9 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
 	if year > 0 {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s&year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=en-US&query=%s&primary_release_year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
 	} else {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
 	}
 
 	if resp.StatusCode != http.StatusOK {
