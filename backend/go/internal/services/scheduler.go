@@ -8,25 +8,43 @@ import (
 	"indexarr/internal/models"
 )
 
-// Scheduler handles periodic background scanning
+// Scheduler handles periodic background scanning or importing
 type Scheduler struct {
-	scanner  *Scanner
+	scanner  *Scanner        // Filesystem scanner (optional)
+	importer *RadarrImporter // Radarr importer (optional)
+	mode     string          // "radarr", "filesystem", or "disabled"
 	interval time.Duration
 	stopChan chan struct{}
 	running  bool
 	mu       sync.Mutex
 }
 
-// NewScheduler creates a new scheduler
+// NewScheduler creates a new scheduler with filesystem scanner
 func NewScheduler(scanner *Scanner, intervalHours int) *Scheduler {
 	return &Scheduler{
 		scanner:  scanner,
+		mode:     "filesystem",
 		interval: time.Duration(intervalHours) * time.Hour,
 		stopChan: make(chan struct{}),
 	}
 }
 
-// Start begins the scheduled scanning
+// NewSchedulerWithImporter creates a new scheduler with Radarr importer
+func NewSchedulerWithImporter(importer *RadarrImporter, intervalHours int) *Scheduler {
+	return &Scheduler{
+		importer: importer,
+		mode:     "radarr",
+		interval: time.Duration(intervalHours) * time.Hour,
+		stopChan: make(chan struct{}),
+	}
+}
+
+// GetMode returns the current scheduler mode
+func (s *Scheduler) GetMode() string {
+	return s.mode
+}
+
+// Start begins the scheduled scanning/importing
 func (s *Scheduler) Start() {
 	s.mu.Lock()
 	if s.running {
@@ -62,9 +80,9 @@ func (s *Scheduler) IsRunning() bool {
 }
 
 func (s *Scheduler) run() {
-	// Run initial scan after a short delay
+	// Run initial scan/import after a short delay
 	initialDelay := 30 * time.Second
-	log.Printf("Scheduler: First scan in %v", initialDelay)
+	log.Printf("Scheduler: First %s in %v", s.mode, initialDelay)
 
 	select {
 	case <-time.After(initialDelay):
@@ -88,38 +106,74 @@ func (s *Scheduler) run() {
 }
 
 func (s *Scheduler) runScan() {
-	log.Println("Scheduler: Run scheduled scan")
+	log.Printf("Scheduler: Run scheduled %s", s.mode)
 
-	_, err := s.scanner.Scan()
-	if err != nil {
-		log.Printf("Scheduler: Scan failed: %v", err)
+	var err error
+	if s.importer != nil {
+		_, err = s.importer.Import()
+	} else if s.scanner != nil {
+		_, err = s.scanner.Scan()
+	} else {
+		log.Println("Scheduler: No scanner or importer configured")
 		return
 	}
 
-	log.Printf("Scheduler: Scheduled scan completed")
+	if err != nil {
+		log.Printf("Scheduler: %s failed: %v", s.mode, err)
+		return
+	}
+
+	log.Printf("Scheduler: Scheduled %s completed", s.mode)
 }
 
-// TriggerScan manually triggers a scan (used by API)
+// TriggerScan manually triggers a scan or import (used by API)
 func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
-	return s.scanner.Scan()
+	if s.importer != nil {
+		return s.importer.Import()
+	}
+	if s.scanner != nil {
+		return s.scanner.Scan()
+	}
+	return nil, nil
 }
 
 // GetScanStatus returns current scan status
 func (s *Scheduler) GetScanStatus() (*models.ScanStatus, error) {
-	return s.scanner.GetStatus()
+	if s.importer != nil {
+		return s.importer.GetStatus()
+	}
+	if s.scanner != nil {
+		return s.scanner.GetStatus()
+	}
+	return &models.ScanStatus{Status: "disabled"}, nil
 }
 
-// StopCurrentScan stops any running scan
+// StopCurrentScan stops any running scan or import
 func (s *Scheduler) StopCurrentScan() {
-	s.scanner.Stop()
+	if s.importer != nil {
+		s.importer.Stop()
+	}
+	if s.scanner != nil {
+		s.scanner.Stop()
+	}
 }
 
-// TriggerMovieScan triggers a scan for a specific movie to update its metadata
+// TriggerMovieScan triggers a scan/refresh for a specific movie
 func (s *Scheduler) TriggerMovieScan(id int64) (*models.ScanResult, error) {
-	return s.scanner.ScanMovie(id)
+	if s.importer != nil {
+		return s.importer.ImportMovie(id)
+	}
+	if s.scanner != nil {
+		return s.scanner.ScanMovie(id)
+	}
+	return nil, nil
 }
 
 // TriggerSeriesScan triggers a scan for a specific series to update its metadata
 func (s *Scheduler) TriggerSeriesScan(id int64) (*models.ScanResult, error) {
-	return s.scanner.ScanSeries(id)
+	// Series scanning only supported via filesystem scanner (for now)
+	if s.scanner != nil {
+		return s.scanner.ScanSeries(id)
+	}
+	return nil, nil
 }
