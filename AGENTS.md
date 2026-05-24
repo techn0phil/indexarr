@@ -1,53 +1,204 @@
-# Indexarr (Mediarr) — Chat Customization Guide
+# Indexarr — AI Agent Guide
 
 **Indexarr** is a media library management application inspired by Sonarr and Radarr. It provides centralized catalog management for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
 
-**Status**: Pre-implementation. Architecture and UI/UX fully designed; codebase ready for development.
+**Status**: Production-ready (~90% complete). Core features implemented, polish and optimization ongoing.
 
-**Stack**: React (frontend) + Go (backend)
+**Stack**: React + TypeScript (frontend) + Go (backend) + SQLite (database) + Docker (deployment)
 
 ---
 
-## Quick Navigation
+## Quick Links
 
-- **Frontend** (React): [frontend/react/](#frontend--react-conventions)
-- **Backend** (Go): [backend/go/](#backend--go-conventions)
-- **Design System**: [Design System](#design-system) — Colors, CSS variables, badges, typography
-- **Design Specs**: [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html) — Complete HTML/CSS mockup with all styling
-- **Implementation Guide**: [ux-ui/prompt.md](ux-ui/prompt.md) — Detailed specifications for frontend implementation
+- **Main README**: [README.md](README.md) — Installation, features, project structure
+- **Implementation Plan**: [plan.md](plan.md) — Detailed phase-by-phase implementation status
+- **Docker Guide**: [DOCKER.md](DOCKER.md) — Container management, common commands
+- **Design System**: [Design System](#design-system) — Colors, CSS variables, badges
+- **UI Mockups**: [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html) — Complete design reference
+- **Backend Docs**: [backend/go/README.md](backend/go/README.md)
+- **Frontend Docs**: [frontend/react/README.md](frontend/react/README.md)
+- **Database Issues**: [/memories/repo/database-locking-analysis.md](/memories/repo/database-locking-analysis.md) — SQLite locking gotchas
+
+---
+
+## Quick Start for AI Agents
+
+### Development Commands
+
+```bash
+# Backend (from backend/go/)
+go run ./cmd/server              # Dev server on :8080
+
+# Frontend (from frontend/react/)
+npm run dev                      # Dev server on :5173 (proxies API to :8080)
+
+# Docker (from root)
+docker compose up -d             # Full stack on :8787
+
+# Tests
+go test ./...                    # Backend tests
+npm test                         # Frontend tests (when implemented)
+```
+
+### Environment Setup
+
+Copy `.env.example` and configure:
+- **Import Mode 1 (Radarr/Sonarr)**: Set `RADARR_URL` + `RADARR_API_KEY` and/or `SONARR_URL` + `SONARR_API_KEY`
+- **Import Mode 2 (Filesystem)**: Set `MOVIES_LIBRARY_PATHS` and/or `SERIES_LIBRARY_PATHS`
+- **Both modes can be mixed**: e.g., Radarr for movies + filesystem for series
+- **Required**: `TMDB_API_KEY` and `TVDB_API_KEY` for metadata enrichment
+
+### Database
+
+- **SQLite** with WAL mode enabled
+- Location: `backend/go/indexarr.db` (dev) or `/app/data/indexarr.db` (Docker)
+- Migrations: Auto-run on startup via `golang-migrate`
+- **Purge endpoint**: `POST /api/purge` (keeps schema, deletes all data)
+
+---
+
+## What's Implemented
+
+### Backend (Go) — ~95% Complete
+
+**✅ Core Services**:
+- **Dual Import Architecture**: Radarr/Sonarr API clients + filesystem scanner (mix and match)
+- **Media Catalog**: Movie/series CRUD with filtering, search, pagination
+- **File Scanner**: Periodic/manual scans with WebSocket progress broadcast
+- **Mediainfo Parser**: Extracts codec, resolution, HDR, bitrate, audio/subtitle tracks using mediainfo CLI
+- **TMDB/TVDB Clients**: Metadata enrichment with per-scan caching
+- **Statistics Service**: Library totals, disk usage, 4K percentage, problem counts
+- **Scheduler**: Configurable scan intervals (cron-like)
+
+**✅ API Endpoints**:
+```
+GET  /api/movies                        # List with filters (status, resolution, codec, audio, HDR, search)
+GET  /api/movies/:id                    # Movie details + cast + mediainfo
+POST /api/movies/:id/refresh            # Refresh single movie metadata
+GET  /api/series                        # List series with filters
+GET  /api/series/:id                    # Series details + seasons + episodes
+POST /api/series/:id/refresh            # Refresh single series metadata
+POST /api/scan                          # Trigger full scan (all media)
+POST /api/scan/movies                   # Trigger movies-only scan
+POST /api/scan/series                   # Trigger series-only scan
+GET  /api/scan/status                   # Current scan status
+POST /api/scan/stop                     # Stop running scan
+GET  /api/scan/ws                       # WebSocket for real-time scan progress
+GET  /api/stats                         # Library statistics
+GET  /api/config                        # Get configuration (import mode, library paths)
+POST /api/purge                         # Purge all data (keep schema)
+GET  /health                            # Health check endpoint
+```
+
+**✅ Database Schema**:
+- **movies**: Metadata, file info, external IDs, poster, status
+- **series**, **seasons**, **episodes**: Full TV series tracking
+- **video_tracks**, **audio_tracks**, **subtitle_tracks**: Technical metadata per file
+- **cast**: Actor names, roles, avatars
+- **scan_status**: Scan progress tracking
+- **Indexes**: Optimized for common queries
+
+### Frontend (React) — ~85% Complete
+
+**✅ Pages**:
+- **ListFilms**: Grid/list view, infinite scroll, multi-filter chips, stat cards, search
+- **ListSeries**: Grid/list view, infinite scroll, filters
+- **MovieDetail**: Hero section, cast grid, mediainfo tracks table, refresh button
+- **SeriesDetail**: Hero section, season tabs, episode list with technical details
+
+**✅ Components**:
+- **Sidebar**: Fixed 210px navigation with active state, badge counts
+- **Topbar**: Search bar, breadcrumb support (placeholder)
+- **MovieCard/SeriesCard**: Poster placeholders, status bar, technical badges
+- **StatCard**: Library statistics
+- **FilterChip/FilterModal**: Multi-select filters with "Clear" and "Apply" buttons
+- **ViewToggle**: Grid/list switcher with localStorage persistence
+- **ScanStatusCard**: Real-time scan progress via WebSocket
+- **ThemeToggle**: Light/dark mode
+
+**✅ Features**:
+- Infinite scroll pagination (custom `useInfiniteList` hook)
+- Multi-criteria filtering with comma-separated OR logic (e.g., `?resolution=3840,1920`)
+- Real-time WebSocket updates for scan progress
+- Dark mode with CSS variables throughout
+- Type-safe API client and interfaces
+
+**⚠️ Missing/Incomplete**:
+- Filter persistence — not saved in URL or localStorage (resets on page change)
+- Error boundaries — no React error boundaries
+- WebSocket auto-reconnect — requires manual page refresh
+- Accessibility — no ARIA labels, limited keyboard navigation
+
+### DevOps — ~90% Complete
+
+**✅ Docker**:
+- Multi-stage build: Node (frontend) + Go (backend) + Alpine runtime
+- Nginx reverse proxy: Frontend static files + backend API proxy on port 80
+- Health checks, volume mounts, environment variables, non-root user
+- CI/CD: GitHub Actions workflow builds multi-arch images → GitHub Container Registry
+
+**⚠️ Missing**:
+- Monitoring/metrics (no Prometheus, Grafana, etc.)
+- Structured logging (console logs only, no JSON structured logs)
 
 ---
 
 ## Architecture Overview
 
-### Frontend (React)
+### Import Mode Architecture
 
-**Purpose**: Single-page application for browsing and managing media library.
+**Unique Feature**: Flexible dual import mode — choose per media type.
 
-**Key Pages**:
-1. **List Films** — Grid/list view of movies with filters, stat cards, and search
-2. **List Series** — Grid/list view of TV series with filters and stats
-3. **Movie Detail** — Hero section, cast grid, mediainfo table (video/audio/subtitle tracks), sidebar with metadata and external IDs
-4. **Series Detail** — Hero section, season tabs, episode list with status and technical details
+**Mode 1: Radarr/Sonarr Integration**
+- Backend calls Radarr/Sonarr API to fetch existing library
+- Extracts mediainfo from files Radarr/Sonarr already knows about
+- Supports path mapping for Docker mounts (`RADARR_PATH_MAPPING`, `SONARR_PATH_MAPPING`)
+- Automatically removes stale items deleted from Radarr/Sonarr
 
-**Navigation**:
-- Fixed sidebar (210px width) with logo, main sections (Films, Séries, Récents, Statistiques, Problèmes), with active item highlight and item count badges
-- Top bar with back button (on detail pages), breadcrumb, and Material Design search pill (/ hotkey for focus)
-- Dynamic breadcrumbs on detail pages
+**Mode 2: Filesystem Scanner**
+- Backend walks directory trees looking for video files (mkv, mp4, avi, etc.)
+- Extracts mediainfo directly from discovered files
+- Enriches metadata via TMDB/TVDB APIs
+- No dependency on external services
 
-**Core Features**:
-- Multi-criteria filtering: Status, Resolution, Codec, Audio, HDR, Sort
-- Grid/list view toggle
-- Status badges on cards (green=ok, orange=warning, red=missing)
-- Technical badges: 4K, 1080p, Dolby Vision, HDR10+, Missing, Codec
-- Real-time stat cards (total count, disk space, 4K %, problems)
-- Search across all media
+**Mix and Match**:
+- Movies via Radarr + Series via filesystem scanner
+- Movies via filesystem + Series via Sonarr
+- Enable both modes simultaneously
 
-### Backend (Go)
+**Configuration**:
+```bash
+# Radarr integration
+RADARR_URL=http://radarr:7878
+RADARR_API_KEY=your_key
+RADARR_PATH_MAPPING=/downloads:/mnt/media  # Optional path translation
 
-**Purpose**: RESTful API and services for media management.
+# Sonarr integration
+SONARR_URL=http://sonarr:8989
+SONARR_API_KEY=your_key
+SONARR_PATH_MAPPING=/downloads:/mnt/media
 
-**Key Services**:
+# Filesystem scanning
+MOVIES_LIBRARY_PATHS=/data/movies,/data/movies2
+SERIES_LIBRARY_PATHS=/data/tv-shows
+
+# Metadata APIs (required)
+TMDB_API_KEY=your_key
+TVDB_API_KEY=your_key
+
+# Scheduling
+SCAN_INTERVAL=24  # Hours between scans (0=disabled)
+```
+
+### Data Flow
+
+1. **Scan Trigger** (manual via API or scheduled via cron)
+2. **Importer** (Radarr/Sonarr API call OR filesystem walk)
+3. **Mediainfo Extraction** (run mediainfo CLI, parse JSON output)
+4. **Metadata Enrichment** (TMDB/TVDB API calls with per-scan caching)
+5. **Database Write** (SQLite with transactions)
+6. **WebSocket Broadcast** (real-time progress to connected clients)
+7. **Frontend Update** (React components re-render with new data)
 1. **Media Catalog Service** — Movie/Series CRUD, metadata from TMDB/TVDB
 2. **File Scanner** — Discover media files and trigger metadata extraction
 3. **Mediainfo Parser** — Extract codec, resolution, HDR, bitrate, audio tracks from files
@@ -103,12 +254,13 @@ Series
 
 ### State Management
 
-**To be decided during implementation** — Consider these approaches:
-- **Redux**: For complex state shared across many components (filters, sidebar, search)
-- **Zustand**: Lighter alternative to Redux with simpler API
-- **Context API**: For simpler state needs (theme, user settings)
+**Current Implementation**: Context API via `useAppContext` hook
+- Manages navigation state (current page, back navigation)
+- Filter state is local to components (not persisted)
+- View preference stored in localStorage (films-view, series-view)
+- Theme managed via CSS variables and localStorage
 
-**Recommendation**: Start with Context API for theme/settings; use Zustand or Redux when filter/search state becomes complex.
+**Future Consideration**: If filter state becomes complex, consider migrating to Zustand or Redux for better state persistence and URL synchronization.
 
 ### Component Patterns
 
@@ -367,36 +519,41 @@ Use CSS custom properties for light/dark mode compatibility. Define in `:root`:
 ## Directory Structure & File Organization
 
 ```
-/home/philippe/sources/indexarr/
+indexarr/
 ├── LICENSE                                    # GPL v3
 ├── AGENTS.md                                  # This file
+├── README.md                                  # Installation & features
+├── plan.md                                    # Phase-by-phase implementation status
+├── DOCKER.md                                  # Docker management guide
+├── docker-compose.yml                         # Production Docker orchestration
+├── Dockerfile                                 # Multi-stage build (frontend + backend)
+├── nginx.conf                                 # Nginx reverse proxy config
 │
-├── backend/
-│   └── go/                                    # Go backend (empty, ready)
-│       ├── cmd/server/main.go                 # Entry point (to create)
-│       ├── internal/services/                 # Service layer
-│       ├── internal/models/                   # Data structures
-│       ├── internal/api/                      # HTTP handlers
-│       ├── go.mod                             # Module definition
-│       └── README.md                          # Backend docs
+├── backend/go/                                # Go backend
+│   ├── cmd/server/main.go                     # Entry point
+│   ├── internal/
+│   │   ├── api/                               # HTTP handlers, routes, WebSocket
+│   │   ├── config/                            # Environment configuration
+│   │   ├── models/                            # Data models (Movie, Series, Episode, etc.)
+│   │   ├── repository/                        # Database layer (SQLite)
+│   │   └── services/                          # Business logic (scanner, importer, TMDB/TVDB)
+│   ├── go.mod                                 # Module definition
+│   └── indexarr.db                            # SQLite database (dev)
 │
-├── frontend/
-│   └── react/                                 # React frontend (empty, ready)
-│       ├── src/
-│       │   ├── components/                    # Reusable components
-│       │   ├── pages/                         # Page components
-│       │   ├── api/                           # API client functions
-│       │   ├── utils/                         # Utilities
-│       │   ├── hooks/                         # Custom hooks
-│       │   ├── types/                         # TypeScript interfaces
-│       │   └── App.tsx                        # Root component
-│       ├── package.json                       # Dependencies
-│       └── README.md                          # Frontend docs
+├── frontend/react/                            # React frontend
+│   ├── src/
+│   │   ├── components/                        # UI components
+│   │   ├── pages/                             # Page components
+│   │   ├── api/client.ts                      # API client
+│   │   ├── hooks/                             # Custom hooks (useInfiniteList, useAppContext)
+│   │   ├── styles/                            # CSS modules + variables
+│   │   └── types/                             # TypeScript interfaces
+│   ├── package.json                           # Dependencies
+│   └── vite.config.ts                         # Vite configuration
 │
 └── ux-ui/
     ├── medialib_v4_detail_pages.html          # Complete HTML/CSS mockup
-    ├── prompt.md                              # Implementation specification
-    └── (*.png mockup images)
+    └── prompt.md                              # Implementation specification
 ```
 
 ---
@@ -490,19 +647,27 @@ npm run format
 
 ### Backend (Go)
 
-1. **Mediainfo Parsing**: Most complex logic. Video/audio/subtitle tracks are nested structures. Parse FFprobe or mediainfo CLI output carefully.
+1. **SQLite Locking**: See [/memories/repo/database-locking-analysis.md](/memories/repo/database-locking-analysis.md) for detailed analysis. Key points:
+   - WAL mode enabled with 5s busy timeout
+   - Connection pool limited to avoid contention
+   - Long transactions can cause "database is locked" errors
+   - Batch scan status updates instead of per-file updates
 
-2. **Filter Combinations**: Support multi-criteria filtering (e.g., "4K + Dolby Vision + H.265"). Use query parameters: `?resolution=4K&hdr=DV&codec=H.265`.
+2. **Path Mapping**: Radarr/Sonarr paths may differ from local filesystem (Docker mounts). Use `RADARR_PATH_MAPPING` and `SONARR_PATH_MAPPING` to translate paths (e.g., `/downloads:/mnt/media`).
 
-3. **Status Calculation**: Status (available, missing, problem) is derived from file existence check. Missing if file path doesn't exist.
+3. **Per-Scan Caching**: Scanner caches TVDB lookups per scan to avoid redundant API calls. Cache is cleared at start of each scan.
 
-4. **Pagination**: List endpoints should support pagination. Default page size = 50.
+4. **Memory Management**: Extractor calls `unix.Fadvise(FADV_DONTNEED)` after reading files to clear Linux page cache and avoid memory bloat during large scans.
 
-5. **External API Rate Limiting**: TMDB and TVDB have rate limits. Implement caching of metadata.
+5. **Nil Service Checks**: Importers can be `nil` if not configured (e.g., no Radarr URL). Always check `if movieImporter != nil` before calling methods.
 
-6. **Error Responses**: Return consistent error format: `{ "success": false, "error": "error message" }`.
+6. **Mediainfo Timeouts**: Mediainfo extraction has 30s timeout per file. Large files or network mounts may timeout.
 
-7. **File Path Security**: Validate file paths to prevent directory traversal attacks.
+7. **Status Calculation**: Status (available, missing, problem) derived from file existence. Check happens during scan, not on-demand.
+
+8. **Filter Combinations**: Backend supports comma-separated OR logic: `?resolution=3840,1920` means "3840 OR 1920".
+
+9. **WebSocket Broadcast**: All connected clients receive scan progress updates. No per-client tracking.
 
 ---
 
@@ -515,12 +680,33 @@ For detailed UI/UX specifications, design mockups, and full implementation guida
 
 ---
 
-## Related Chat Customizations
+## Known Issues & Future Work
 
-Future skills to create during implementation:
+### Frontend
+- [ ] Filter persistence (URL or localStorage)
+- [ ] Error boundaries for graceful failure handling
+- [ ] WebSocket auto-reconnect on disconnect
+- [ ] Accessibility (ARIA labels, keyboard navigation)
+- [ ] Loading skeleton screens
 
-- **`indexarr-backend-go`** (skill) — Deep dive into Go service architecture, API contracts, mediainfo parsing patterns, testing strategies
-- **`indexarr-frontend-react`** (skill) — React component patterns, state management decisions, filter UX implementation, styling with CSS modules
+### Backend
+- [ ] TMDB/TVDB rate limit handling with retry logic
+- [ ] Automatic cleanup of deleted files (filesystem scanner)
+- [ ] Structured logging (JSON format)
+- [ ] Unit and integration tests
+- [ ] API documentation (OpenAPI/Swagger)
+- [ ] Metrics/monitoring (Prometheus endpoints)
+
+### DevOps
+- [ ] Health check on actual database connectivity (not just stats endpoint)
+- [ ] Database backup/restore procedures
+- [ ] Migration rollback documentation
+
+## Related Resources
+
+- **Repository Memory**: [/memories/repo/](/memories/repo/) — Critical gotchas and lessons learned
+- **Implementation Plan**: [plan.md](plan.md) — Phase status and completion tracking
+- **Design Mockups**: [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html) — Complete UI reference
 
 ---
 
