@@ -193,6 +193,11 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 		if err := repository.UpdateScanStatus(s.db, status); err != nil {
 			log.Printf("Failed to update scan status: %v", err)
 		}
+
+		// Broadcast scan start to WebSocket clients
+		if s.broadcaster != nil {
+			s.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+		}
 	}
 
 	// Collect all media files
