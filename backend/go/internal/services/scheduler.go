@@ -164,6 +164,22 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	return result, nil
 }
 
+// TriggerMoviesScan triggers a scan for movies only
+func (s *Scheduler) TriggerMoviesScan() (*models.ScanResult, error) {
+	if s.movieImporter == nil {
+		return nil, nil
+	}
+	return s.movieImporter.Import()
+}
+
+// TriggerSeriesScan triggers a scan for series only
+func (s *Scheduler) TriggerSeriesScan() (*models.ScanResult, error) {
+	if s.seriesImporter == nil {
+		return nil, nil
+	}
+	return s.seriesImporter.Import()
+}
+
 // GetScanStatus returns current scan status (combines movie and series status)
 func (s *Scheduler) GetScanStatus() (*models.ScanStatus, error) {
 	// Check movie importer status first
@@ -205,16 +221,16 @@ func (s *Scheduler) StopCurrentScan() {
 	}
 }
 
-// TriggerMovieScan manually triggers a scan/refresh for a specific movie
-func (s *Scheduler) TriggerMovieScan(id int64) (*models.ScanResult, error) {
+// TriggerSingleMovieScan manually triggers a scan/refresh for a specific movie
+func (s *Scheduler) TriggerSingleMovieScan(id int64) (*models.ScanResult, error) {
 	if s.movieImporter != nil {
 		return s.movieImporter.ImportMovie(id)
 	}
 	return nil, nil
 }
 
-// TriggerSeriesScan triggers a scan for a specific series to update its metadata
-func (s *Scheduler) TriggerSeriesScan(id int64) (*models.ScanResult, error) {
+// TriggerSingleSeriesScan triggers a scan for a specific series to update its metadata
+func (s *Scheduler) TriggerSingleSeriesScan(id int64) (*models.ScanResult, error) {
 	if s.seriesImporter != nil {
 		return s.seriesImporter.ImportSeries(id)
 	}
