@@ -92,7 +92,7 @@ func main() {
 	}
 
 	// Initialize scheduler with both importers
-	scheduler := services.NewScheduler(movieImporter, seriesImporter, cfg.ScanInterval)
+	scheduler := services.NewScheduler(db, movieImporter, seriesImporter, broadcaster, cfg.ScanInterval)
 
 	if movieImporter != nil || seriesImporter != nil {
 		if cfg.ScanInterval > 0 {

@@ -15,16 +15,17 @@ import (
 
 // SonarrImporter handles importing series from Sonarr API
 type SonarrImporter struct {
-	db          *sql.DB
-	config      *config.Config
-	client      *SonarrClient
-	extractor   *Extractor
-	broadcaster *Broadcaster
-	pathFrom    string // Path mapping: from (Sonarr path prefix)
-	pathTo      string // Path mapping: to (local path prefix)
-	running     bool
-	stopChan    chan struct{}
-	mu          sync.Mutex
+	db           *sql.DB
+	config       *config.Config
+	client       *SonarrClient
+	extractor    *Extractor
+	broadcaster  *Broadcaster
+	pathFrom     string // Path mapping: from (Sonarr path prefix)
+	pathTo       string // Path mapping: to (local path prefix)
+	running      bool
+	stopChan     chan struct{}
+	mu           sync.Mutex
+	cachedSeries []SonarrSeries // Cached series from GetPendingFileCount(), consumed by Import()
 }
 
 // NewSonarrImporter creates a new Sonarr importer
@@ -69,8 +70,30 @@ func (si *SonarrImporter) Stop() {
 	si.mu.Unlock()
 }
 
+// GetPendingFileCount returns the total number of episode files, caching the API response
+func (si *SonarrImporter) GetPendingFileCount() (int, error) {
+	log.Println("Fetching episode count from Sonarr...")
+	sonarrSeriesList, err := si.client.GetSeries()
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch series from Sonarr: %w", err)
+	}
+
+	// Count total episodes with files and cache series list
+	si.mu.Lock()
+	si.cachedSeries = sonarrSeriesList
+	totalEpisodes := 0
+	for _, ss := range sonarrSeriesList {
+		totalEpisodes += ss.Statistics.EpisodeFileCount
+	}
+	si.mu.Unlock()
+
+	log.Printf("Found %d series with %d episode files in Sonarr", len(sonarrSeriesList), totalEpisodes)
+	return totalEpisodes, nil
+}
+
 // Import performs a full sync from Sonarr
-func (si *SonarrImporter) Import() (*models.ScanResult, error) {
+// If ctx is nil, uses default behavior. If ctx is provided, applies progress coordination.
+func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResult, error) {
 	si.mu.Lock()
 	if si.running {
 		si.mu.Unlock()
@@ -99,29 +122,49 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 		Errors: []string{},
 	}
 
-	// Update scan status to running
+	// Check if we should suppress start/complete broadcasts (coordinated by scheduler)
+	suppressBroadcasts := ctx != nil && ctx.SuppressStartComplete
+	progressOffset := 0
+	progressTotal := 0
+	if ctx != nil {
+		progressOffset = ctx.Offset
+		progressTotal = ctx.TotalOverride
+	}
+
+	// Update scan status to running (only if not suppressed)
 	status := &models.ScanStatus{
 		Status:     "running",
 		StartedAt:  time.Now().Format(time.RFC3339),
 		FilesFound: 0,
 	}
-	if err := repository.UpdateScanStatus(si.db, status); err != nil {
-		log.Printf("Failed to update scan status: %v", err)
+	if !suppressBroadcasts {
+		if err := repository.UpdateScanStatus(si.db, status); err != nil {
+			log.Printf("Failed to update scan status: %v", err)
+		}
 	}
 
-	// Broadcast scan start
-	if si.broadcaster != nil {
-		si.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
-	}
+	// Use cached series if available (from GetPendingFileCount), otherwise fetch
+	si.mu.Lock()
+	sonarrSeriesList := si.cachedSeries
+	si.cachedSeries = nil // Clear cache after use
+	si.mu.Unlock()
 
-	// Fetch all series from Sonarr
-	log.Println("Fetching series from Sonarr...")
-	sonarrSeriesList, err := si.client.GetSeries()
-	if err != nil {
-		status.Status = "failed"
-		status.ErrorMessage = err.Error()
-		repository.UpdateScanStatus(si.db, status)
-		return nil, fmt.Errorf("failed to fetch series from Sonarr: %w", err)
+	if sonarrSeriesList == nil {
+		// Fetch all series from Sonarr
+		log.Println("Fetching series from Sonarr...")
+		var err error
+		sonarrSeriesList, err = si.client.GetSeries()
+		if err != nil {
+			if !suppressBroadcasts {
+				status.Status = "failed"
+				status.ErrorMessage = err.Error()
+				repository.UpdateScanStatus(si.db, status)
+			}
+			return nil, fmt.Errorf("failed to fetch series from Sonarr: %w", err)
+		}
+		log.Printf("Found %d series in Sonarr", len(sonarrSeriesList))
+	} else {
+		log.Printf("Using cached series: %d series", len(sonarrSeriesList))
 	}
 
 	// Count total episodes with files for progress tracking
@@ -135,11 +178,12 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 
 	// Update status with count
 	status.FilesFound = totalEpisodesWithFiles
-	repository.UpdateScanStatus(si.db, status)
-
-	// Update progress with effective file count
-	if si.broadcaster != nil {
-		si.broadcaster.BroadcastScanStart(totalEpisodesWithFiles, status.StartedAt)
+	if !suppressBroadcasts {
+		repository.UpdateScanStatus(si.db, status)
+		// Broadcast scan start
+		if si.broadcaster != nil {
+			si.broadcaster.BroadcastScanStart(totalEpisodesWithFiles, status.StartedAt)
+		}
 	}
 
 	// Track Sonarr IDs we've seen (for deletion detection)
@@ -150,12 +194,14 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 		// Check for stop signal
 		select {
 		case <-si.stopChan:
-			status.Status = "stopped"
-			status.CompletedAt = time.Now().Format(time.RFC3339)
-			status.ErrorMessage = "Import stopped by user"
-			repository.UpdateScanStatus(si.db, status)
-			if si.broadcaster != nil {
-				si.broadcaster.BroadcastScanStopped()
+			if !suppressBroadcasts {
+				status.Status = "stopped"
+				status.CompletedAt = time.Now().Format(time.RFC3339)
+				status.ErrorMessage = "Import stopped by user"
+				repository.UpdateScanStatus(si.db, status)
+				if si.broadcaster != nil {
+					si.broadcaster.BroadcastScanStopped()
+				}
 			}
 			return result, fmt.Errorf("import stopped by user")
 		default:
@@ -170,10 +216,18 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 
 		// Broadcast progress periodically
 		if si.broadcaster != nil {
-			si.broadcaster.BroadcastScanProgress(result.FilesProcessed, result.FilesFound)
+			// Apply progress offset and total override if coordinated
+			reportProcessed := result.FilesProcessed + progressOffset
+			reportTotal := result.FilesFound
+			if progressTotal > 0 {
+				reportTotal = progressTotal
+			}
+			si.broadcaster.BroadcastScanProgress(reportProcessed, reportTotal)
 		}
-		status.FilesProcessed = result.FilesProcessed
-		repository.UpdateScanStatus(si.db, status)
+		if !suppressBroadcasts {
+			status.FilesProcessed = result.FilesProcessed
+			repository.UpdateScanStatus(si.db, status)
+		}
 	}
 
 	// Full sync: Remove series that are no longer in Sonarr
@@ -185,18 +239,20 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 		log.Printf("Removed %d series no longer in Sonarr", deletedCount)
 	}
 
-	// Update status to completed
-	status.Status = "completed"
-	status.CompletedAt = time.Now().Format(time.RFC3339)
-	status.FilesProcessed = result.FilesProcessed
-	if len(result.Errors) > 0 {
-		status.ErrorMessage = fmt.Sprintf("%d errors during import", len(result.Errors))
-	}
-	repository.UpdateScanStatus(si.db, status)
+	// Update status to completed (only if not suppressed)
+	if !suppressBroadcasts {
+		status.Status = "completed"
+		status.CompletedAt = time.Now().Format(time.RFC3339)
+		status.FilesProcessed = result.FilesProcessed
+		if len(result.Errors) > 0 {
+			status.ErrorMessage = fmt.Sprintf("%d errors during import", len(result.Errors))
+		}
+		repository.UpdateScanStatus(si.db, status)
 
-	// Broadcast completion
-	if si.broadcaster != nil {
-		si.broadcaster.BroadcastScanComplete(result.FilesProcessed, 0, result.EpisodesAdded)
+		// Broadcast completion
+		if si.broadcaster != nil {
+			si.broadcaster.BroadcastScanComplete(result.FilesProcessed, 0, result.EpisodesAdded)
+		}
 	}
 
 	duration := time.Since(start)

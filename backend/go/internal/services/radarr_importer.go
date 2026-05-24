@@ -15,16 +15,17 @@ import (
 
 // RadarrImporter handles importing movies from Radarr API
 type RadarrImporter struct {
-	db          *sql.DB
-	config      *config.Config
-	client      *RadarrClient
-	extractor   *Extractor
-	broadcaster *Broadcaster
-	pathFrom    string // Path mapping: from (Radarr path prefix)
-	pathTo      string // Path mapping: to (local path prefix)
-	running     bool
-	stopChan    chan struct{}
-	mu          sync.Mutex
+	db           *sql.DB
+	config       *config.Config
+	client       *RadarrClient
+	extractor    *Extractor
+	broadcaster  *Broadcaster
+	pathFrom     string // Path mapping: from (Radarr path prefix)
+	pathTo       string // Path mapping: to (local path prefix)
+	running      bool
+	stopChan     chan struct{}
+	mu           sync.Mutex
+	cachedMovies []RadarrMovie // Cached movies from GetPendingFileCount(), consumed by Import()
 }
 
 // NewRadarrImporter creates a new Radarr importer
@@ -69,8 +70,32 @@ func (ri *RadarrImporter) Stop() {
 	ri.mu.Unlock()
 }
 
+// GetPendingFileCount returns the number of movies with files, caching the API response
+func (ri *RadarrImporter) GetPendingFileCount() (int, error) {
+	log.Println("Fetching movie count from Radarr...")
+	radarrMovies, err := ri.client.GetMovies()
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch movies from Radarr: %w", err)
+	}
+
+	// Filter to only movies with files and cache
+	ri.mu.Lock()
+	ri.cachedMovies = nil
+	for _, m := range radarrMovies {
+		if m.HasFile && m.MovieFile != nil {
+			ri.cachedMovies = append(ri.cachedMovies, m)
+		}
+	}
+	count := len(ri.cachedMovies)
+	ri.mu.Unlock()
+
+	log.Printf("Found %d movies with files in Radarr (out of %d total)", count, len(radarrMovies))
+	return count, nil
+}
+
 // Import performs a full sync from Radarr
-func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
+// If ctx is nil, uses default behavior. If ctx is provided, applies progress coordination.
+func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResult, error) {
 	ri.mu.Lock()
 	if ri.running {
 		ri.mu.Unlock()
@@ -99,49 +124,67 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		Errors: []string{},
 	}
 
-	// Update scan status to running
+	// Check if we should suppress start/complete broadcasts (coordinated by scheduler)
+	suppressBroadcasts := ctx != nil && ctx.SuppressStartComplete
+	progressOffset := 0
+	progressTotal := 0
+	if ctx != nil {
+		progressOffset = ctx.Offset
+		progressTotal = ctx.TotalOverride
+	}
+
+	// Update scan status to running (only if not suppressed)
 	status := &models.ScanStatus{
 		Status:     "running",
 		StartedAt:  time.Now().Format(time.RFC3339),
 		FilesFound: 0,
 	}
-	if err := repository.UpdateScanStatus(ri.db, status); err != nil {
-		log.Printf("Failed to update scan status: %v", err)
-	}
-
-	// Broadcast scan start
-	if ri.broadcaster != nil {
-		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
-	}
-
-	// Fetch all movies from Radarr
-	log.Println("Fetching movies from Radarr...")
-	radarrMovies, err := ri.client.GetMovies()
-	if err != nil {
-		status.Status = "failed"
-		status.ErrorMessage = err.Error()
-		repository.UpdateScanStatus(ri.db, status)
-		return nil, fmt.Errorf("failed to fetch movies from Radarr: %w", err)
-	}
-
-	// Filter to only movies with files
-	var moviesWithFiles []RadarrMovie
-	for _, m := range radarrMovies {
-		if m.HasFile && m.MovieFile != nil {
-			moviesWithFiles = append(moviesWithFiles, m)
+	if !suppressBroadcasts {
+		if err := repository.UpdateScanStatus(ri.db, status); err != nil {
+			log.Printf("Failed to update scan status: %v", err)
 		}
 	}
 
+	// Use cached movies if available (from GetPendingFileCount), otherwise fetch
+	ri.mu.Lock()
+	moviesWithFiles := ri.cachedMovies
+	ri.cachedMovies = nil // Clear cache after use
+	ri.mu.Unlock()
+
+	if moviesWithFiles == nil {
+		// Fetch all movies from Radarr
+		log.Println("Fetching movies from Radarr...")
+		radarrMovies, err := ri.client.GetMovies()
+		if err != nil {
+			if !suppressBroadcasts {
+				status.Status = "failed"
+				status.ErrorMessage = err.Error()
+				repository.UpdateScanStatus(ri.db, status)
+			}
+			return nil, fmt.Errorf("failed to fetch movies from Radarr: %w", err)
+		}
+
+		// Filter to only movies with files
+		for _, m := range radarrMovies {
+			if m.HasFile && m.MovieFile != nil {
+				moviesWithFiles = append(moviesWithFiles, m)
+			}
+		}
+		log.Printf("Found %d movies with files in Radarr (out of %d total)", len(moviesWithFiles), len(radarrMovies))
+	} else {
+		log.Printf("Using cached movies: %d movies with files", len(moviesWithFiles))
+	}
+
 	result.FilesFound = len(moviesWithFiles)
-	log.Printf("Found %d movies with files in Radarr (out of %d total)", result.FilesFound, len(radarrMovies))
 
 	// Update status with count
 	status.FilesFound = result.FilesFound
-	repository.UpdateScanStatus(ri.db, status)
-
-	// Update progress with effective file count
-	if ri.broadcaster != nil {
-		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+	if !suppressBroadcasts {
+		repository.UpdateScanStatus(ri.db, status)
+		// Broadcast scan start
+		if ri.broadcaster != nil {
+			ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+		}
 	}
 
 	// Track TMDB IDs we've seen (for deletion detection)
@@ -152,12 +195,14 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		// Check for stop signal
 		select {
 		case <-ri.stopChan:
-			status.Status = "stopped"
-			status.CompletedAt = time.Now().Format(time.RFC3339)
-			status.ErrorMessage = "Import stopped by user"
-			repository.UpdateScanStatus(ri.db, status)
-			if ri.broadcaster != nil {
-				ri.broadcaster.BroadcastScanStopped()
+			if !suppressBroadcasts {
+				status.Status = "stopped"
+				status.CompletedAt = time.Now().Format(time.RFC3339)
+				status.ErrorMessage = "Import stopped by user"
+				repository.UpdateScanStatus(ri.db, status)
+				if ri.broadcaster != nil {
+					ri.broadcaster.BroadcastScanStopped()
+				}
 			}
 			return result, fmt.Errorf("import stopped by user")
 		default:
@@ -175,9 +220,17 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		// Update progress periodically
 		if i%10 == 0 || i == len(moviesWithFiles)-1 {
 			status.FilesProcessed = result.FilesProcessed
-			repository.UpdateScanStatus(ri.db, status)
+			if !suppressBroadcasts {
+				repository.UpdateScanStatus(ri.db, status)
+			}
 			if ri.broadcaster != nil {
-				ri.broadcaster.BroadcastScanProgress(result.FilesProcessed, result.FilesFound)
+				// Apply progress offset and total override if coordinated
+				reportProcessed := result.FilesProcessed + progressOffset
+				reportTotal := result.FilesFound
+				if progressTotal > 0 {
+					reportTotal = progressTotal
+				}
+				ri.broadcaster.BroadcastScanProgress(reportProcessed, reportTotal)
 			}
 		}
 	}
@@ -191,18 +244,20 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		log.Printf("Removed %d movies no longer in Radarr", deletedCount)
 	}
 
-	// Update status to completed
-	status.Status = "completed"
-	status.CompletedAt = time.Now().Format(time.RFC3339)
-	status.FilesProcessed = result.FilesProcessed
-	if len(result.Errors) > 0 {
-		status.ErrorMessage = fmt.Sprintf("%d errors during import", len(result.Errors))
-	}
-	repository.UpdateScanStatus(ri.db, status)
+	// Update status to completed (only if not suppressed)
+	if !suppressBroadcasts {
+		status.Status = "completed"
+		status.CompletedAt = time.Now().Format(time.RFC3339)
+		status.FilesProcessed = result.FilesProcessed
+		if len(result.Errors) > 0 {
+			status.ErrorMessage = fmt.Sprintf("%d errors during import", len(result.Errors))
+		}
+		repository.UpdateScanStatus(ri.db, status)
 
-	// Broadcast completion
-	if ri.broadcaster != nil {
-		ri.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, 0)
+		// Broadcast completion
+		if ri.broadcaster != nil {
+			ri.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, 0)
+		}
 	}
 
 	duration := time.Since(start)
