@@ -226,3 +226,66 @@ touch "Alice in Wonderland (2010)/Alice Au Pays Des Merveilles 1080p HDLight-KiR
 
 mkdir "Alice Through the Looking Glass (2016)"
 touch "Alice Through the Looking Glass (2016)/Alice Through The Looking Glass 1080p HDlight.mkv"
+
+
+# Color Out of Space (2019) -> 2020
+# Coma (2019) -> 2020
+# Cube (1997) -> 1998
+# Diary of the Dead (2008) -> 2007
+# Hostel (2005) -> 2006
+# I Kill Giants (2018) -> 2017
+# Insidious (2010) -> 2011
+# Kingsman The Secret Services (2014) -> 2015
+# Last Survivors (2022) -> 2021
+# Resident Evil Afterlife (2010) -> No change
+# Revenge (2018) -> 2017
+# Sisu (2023) -> 2022
+# Snow White and the Seven Dwarfs (1937) -> 1938
+# Split (2016) -> 2017
+# The Gentlemen (2019) -> 2020
+# The Raid (2011) -> 2012
+# Dumped (2018) -> Larguées (2018)
+# The Revenge (2016) -> I Am Wrath (2016)
+# Mortal (2020) -> Not fixed
+# X2 (2003) -> Not fixed
+
+mkdir "Revenge (2018)"
+touch "Revenge (2018)/Revenge (2018).avi"
+mkdir "Color Out of Space (2019)"
+touch "Color Out of Space (2019)/La Couleur tombée du ciel (2020).mkv"
+mkdir "Coma (2019)"
+touch "Coma (2019)/COMⱯ Esprits prisonniers (2019).mkv"
+mkdir "Cube (1997)"
+touch "Cube (1997)/Cube (1997).mkv"
+mkdir "Diary of the Dead (2008)"
+touch "Diary of the Dead (2008)/Diary of the Dead Chroniques des morts-vivants (2008).avi"
+mkdir "Hostel (2005)"
+touch "Hostel (2005)/Hostel (2006).avi"
+mkdir "The Gentlemen (2019)"
+touch "The Gentlemen (2019)/The Gentlemen (2020).mkv"
+mkdir "I Kill Giants (2018)"
+touch "I Kill Giants (2018)/Chasseuse de géants (2018).avi"
+mkdir "Insidious (2010)"
+touch "Insidious (2010)/Insidious (2010).avi"
+mkdir "Kingsman The Secret Service (2014)"
+touch "Kingsman The Secret Service (2014)/Kingsman The Secret Service - 1080p.MULTI.mkv"
+mkdir "Dumped (2018)"
+touch "Dumped (2018)/Larguées (2018).avi"
+mkdir "Last Survivors (2022)"
+touch "Last Survivors (2022)/Last.Survivors.2022.MULTi.1080p.WEB-DL.H264-Slay3R.mkv"
+mkdir "Mortal (2020)"
+touch "Mortal (2020)/Mortal (2020).mkv"
+mkdir "The Revenge (2016)"
+touch "The Revenge (2016)/The Revenge (2016).avi"
+mkdir "Sisu (2023)"
+touch "Sisu (2023)/Sisu (2022) MULTi VFI 2160p 10bit 4KLight DV HDR BluRay DDP 5.1 Atmos x265-QTZ.mkv"
+mkdir "Snow White and the Seven Dwarfs (1937)"
+touch "Snow White and the Seven Dwarfs (1937)/Blanche‐Neige et les Sept Nains (1937).avi"
+mkdir "Split (2016)"
+touch "Split (2016)/Split (2016).mkv"
+mkdir "The Raid (2011)"
+touch "The Raid (2011)/The Raid (2011).avi"
+mkdir "Resident Evil Afterlife (2010)"
+touch "Resident Evil Afterlife (2010)/Resident Evil Afterlife (2010).avi"
+mkdir "X2 (2003)"
+touch "X2 (2003)/X-Men 2 1080p.mkv"
