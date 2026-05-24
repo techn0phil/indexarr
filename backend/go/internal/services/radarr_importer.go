@@ -20,6 +20,8 @@ type RadarrImporter struct {
 	client      *RadarrClient
 	extractor   *Extractor
 	broadcaster *Broadcaster
+	pathFrom    string // Path mapping: from (Radarr path prefix)
+	pathTo      string // Path mapping: to (local path prefix)
 	running     bool
 	stopChan    chan struct{}
 	mu          sync.Mutex
@@ -27,14 +29,28 @@ type RadarrImporter struct {
 
 // NewRadarrImporter creates a new Radarr importer
 func NewRadarrImporter(db *sql.DB, cfg *config.Config, client *RadarrClient, broadcaster *Broadcaster) *RadarrImporter {
+	pathFrom, pathTo := config.ParsePathMapping(cfg.RadarrPathMapping)
 	return &RadarrImporter{
 		db:          db,
 		config:      cfg,
 		client:      client,
 		extractor:   NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
 		broadcaster: broadcaster,
+		pathFrom:    pathFrom,
+		pathTo:      pathTo,
 		stopChan:    make(chan struct{}),
 	}
+}
+
+// mapPath applies path mapping to convert Radarr paths to local paths
+func (ri *RadarrImporter) mapPath(radarrPath string) string {
+	if ri.pathFrom == "" || ri.pathTo == "" {
+		return radarrPath
+	}
+	if strings.HasPrefix(radarrPath, ri.pathFrom) {
+		return ri.pathTo + radarrPath[len(ri.pathFrom):]
+	}
+	return radarrPath
 }
 
 // IsRunning returns whether an import is currently in progress
@@ -93,6 +109,11 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		log.Printf("Failed to update scan status: %v", err)
 	}
 
+	// Broadcast scan start
+	if ri.broadcaster != nil {
+		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+	}
+
 	// Fetch all movies from Radarr
 	log.Println("Fetching movies from Radarr...")
 	radarrMovies, err := ri.client.GetMovies()
@@ -118,7 +139,7 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 	status.FilesFound = result.FilesFound
 	repository.UpdateScanStatus(ri.db, status)
 
-	// Broadcast scan start
+	// Update progress with effective file count
 	if ri.broadcaster != nil {
 		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
 	}
@@ -198,7 +219,8 @@ func (ri *RadarrImporter) processRadarrMovie(rm *RadarrMovie, result *models.Sca
 
 	// Extract mediainfo from the actual file
 	if rm.MovieFile != nil && rm.MovieFile.Path != "" {
-		mediaInfo, fileSize, duration, err := ri.extractor.Extract(rm.MovieFile.Path)
+		localPath := ri.mapPath(rm.MovieFile.Path)
+		mediaInfo, fileSize, duration, err := ri.extractor.Extract(localPath)
 		if err != nil {
 			log.Printf("Mediainfo extraction failed for %s: %v", rm.Title, err)
 			// Continue with Radarr's file size
@@ -210,6 +232,7 @@ func (ri *RadarrImporter) processRadarrMovie(rm *RadarrMovie, result *models.Sca
 				movie.Duration = duration / 60 // Convert seconds to minutes
 			}
 		}
+		movie.FilePath = localPath
 	}
 
 	// Check if movie already exists by TMDB ID

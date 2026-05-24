@@ -53,6 +53,8 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 		// Scan (only if scheduler is provided)
 		if scheduler != nil {
 			r.Post("/scan", TriggerScan(scheduler))
+			r.Post("/scan/movies", TriggerMoviesScan(scheduler))
+			r.Post("/scan/series", TriggerSeriesScan(scheduler))
 			r.Get("/scan/status", GetScanStatus(scheduler))
 			r.Post("/scan/stop", StopScan(scheduler))
 

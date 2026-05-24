@@ -8,40 +8,39 @@ import (
 	"indexarr/internal/models"
 )
 
-// Scheduler handles periodic background scanning or importing
+// Scheduler handles periodic background scanning or importing for both movies and series
 type Scheduler struct {
-	scanner  *Scanner        // Filesystem scanner (optional)
-	importer *RadarrImporter // Radarr importer (optional)
-	mode     string          // "radarr", "filesystem", or "disabled"
-	interval time.Duration
-	stopChan chan struct{}
-	running  bool
-	mu       sync.Mutex
+	movieImporter  MovieImporter  // Radarr OR FilesystemMovieScanner (optional)
+	seriesImporter SeriesImporter // Sonarr OR FilesystemSeriesScanner (optional)
+	interval       time.Duration
+	stopChan       chan struct{}
+	running        bool
+	mu             sync.Mutex
 }
 
-// NewScheduler creates a new scheduler with filesystem scanner
-func NewScheduler(scanner *Scanner, intervalHours int) *Scheduler {
+// NewScheduler creates a new scheduler with the given importers
+// Either or both importers can be nil if that media type is disabled
+func NewScheduler(movieImporter MovieImporter, seriesImporter SeriesImporter, intervalHours int) *Scheduler {
 	return &Scheduler{
-		scanner:  scanner,
-		mode:     "filesystem",
-		interval: time.Duration(intervalHours) * time.Hour,
-		stopChan: make(chan struct{}),
+		movieImporter:  movieImporter,
+		seriesImporter: seriesImporter,
+		interval:       time.Duration(intervalHours) * time.Hour,
+		stopChan:       make(chan struct{}),
 	}
 }
 
-// NewSchedulerWithImporter creates a new scheduler with Radarr importer
-func NewSchedulerWithImporter(importer *RadarrImporter, intervalHours int) *Scheduler {
-	return &Scheduler{
-		importer: importer,
-		mode:     "radarr",
-		interval: time.Duration(intervalHours) * time.Hour,
-		stopChan: make(chan struct{}),
-	}
-}
-
-// GetMode returns the current scheduler mode
+// GetMode returns a description of the current scheduler mode (for backward compatibility)
 func (s *Scheduler) GetMode() string {
-	return s.mode
+	if s.movieImporter != nil && s.seriesImporter != nil {
+		return "dual"
+	}
+	if s.movieImporter != nil {
+		return "movies"
+	}
+	if s.seriesImporter != nil {
+		return "series"
+	}
+	return "disabled"
 }
 
 // Start begins the scheduled scanning/importing
@@ -82,11 +81,11 @@ func (s *Scheduler) IsRunning() bool {
 func (s *Scheduler) run() {
 	// Run initial scan/import after a short delay
 	initialDelay := 30 * time.Second
-	log.Printf("Scheduler: First %s in %v", s.mode, initialDelay)
+	log.Printf("Scheduler: First import in %v (mode: %s)", initialDelay, s.GetMode())
 
 	select {
 	case <-time.After(initialDelay):
-		s.runScan()
+		s.runImport()
 	case <-s.stopChan:
 		return
 	}
@@ -98,82 +97,142 @@ func (s *Scheduler) run() {
 	for {
 		select {
 		case <-ticker.C:
-			s.runScan()
+			s.runImport()
 		case <-s.stopChan:
 			return
 		}
 	}
 }
 
-func (s *Scheduler) runScan() {
-	log.Printf("Scheduler: Run scheduled %s", s.mode)
+func (s *Scheduler) runImport() {
+	log.Println("Scheduler: Running scheduled import")
 
-	var err error
-	if s.importer != nil {
-		_, err = s.importer.Import()
-	} else if s.scanner != nil {
-		_, err = s.scanner.Scan()
-	} else {
-		log.Println("Scheduler: No scanner or importer configured")
-		return
+	// Import movies first, then series (sequential to avoid CPU overload)
+	if s.movieImporter != nil {
+		log.Println("Scheduler: Starting movie import...")
+		if _, err := s.movieImporter.Import(); err != nil {
+			log.Printf("Scheduler: Movie import failed: %v", err)
+		} else {
+			log.Println("Scheduler: Movie import completed")
+		}
 	}
 
-	if err != nil {
-		log.Printf("Scheduler: %s failed: %v", s.mode, err)
-		return
+	if s.seriesImporter != nil {
+		log.Println("Scheduler: Starting series import...")
+		if _, err := s.seriesImporter.Import(); err != nil {
+			log.Printf("Scheduler: Series import failed: %v", err)
+		} else {
+			log.Println("Scheduler: Series import completed")
+		}
 	}
 
-	log.Printf("Scheduler: Scheduled %s completed", s.mode)
+	log.Println("Scheduler: Scheduled import completed")
 }
 
-// TriggerScan manually triggers a scan or import (used by API)
+// TriggerScan manually triggers an import for both movies and series (used by API)
 func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
-	if s.importer != nil {
-		return s.importer.Import()
+	result := &models.ScanResult{
+		Errors: []string{},
 	}
-	if s.scanner != nil {
-		return s.scanner.Scan()
+
+	// Import movies
+	if s.movieImporter != nil {
+		movieResult, err := s.movieImporter.Import()
+		if err != nil {
+			result.Errors = append(result.Errors, "Movie import: "+err.Error())
+		} else if movieResult != nil {
+			result.FilesFound += movieResult.FilesFound
+			result.FilesProcessed += movieResult.FilesProcessed
+			result.MoviesAdded += movieResult.MoviesAdded
+			result.Errors = append(result.Errors, movieResult.Errors...)
+		}
 	}
-	return nil, nil
+
+	// Import series
+	if s.seriesImporter != nil {
+		seriesResult, err := s.seriesImporter.Import()
+		if err != nil {
+			result.Errors = append(result.Errors, "Series import: "+err.Error())
+		} else if seriesResult != nil {
+			result.FilesFound += seriesResult.FilesFound
+			result.FilesProcessed += seriesResult.FilesProcessed
+			result.EpisodesAdded += seriesResult.EpisodesAdded
+			result.Errors = append(result.Errors, seriesResult.Errors...)
+		}
+	}
+
+	return result, nil
 }
 
-// GetScanStatus returns current scan status
+// TriggerMoviesScan triggers a scan for movies only
+func (s *Scheduler) TriggerMoviesScan() (*models.ScanResult, error) {
+	if s.movieImporter == nil {
+		return nil, nil
+	}
+	return s.movieImporter.Import()
+}
+
+// TriggerSeriesScan triggers a scan for series only
+func (s *Scheduler) TriggerSeriesScan() (*models.ScanResult, error) {
+	if s.seriesImporter == nil {
+		return nil, nil
+	}
+	return s.seriesImporter.Import()
+}
+
+// GetScanStatus returns current scan status (combines movie and series status)
 func (s *Scheduler) GetScanStatus() (*models.ScanStatus, error) {
-	if s.importer != nil {
-		return s.importer.GetStatus()
+	// Check movie importer status first
+	if s.movieImporter != nil {
+		status, err := s.movieImporter.GetStatus()
+		if err != nil {
+			return nil, err
+		}
+		// If movie import is running, return that status
+		if status.Status == "running" {
+			return status, nil
+		}
 	}
-	if s.scanner != nil {
-		return s.scanner.GetStatus()
+
+	// Check series importer status
+	if s.seriesImporter != nil {
+		status, err := s.seriesImporter.GetStatus()
+		if err != nil {
+			return nil, err
+		}
+		return status, nil
 	}
+
+	// No importers configured
+	if s.movieImporter != nil {
+		return s.movieImporter.GetStatus()
+	}
+
 	return &models.ScanStatus{Status: "disabled"}, nil
 }
 
 // StopCurrentScan stops any running scan or import
 func (s *Scheduler) StopCurrentScan() {
-	if s.importer != nil {
-		s.importer.Stop()
+	if s.movieImporter != nil {
+		s.movieImporter.Stop()
 	}
-	if s.scanner != nil {
-		s.scanner.Stop()
+	if s.seriesImporter != nil {
+		s.seriesImporter.Stop()
 	}
 }
 
-// TriggerMovieScan triggers a scan/refresh for a specific movie
-func (s *Scheduler) TriggerMovieScan(id int64) (*models.ScanResult, error) {
-	if s.importer != nil {
-		return s.importer.ImportMovie(id)
-	}
-	if s.scanner != nil {
-		return s.scanner.ScanMovie(id)
+// TriggerSingleMovieScan manually triggers a scan/refresh for a specific movie
+func (s *Scheduler) TriggerSingleMovieScan(id int64) (*models.ScanResult, error) {
+	if s.movieImporter != nil {
+		return s.movieImporter.ImportMovie(id)
 	}
 	return nil, nil
 }
 
-// TriggerSeriesScan triggers a scan for a specific series to update its metadata
-func (s *Scheduler) TriggerSeriesScan(id int64) (*models.ScanResult, error) {
-	// Series scanning only supported via filesystem scanner (for now)
-	if s.scanner != nil {
-		return s.scanner.ScanSeries(id)
+// TriggerSingleSeriesScan triggers a scan for a specific series to update its metadata
+func (s *Scheduler) TriggerSingleSeriesScan(id int64) (*models.ScanResult, error) {
+	if s.seriesImporter != nil {
+		return s.seriesImporter.ImportSeries(id)
 	}
 	return nil, nil
 }
