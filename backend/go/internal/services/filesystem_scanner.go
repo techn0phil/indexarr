@@ -21,15 +21,21 @@ func NewFilesystemMovieScanner(db *sql.DB, cfg *config.Config, broadcaster *Broa
 }
 
 // Import performs a full scan for movies
-func (fms *FilesystemMovieScanner) Import() (*models.ScanResult, error) {
+// If ctx is nil, uses default behavior. If ctx is provided, applies progress coordination.
+func (fms *FilesystemMovieScanner) Import(ctx *models.ProgressContext) (*models.ScanResult, error) {
 	// The scanner will scan all media files; we filter to movies
 	// For now, use the same scan method - it handles both
-	return fms.scanner.ScanPaths(fms.scanner.config.GetMovieLibraryPaths())
+	return fms.scanner.ScanPaths(fms.scanner.config.GetMovieLibraryPaths(), ctx)
 }
 
 // ImportMovie scans/refreshes a single movie by its database ID
 func (fms *FilesystemMovieScanner) ImportMovie(id int64) (*models.ScanResult, error) {
 	return fms.scanner.ScanMovie(id)
+}
+
+// GetPendingFileCount returns the number of video files in movie library paths
+func (fms *FilesystemMovieScanner) GetPendingFileCount() (int, error) {
+	return fms.scanner.CountMediaFiles(fms.scanner.config.GetMovieLibraryPaths())
 }
 
 // GetStatus returns the current scan status
@@ -61,15 +67,21 @@ func NewFilesystemSeriesScanner(db *sql.DB, cfg *config.Config, broadcaster *Bro
 }
 
 // Import performs a full scan for series
-func (fss *FilesystemSeriesScanner) Import() (*models.ScanResult, error) {
+// If ctx is nil, uses default behavior. If ctx is provided, applies progress coordination.
+func (fss *FilesystemSeriesScanner) Import(ctx *models.ProgressContext) (*models.ScanResult, error) {
 	// The scanner will scan all media files; we filter to series
 	// For now, use the same scan method - it handles both
-	return fss.scanner.ScanPaths(fss.scanner.config.GetSeriesLibraryPaths())
+	return fss.scanner.ScanPaths(fss.scanner.config.GetSeriesLibraryPaths(), ctx)
 }
 
 // ImportSeries scans/refreshes a single series by its database ID
 func (fss *FilesystemSeriesScanner) ImportSeries(id int64) (*models.ScanResult, error) {
 	return fss.scanner.ScanSeries(id)
+}
+
+// GetPendingFileCount returns the number of video files in series library paths
+func (fss *FilesystemSeriesScanner) GetPendingFileCount() (int, error) {
+	return fss.scanner.CountMediaFiles(fss.scanner.config.GetSeriesLibraryPaths())
 }
 
 // GetStatus returns the current scan status
