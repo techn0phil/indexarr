@@ -109,6 +109,11 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 		log.Printf("Failed to update scan status: %v", err)
 	}
 
+	// Broadcast scan start
+	if si.broadcaster != nil {
+		si.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+	}
+
 	// Fetch all series from Sonarr
 	log.Println("Fetching series from Sonarr...")
 	sonarrSeriesList, err := si.client.GetSeries()
@@ -132,7 +137,7 @@ func (si *SonarrImporter) Import() (*models.ScanResult, error) {
 	status.FilesFound = totalEpisodesWithFiles
 	repository.UpdateScanStatus(si.db, status)
 
-	// Broadcast scan start
+	// Update progress with effective file count
 	if si.broadcaster != nil {
 		si.broadcaster.BroadcastScanStart(totalEpisodesWithFiles, status.StartedAt)
 	}

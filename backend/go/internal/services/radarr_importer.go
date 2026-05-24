@@ -109,6 +109,11 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 		log.Printf("Failed to update scan status: %v", err)
 	}
 
+	// Broadcast scan start
+	if ri.broadcaster != nil {
+		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+	}
+
 	// Fetch all movies from Radarr
 	log.Println("Fetching movies from Radarr...")
 	radarrMovies, err := ri.client.GetMovies()
@@ -134,7 +139,7 @@ func (ri *RadarrImporter) Import() (*models.ScanResult, error) {
 	status.FilesFound = result.FilesFound
 	repository.UpdateScanStatus(ri.db, status)
 
-	// Broadcast scan start
+	// Update progress with effective file count
 	if ri.broadcaster != nil {
 		ri.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
 	}
