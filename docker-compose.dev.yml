@@ -13,33 +13,39 @@ services:
     volumes:
       - data:/app/data
       # Optional: Mount as many media library paths as needed (read-only recommended)
-      - ${MOVIES_PATH}:/data/movies:ro
-      - ${TV_SHOWS_PATH}:/data/tv-shows:ro
+      - ${MOVIES_HOST_PATH:-/host/path/to/movies}:/data/movies:ro
+      - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/tv-shows:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
-      - MEDIA_LIBRARY_PATHS=/data/movies,/data/tv-shows
+      MEDIA_LIBRARY_PATHS: /data/movies,/data/tv-shows
+      MOVIES_LIBRARY_PATH: /data/movies
+      SERIES_LIBRARY_PATH: /data/tv-shows
 
       # Comma-separated list of folder names to skip during scanning (optional)
-      - SKIP_FOLDERS=${SKIP_FOLDERS:-}
+      SKIP_FOLDERS: ${SKIP_FOLDERS:-}
 
       # User/Group configuration (optional: match your media library owner)
-      - UID=${UID:-1000}
-      - GID=${GID:-1000}
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
 
       # API keys (replace with your actual keys or use .env file)
-      - TMDB_API_KEY=${TMDB_API_KEY}
-      - TVDB_API_KEY=${TVDB_API_KEY}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      TVDB_API_KEY: ${TVDB_API_KEY:-}
+      RADARR_API_KEY: ${RADARR_API_KEY:-}
+      SONARR_API_KEY: ${SONARR_API_KEY:-}
 
       # External services
-      - RADARR_URL=${RADARR_URL:-http://radarr:7878}
-      - SONARR_URL=${SONARR_URL:-http://sonarr:8989}
+      RADARR_URL: ${RADARR_URL:-http://radarr:7878}
+      RADARR_PATH_MAPPING: ${RADARR_PATH_MAPPING:-}
+      SONARR_URL: ${SONARR_URL:-http://sonarr:8989}
+      SONARR_PATH_MAPPING: ${SONARR_PATH_MAPPING:-}
       
       # Scan configuration
-      - SCAN_INTERVAL=${SCAN_INTERVAL:-24}
-      - SCAN_TIMEOUT=${SCAN_TIMEOUT:-30}
+      SCAN_INTERVAL: ${SCAN_INTERVAL:-24}
+      SCAN_TIMEOUT: ${SCAN_TIMEOUT:-30}
       
       # Timezone (optional, adjust to your location)
-      - TZ=${TZ:-UTC}
+      TZ: ${TZ:-UTC}
 
 
 volumes:
