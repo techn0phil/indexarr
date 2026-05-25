@@ -272,6 +272,8 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 		}
 	}
 
+	var seenFiles []string
+
 	// Process each file sequentially
 	for i, filePath := range files {
 		// Check for stop signal
@@ -294,6 +296,8 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 		if err := s.processFile(filePath, result); err != nil {
 			log.Printf("Error processing %s: %v", filePath, err)
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: %v", filepath.Base(filePath), err))
+		} else {
+			seenFiles = append(seenFiles, filePath)
 		}
 
 		result.FilesProcessed++
@@ -317,6 +321,35 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 		}
 	}
 
+	// If paths are exactly the library paths, we can be confident that any file not seen during the scan is truly missing from disk.
+	// In this case, we can safely remove stale entries from the database.
+	// However, if the scan was performed on a subset of folders (e.g. for a specific series), we should not remove entries for files
+	// that were outside the scanned folders, as they may still exist on disk.
+	// Therefore, we only perform the stale file removal if the scanned paths match the configured library paths.
+	// This prevents false deletions in cases where users scan specific folders that do not encompass the entire library.
+
+	deletedMoviesCount := 0
+	deletedEpisodesCount := 0
+	if s.pathsMatchAnyLibrary(paths) {
+		// Handle deletions: find movies/episodes in database that were not seen during scan and check if their files are missing from disk.
+		// If so, mark them as deleted. This ensures that if a file was deleted from disk, it will be reflected in the database after the scan.
+		log.Default().Printf("Removing stale media files not seen during scan...")
+		var err error
+		deletedMoviesCount, deletedEpisodesCount, err = s.removeStaleMediaFiles(paths, seenFiles)
+		if err != nil {
+			log.Printf("Warning: Failed to remove stale media files: %v", err)
+			result.Errors = append(result.Errors, fmt.Sprintf("Failed to remove stale media files: %v", err))
+		} else if deletedMoviesCount > 0 || deletedEpisodesCount > 0 {
+			log.Printf("Removed %d movies and %d episodes no longer on disk", deletedMoviesCount, deletedEpisodesCount)
+		}
+
+		// Remove series that have no episodes left after episode deletions
+		if err := repository.DeleteEmptySeries(s.db); err != nil {
+			log.Printf("Warning: Failed to delete empty series: %v", err)
+			result.Errors = append(result.Errors, fmt.Sprintf("Failed to delete empty series: %v", err))
+		}
+	}
+
 	// Update status to completed (only if not suppressed)
 	if !suppressBroadcasts {
 		status.Status = "completed"
@@ -334,8 +367,8 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	}
 
 	duration := time.Since(start)
-	log.Printf("Scan completed in %v - %d files processed, %d movies added, %d episodes added, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+	log.Printf("Scan completed in %v - %d files processed, %d movies added, %d episodes added, %d movies removed, %d episodes removed, %d errors",
+		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, deletedMoviesCount, deletedEpisodesCount, len(result.Errors))
 
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
@@ -349,6 +382,161 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	}
 
 	return result, nil
+}
+
+// pathsMatchAnyLibrary checks if all the scanned paths match some of the configured library paths (ignoring trailing slashes and case)
+// Library paths checked are MediaLibraryPaths, MoviesLibraryPaths, and SeriesLibraryPaths to cover all possible configurations
+// (e.g. users who have separate folders for movies and series, or users who have only one of the two types configured)
+func (s *Scanner) pathsMatchAnyLibrary(paths []string) bool {
+	for _, scanPath := range paths {
+		scanPathClean := strings.TrimRight(filepath.Clean(scanPath), string(os.PathSeparator))
+		matchFound := false
+		for _, libPath := range s.config.MediaLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		for _, libPath := range s.config.MoviesLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		for _, libPath := range s.config.SeriesLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		if !matchFound {
+			return false
+		}
+	}
+	return true
+}
+
+// pathsMatchMovieOrMediaLibrary checks if all the scanned paths match some of the configured movie or media library paths (ignoring trailing slashes and case)
+func (s *Scanner) pathsMatchMovieOrMediaLibrary(paths []string) bool {
+	for _, scanPath := range paths {
+		scanPathClean := strings.TrimRight(filepath.Clean(scanPath), string(os.PathSeparator))
+		matchFound := false
+		for _, libPath := range s.config.MediaLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		for _, libPath := range s.config.MoviesLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		if !matchFound {
+			return false
+		}
+	}
+	return true
+}
+
+// pathsMatchSeriesOrMediaLibrary checks if all the scanned paths match some of the configured series or media library paths (ignoring trailing slashes and case)
+func (s *Scanner) pathsMatchSeriesOrMediaLibrary(paths []string) bool {
+	for _, scanPath := range paths {
+		scanPathClean := strings.TrimRight(filepath.Clean(scanPath), string(os.PathSeparator))
+		matchFound := false
+		for _, libPath := range s.config.SeriesLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		for _, libPath := range s.config.MediaLibraryPaths {
+			libPathClean := strings.TrimRight(filepath.Clean(libPath), string(os.PathSeparator))
+			if strings.EqualFold(scanPathClean, libPathClean) {
+				matchFound = true
+				break
+			}
+		}
+		if !matchFound {
+			return false
+		}
+	}
+	return true
+}
+
+// removeStaleMediaFiles removes media files that exist in our DB but not on disk
+func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int, int, error) {
+	seenFilesMap := make(map[string]bool)
+	for _, file := range seenFiles {
+		seenFilesMap[file] = true
+	}
+
+	// Print seen files count for debugging
+	log.Printf("Seen %d files during scan, checking for stale entries in database...", len(seenFiles))
+
+	deletedMoviesCount := 0
+	deletedEpisodesCount := 0
+
+	if s.pathsMatchMovieOrMediaLibrary(paths) {
+		// Remove movies not seen during scan
+		moviePaths, err := repository.GetAllMovieFilePaths(s.db)
+		if err != nil {
+			return deletedMoviesCount, deletedEpisodesCount, fmt.Errorf("failed to fetch movies for deletion check: %w", err)
+		}
+
+		// Print movie paths count for debugging
+		log.Printf("Fetched %d movie file paths from database for deletion check", len(moviePaths))
+
+		for _, moviePath := range moviePaths {
+			if !seenFilesMap[moviePath] {
+				if _, err := os.Stat(moviePath); os.IsNotExist(err) {
+					log.Printf("Movie file missing from disk, deleting movie: %s", moviePath)
+					if err := repository.DeleteMovieByPath(s.db, moviePath); err != nil {
+						log.Printf("Failed to delete movie: %v", err)
+					} else {
+						deletedMoviesCount++
+					}
+				}
+			}
+		}
+
+		log.Printf("Removed %d movies no longer on disk", deletedMoviesCount)
+	}
+
+	if s.pathsMatchSeriesOrMediaLibrary(paths) {
+		// Remove episodes not seen during scan
+		episodePaths, err := repository.GetAllEpisodeFilePaths(s.db)
+		if err != nil {
+			return deletedMoviesCount, deletedEpisodesCount, fmt.Errorf("failed to fetch episodes for deletion check: %w", err)
+		}
+
+		// Print episode paths count for debugging
+		log.Printf("Fetched %d episode file paths from database for deletion check", len(episodePaths))
+
+		for _, episodePath := range episodePaths {
+			if !seenFilesMap[episodePath] {
+				if _, err := os.Stat(episodePath); os.IsNotExist(err) {
+					log.Printf("Episode file missing from disk, deleting episode: %s", episodePath)
+					if err := repository.DeleteEpisodeByPath(s.db, episodePath); err != nil {
+						log.Printf("Failed to delete episode: %v", err)
+					} else {
+						deletedEpisodesCount++
+					}
+				}
+			}
+		}
+
+		log.Printf("Removed %d episodes no longer on disk", deletedEpisodesCount)
+	}
+
+	return deletedMoviesCount, deletedEpisodesCount, nil
 }
 
 // ScanMovie scans a single movie (used for manual refresh via API)

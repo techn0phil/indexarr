@@ -167,7 +167,7 @@ func (s *Scheduler) runImport() {
 	var errors []string
 
 	// Phase 3: Run movie import with progress coordination
-	if s.movieImporter != nil && movieCount > 0 {
+	if s.movieImporter != nil {
 		log.Println("Scheduler: Starting movie import...")
 		moviectx := &models.ProgressContext{
 			Offset:                0,
@@ -226,7 +226,7 @@ func (s *Scheduler) runImport() {
 	}
 
 	// Phase 4: Run series import with progress coordination (offset by movie count)
-	if s.seriesImporter != nil && seriesCount > 0 {
+	if s.seriesImporter != nil {
 		log.Println("Scheduler: Starting series import...")
 		seriesctx := &models.ProgressContext{
 			Offset:                movieProcessed,
@@ -374,7 +374,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 
 	// Phase 3: Run movie import with progress coordination
 	var movieProcessed int
-	if s.movieImporter != nil && movieCount > 0 {
+	if s.movieImporter != nil {
 		moviectx := &models.ProgressContext{
 			Offset:                0,
 			TotalOverride:         totalCount,
@@ -430,7 +430,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	}
 
 	// Phase 4: Run series import with progress coordination (offset by movie count)
-	if s.seriesImporter != nil && seriesCount > 0 {
+	if s.seriesImporter != nil {
 		seriesctx := &models.ProgressContext{
 			Offset:                movieProcessed,
 			TotalOverride:         totalCount,
