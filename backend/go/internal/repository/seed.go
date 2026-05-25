@@ -37,7 +37,7 @@ func SeedMockData(db *sql.DB) error {
 		}
 	}
 
-	log.Printf("✅ Mock data seeded successfully (%d movies and %d series)", len(movies), len(series))
+	log.Printf("Mock data seeded successfully (%d movies and %d series)", len(movies), len(series))
 
 	return nil
 }

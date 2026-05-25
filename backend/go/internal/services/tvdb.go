@@ -48,7 +48,7 @@ func NewTVClient(apiKey string, db *sql.DB) *TVClient {
 		if err == nil && token != "" && time.Now().Before(expiry) {
 			client.token = token
 			client.tokenExpiry = expiry
-			log.Printf("Loaded TVDB token from database (expires: %s)", expiry.Format(time.RFC3339))
+			// log.Printf("Loaded TVDB token from database (expires: %s)", expiry.Format(time.RFC3339))
 		}
 	}
 

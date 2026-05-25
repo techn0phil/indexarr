@@ -46,49 +46,66 @@ func main() {
 
 	// Movies: Radarr OR filesystem
 	moviesMode := cfg.GetMoviesImportMode()
+	moviesModeDetails := ""
 	switch moviesMode {
 	case "radarr":
-		log.Println("🎬 Movies: Using Radarr API")
 		radarrClient := services.NewRadarrClient(cfg.RadarrURL, cfg.RadarrAPIKey)
 
 		// Test connection to Radarr
 		if err := radarrClient.TestConnection(); err != nil {
-			log.Printf("⚠️  Warning: Could not connect to Radarr: %v", err)
+			moviesModeDetails = "[❌ Connection failed]"
 		} else {
-			log.Println("✅ Connected to Radarr successfully")
+			moviesModeDetails = "[✅ Connected]"
 		}
 
 		movieImporter = services.NewRadarrImporter(db, cfg, radarrClient, broadcaster)
 
 	case "filesystem":
-		log.Println("📁 Movies: Using filesystem scanning")
-		log.Printf("   Paths: %v", cfg.GetMovieLibraryPaths())
+		moviesModeDetails = fmt.Sprintf("%v", cfg.GetMovieLibraryPaths())
 		movieImporter = services.NewFilesystemMovieScanner(db, cfg, broadcaster)
 
 	default:
-		log.Println("⚠️  Movies: Import disabled (no Radarr config or library paths)")
+		moviesModeDetails = "[⚠️  No Radarr config or library paths]"
 	}
+
+	log.Printf("🎬 Movies import mode: %s %s", moviesMode, moviesModeDetails)
 
 	// Series: Sonarr OR filesystem
 	seriesMode := cfg.GetSeriesImportMode()
+	seriesModeDetails := ""
 	switch seriesMode {
 	case "sonarr":
-		log.Println("📺 Series: Using Sonarr API")
 		sonarrClient := services.NewSonarrClient(cfg.SonarrURL, cfg.SonarrAPIKey)
+
+		// Test connection to Sonarr
 		if err := sonarrClient.TestConnection(); err != nil {
-			log.Printf("⚠️  Warning: Could not connect to Sonarr: %v", err)
+			seriesModeDetails = "[❌ Connection failed]"
 		} else {
-			log.Println("✅ Connected to Sonarr successfully")
+			seriesModeDetails = "[✅ Connected]"
 		}
+
 		seriesImporter = services.NewSonarrImporter(db, cfg, sonarrClient, broadcaster)
 
 	case "filesystem":
-		log.Println("📁 Series: Using filesystem scanning")
-		log.Printf("   Paths: %v", cfg.GetSeriesLibraryPaths())
+		seriesModeDetails = fmt.Sprintf("%v", cfg.GetSeriesLibraryPaths())
 		seriesImporter = services.NewFilesystemSeriesScanner(db, cfg, broadcaster)
 
 	default:
-		log.Println("⚠️  Series: Import disabled (no Sonarr config or library paths)")
+		seriesModeDetails = "[⚠️  No Sonarr config or library paths]"
+	}
+
+	log.Printf("📺 Series import mode: %s %s", seriesMode, seriesModeDetails)
+
+	if cfg.RadarrURL != "" {
+		log.Printf("📡 Radarr URL: %s", cfg.RadarrURL)
+	}
+
+	if cfg.SonarrURL != "" {
+		log.Printf("🔊 Sonarr URL: %s", cfg.SonarrURL)
+	}
+
+	if len(cfg.MediaLibraryPaths) > 0 {
+		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)
 	}
 
 	// Initialize scheduler with both importers
@@ -121,15 +138,8 @@ func main() {
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
+
 	log.Printf("Indexarr server running on http://localhost:%s", cfg.ServerPort)
-	log.Printf("🎬 Movies import mode: %s", moviesMode)
-	log.Printf("📺 Series import mode: %s", seriesMode)
-	log.Printf("📡 Radarr URL: %s", cfg.RadarrURL)
-	log.Printf("🔊 Sonarr URL: %s", cfg.SonarrURL)
-	log.Printf("📁 Database: %s", cfg.DBPath)
-	if len(cfg.MediaLibraryPaths) > 0 {
-		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)
-	}
 
 	if err := http.ListenAndServe(addr, router); err != nil {
 		log.Fatalf("Server error: %v", err)
