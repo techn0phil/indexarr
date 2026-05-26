@@ -599,10 +599,26 @@ func DeleteMovie(db *sql.DB, movieID int64) error {
 	})
 }
 
+// DeleteMovieByPath deletes movies matching a file path pattern (for handling moved/deleted files)
+func DeleteMovieByPath(db *sql.DB, pathPattern string) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM movies WHERE file_path LIKE ?`, pathPattern)
+		return err
+	})
+}
+
 // DeleteEpisode deletes an episode by ID (cascade constraints handle tracks)
 func DeleteEpisode(db *sql.DB, episodeID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`DELETE FROM episodes WHERE id = ?`, episodeID)
+		return err
+	})
+}
+
+// DeleteEpisodeByPath deletes episodes matching a file path pattern (for handling moved/deleted files)
+func DeleteEpisodeByPath(db *sql.DB, pathPattern string) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM episodes WHERE file_path LIKE ?`, pathPattern)
 		return err
 	})
 }
@@ -621,6 +637,17 @@ func DeleteEmptySeasons(db *sql.DB, seriesID int64) error {
 			DELETE FROM seasons
 			WHERE series_id = ? AND number NOT IN (SELECT DISTINCT season_num FROM episodes WHERE series_id = ?)
 		`, seriesID, seriesID)
+		return err
+	})
+}
+
+// DeleteEmptySeries deletes series that have no episodes (used after scanning to clean up)
+func DeleteEmptySeries(db *sql.DB) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`
+			DELETE FROM series
+			WHERE id NOT IN (SELECT DISTINCT series_id FROM episodes)
+		`)
 		return err
 	})
 }
@@ -743,6 +770,25 @@ func GetAllMovieTMDBIds(db *sql.DB) ([]int64, error) {
 	return ids, nil
 }
 
+// GetAllMovieFilePaths returns all file paths of movies in the database
+func GetAllMovieFilePaths(db *sql.DB) ([]string, error) {
+	rows, err := db.Query(`SELECT file_path FROM movies WHERE file_path IS NOT NULL`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paths []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+	return paths, nil
+}
+
 // DeleteMovieByTMDBId deletes a movie by its TMDB ID
 func DeleteMovieByTMDBId(db *sql.DB, tmdbID int64) error {
 	return retryOnLock(func() error {
@@ -768,6 +814,25 @@ func GetAllSeriesSonarrIDs(db *sql.DB) ([]int64, error) {
 		ids = append(ids, id)
 	}
 	return ids, nil
+}
+
+// GetAllEpisodeFilePaths returns all file paths of episodes in the database
+func GetAllEpisodeFilePaths(db *sql.DB) ([]string, error) {
+	rows, err := db.Query(`SELECT file_path FROM episodes WHERE file_path IS NOT NULL`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paths []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+	return paths, nil
 }
 
 // DeleteSeriesBySonarrID deletes a series by its Sonarr ID
