@@ -99,8 +99,14 @@ indexarr/
 | `TMDB_API_KEY` | - | TMDB API key (required) |
 | `TVDB_API_KEY` | - | TVDB API key (required) |
 | `RADARR_URL` | http://radarr:7878 | Radarr URL (optional) |
+| `RADARR_API_KEY` | - | Radarr API key (optional) |
+| `RADARR_PATH_MAPPING` | - | Path mapping between Radarr and Indexarr |
 | `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
+| `SONARR_API_KEY` | - | Sonarr API key (optional) |
+| `SONARR_PATH_MAPPING` | - | Path mapping between Sonarr and Indexarr |
 | `MEDIA_LIBRARY_PATHS` | - | Comma-separated media folder paths |
+| `MOVIES_LIBRARY_PATHS` | - | Comma-separated movies folder paths |
+| `SERIES_LIBRARY_PATHS` | - | Comma-separated series folder paths |
 | `SKIP_FOLDERS` | - | Comma-separated list of folder names to skip during scanning |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |

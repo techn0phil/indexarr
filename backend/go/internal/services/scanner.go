@@ -74,11 +74,64 @@ func (s *Scanner) Stop() {
 
 // Scan performs a full library scan
 func (s *Scanner) Scan() (*models.ScanResult, error) {
-	return s.ScanPaths(s.config.MediaLibraryPaths)
+	return s.ScanPaths(s.config.MediaLibraryPaths, nil)
+}
+
+// CountMediaFiles counts video files in the given paths without processing them
+// This is a fast operation (no mediainfo extraction) for progress estimation
+func (s *Scanner) CountMediaFiles(paths []string) (int, error) {
+	var count int
+	for _, libPath := range paths {
+		if libPath == "" {
+			continue
+		}
+
+		if _, err := os.Stat(libPath); os.IsNotExist(err) {
+			continue
+		}
+
+		err := filepath.WalkDir(libPath, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return nil // Continue walking
+			}
+
+			if d.IsDir() {
+				name := d.Name()
+
+				// Skip hidden directories
+				if strings.HasPrefix(name, ".") || strings.HasPrefix(name, "@") {
+					return fs.SkipDir
+				}
+
+				// Skip extra media folders
+				for _, extraFolder := range s.config.SkipFolders {
+					if strings.EqualFold(name, extraFolder) {
+						return fs.SkipDir
+					}
+				}
+
+				return nil
+			}
+
+			// Count video files
+			if IsVideoFile(path) {
+				count++
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("Error counting files in %s: %v", libPath, err)
+		}
+	}
+
+	return count, nil
 }
 
 // ScanPaths performs a scan on specified paths (used for manual scans via API)
-func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
+// If ctx is nil, uses default behavior. If ctx is provided, applies progress coordination.
+func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*models.ScanResult, error) {
 	s.mu.Lock()
 	if s.running {
 		s.mu.Unlock()
@@ -121,14 +174,30 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 		Errors: []string{},
 	}
 
-	// Update scan status to running
+	// Check if we should suppress start/complete broadcasts (coordinated by scheduler)
+	suppressBroadcasts := ctx != nil && ctx.SuppressStartComplete
+	progressOffset := 0
+	progressTotal := 0
+	if ctx != nil {
+		progressOffset = ctx.Offset
+		progressTotal = ctx.TotalOverride
+	}
+
+	// Update scan status to running (only if not suppressed)
 	status := &models.ScanStatus{
 		Status:     "running",
 		StartedAt:  time.Now().Format(time.RFC3339),
 		FilesFound: 0,
 	}
-	if err := repository.UpdateScanStatus(s.db, status); err != nil {
-		log.Printf("Failed to update scan status: %v", err)
+	if !suppressBroadcasts {
+		if err := repository.UpdateScanStatus(s.db, status); err != nil {
+			log.Printf("Failed to update scan status: %v", err)
+		}
+
+		// Broadcast scan start to WebSocket clients
+		if s.broadcaster != nil {
+			s.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+		}
 	}
 
 	// Collect all media files
@@ -194,11 +263,13 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 
 	// Update status with files found
 	status.FilesFound = result.FilesFound
-	repository.UpdateScanStatus(s.db, status)
+	if !suppressBroadcasts {
+		repository.UpdateScanStatus(s.db, status)
 
-	// Broadcast scan start to WebSocket clients
-	if s.broadcaster != nil {
-		s.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+		// Broadcast scan start to WebSocket clients
+		if s.broadcaster != nil {
+			s.broadcaster.BroadcastScanStart(result.FilesFound, status.StartedAt)
+		}
 	}
 
 	// Process each file sequentially
@@ -206,13 +277,15 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 		// Check for stop signal
 		select {
 		case <-s.stopChan:
-			status.Status = "stopped"
-			status.CompletedAt = time.Now().Format(time.RFC3339)
-			status.ErrorMessage = "Scan stopped by user"
-			repository.UpdateScanStatus(s.db, status)
-			// Broadcast stopped event to WebSocket clients
-			if s.broadcaster != nil {
-				s.broadcaster.BroadcastScanStopped()
+			if !suppressBroadcasts {
+				status.Status = "stopped"
+				status.CompletedAt = time.Now().Format(time.RFC3339)
+				status.ErrorMessage = "Scan stopped by user"
+				repository.UpdateScanStatus(s.db, status)
+				// Broadcast stopped event to WebSocket clients
+				if s.broadcaster != nil {
+					s.broadcaster.BroadcastScanStopped()
+				}
 			}
 			return result, fmt.Errorf("scan stopped by user")
 		default:
@@ -228,26 +301,36 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 		// Update progress periodically
 		if i%10 == 0 || i == len(files)-1 {
 			status.FilesProcessed = result.FilesProcessed
-			repository.UpdateScanStatus(s.db, status)
+			if !suppressBroadcasts {
+				repository.UpdateScanStatus(s.db, status)
+			}
 			// Broadcast progress to WebSocket clients
 			if s.broadcaster != nil {
-				s.broadcaster.BroadcastScanProgress(result.FilesProcessed, result.FilesFound)
+				// Apply progress offset and total override if coordinated
+				reportProcessed := result.FilesProcessed + progressOffset
+				reportTotal := result.FilesFound
+				if progressTotal > 0 {
+					reportTotal = progressTotal
+				}
+				s.broadcaster.BroadcastScanProgress(reportProcessed, reportTotal)
 			}
 		}
 	}
 
-	// Update status to completed
-	status.Status = "completed"
-	status.CompletedAt = time.Now().Format(time.RFC3339)
-	status.FilesProcessed = result.FilesProcessed
-	if len(result.Errors) > 0 {
-		status.ErrorMessage = fmt.Sprintf("%d errors during scan", len(result.Errors))
-	}
-	repository.UpdateScanStatus(s.db, status)
+	// Update status to completed (only if not suppressed)
+	if !suppressBroadcasts {
+		status.Status = "completed"
+		status.CompletedAt = time.Now().Format(time.RFC3339)
+		status.FilesProcessed = result.FilesProcessed
+		if len(result.Errors) > 0 {
+			status.ErrorMessage = fmt.Sprintf("%d errors during scan", len(result.Errors))
+		}
+		repository.UpdateScanStatus(s.db, status)
 
-	// Broadcast completion to WebSocket clients
-	if s.broadcaster != nil {
-		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+		// Broadcast completion to WebSocket clients
+		if s.broadcaster != nil {
+			s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+		}
 	}
 
 	duration := time.Since(start)
@@ -283,7 +366,7 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 
 	log.Printf("Found movie: %s (%d)", movie.Title, movie.Year)
 
-	result, err := s.ScanPaths([]string{movie.FilePath})
+	result, err := s.ScanPaths([]string{movie.FilePath}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -366,7 +449,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	log.Printf("Will scan %d folder(s) for series: %v", len(folderPaths), folderPaths)
 
 	// Step 3: Scan folder paths to detect new episodes
-	scanResult, err := s.ScanPaths(folderPaths)
+	scanResult, err := s.ScanPaths(folderPaths, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan series folders: %w", err)
 	}

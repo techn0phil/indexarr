@@ -52,6 +52,16 @@ export const apiClient = {
     return response.json() as Promise<ScanResponse>;
   },
 
+  triggerMoviesScan: async () => {
+    const response = await fetch(`${API_BASE}/scan/movies`, { method: 'POST' });
+    return response.json() as Promise<ScanResponse>;
+  },
+
+  triggerSeriesScan: async () => {
+    const response = await fetch(`${API_BASE}/scan/series`, { method: 'POST' });
+    return response.json() as Promise<ScanResponse>;
+  },
+
   getScanStatus: async () => {
     const response = await fetch(`${API_BASE}/scan/status`);
     return response.json() as Promise<ScanStatus>;

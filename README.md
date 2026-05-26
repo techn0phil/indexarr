@@ -107,12 +107,18 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 |----------|---------|----------|-------------|
 | `TMDB_API_KEY` | - | No | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
 | `TVDB_API_KEY` | - | No | TVDB API key for tv-shows metadata ([get here](https://www.thetvdb.com/api-information)) |
-| `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
-| `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder on the host (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
+| `MOVIES_HOST_PATH` | - | Yes | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
+| `SERIES_HOST_PATH` | - | Yes | Comma-separated paths to tv-shows folder on the host (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/tv-shows | No | Comma-separated paths to media on the guest |
+| `MOVIES_LIBRARY_PATHS` | - | No | Comma-separated paths to movies on the guest |
+| `SERIES_LIBRARY_PATHS` | - | No | Comma-separated paths to series on the guest |
 | `SKIP_FOLDERS` | - | No | Comma-separated list of folder names to skip during scanning |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
+| `RADARR_API_KEY` | - | No | Radarr API key for importing movies from Radarr |
+| `RADARR_PATH_MAPPING` | - | No | Used to map Radarr paths to local paths (e.g. `/movies:/data/movies`) |
 | `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
+| `SONARR_API_KEY` | - | No | Sonarr API key for importing series from Sonarr |
+| `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |

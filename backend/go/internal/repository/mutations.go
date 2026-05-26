@@ -279,11 +279,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 		defer tx.Rollback()
 
 		result, err := tx.Exec(`
-			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug)
+			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug)
 		if err != nil {
 			return err
 		}
@@ -421,16 +421,56 @@ func GetSeriesByTitleAndYear(db *sql.DB, title string, year int) (*models.Series
 func GetSeriesByTMDBId(db *sql.DB, tmdbID int64) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
+	var sonarrID sql.NullInt64
+	var titleSlug sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
 		FROM series WHERE tmdb_id = ?
 	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrID, &titleSlug)
 	if poster.Valid {
 		series.Poster = &poster.String
 	} else {
 		series.Poster = nil
+	}
+	if sonarrID.Valid {
+		series.SonarrID = sonarrID.Int64
+	}
+	if titleSlug.Valid {
+		series.TitleSlug = titleSlug.String
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &series, nil
+}
+
+// GetSeriesBySonarrID finds a series by Sonarr ID
+func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
+	var series models.Series
+	var poster sql.NullString
+	var sonarrIDVal sql.NullInt64
+	var titleSlug sql.NullString
+	err := db.QueryRow(`
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
+		FROM series WHERE sonarr_id = ?
+	`, sonarrID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrIDVal, &titleSlug)
+	if poster.Valid {
+		series.Poster = &poster.String
+	} else {
+		series.Poster = nil
+	}
+	if sonarrIDVal.Valid {
+		series.SonarrID = sonarrIDVal.Int64
+	}
+	if titleSlug.Valid {
+		series.TitleSlug = titleSlug.String
 	}
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -597,10 +637,10 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		// Update series
 		_, err = tx.Exec(`
 			UPDATE series
-			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?, sonarr_id = ?, title_slug = ?
 			WHERE id = ?
 		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
-			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.ID)
+			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.ID)
 		if err != nil {
 			return err
 		}
@@ -656,6 +696,84 @@ func SaveTVDBToken(db *sql.DB, token string, expiresAt time.Time) error {
 			INSERT OR REPLACE INTO tvdb_tokens (id, token, expires_at, created_at)
 			VALUES (1, ?, ?, ?)
 		`, token, expiresAt.Format(time.RFC3339), time.Now().Format(time.RFC3339))
+		return err
+	})
+}
+
+// GetMovieByTMDBId finds a movie by TMDB ID
+func GetMovieByTMDBId(db *sql.DB, tmdbID int64) (*models.Movie, error) {
+	var m models.Movie
+	var poster sql.NullString
+	err := db.QueryRow(`
+		SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster
+		FROM movies WHERE tmdb_id = ?
+	`, tmdbID).Scan(&m.ID, &m.Title, &m.Year, &m.Duration, &m.Synopsis, &m.Genres, &m.Rating, &m.Popularity, &m.Status, &m.FileSize, &m.FilePath, &m.Container, &m.DateAdded, &m.TMDBId, &m.IMDbId, &poster)
+	if poster.Valid {
+		m.Poster = &poster.String
+	} else {
+		m.Poster = nil
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	m.Cast, _ = GetCastForMovie(db, m.ID)
+	m.MediaInfo, _ = GetMediaInfoForMovie(db, m.ID)
+	return &m, nil
+}
+
+// GetAllMovieTMDBIds returns all TMDB IDs of movies in the database
+func GetAllMovieTMDBIds(db *sql.DB) ([]int64, error) {
+	rows, err := db.Query(`SELECT tmdb_id FROM movies WHERE tmdb_id > 0`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// DeleteMovieByTMDBId deletes a movie by its TMDB ID
+func DeleteMovieByTMDBId(db *sql.DB, tmdbID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM movies WHERE tmdb_id = ?`, tmdbID)
+		return err
+	})
+}
+
+// GetAllSeriesSonarrIDs returns all Sonarr IDs of series in the database
+func GetAllSeriesSonarrIDs(db *sql.DB) ([]int64, error) {
+	rows, err := db.Query(`SELECT sonarr_id FROM series WHERE sonarr_id > 0`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// DeleteSeriesBySonarrID deletes a series by its Sonarr ID
+func DeleteSeriesBySonarrID(db *sql.DB, sonarrID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM series WHERE sonarr_id = ?`, sonarrID)
 		return err
 	})
 }

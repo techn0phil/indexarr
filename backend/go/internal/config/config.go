@@ -7,32 +7,44 @@ import (
 )
 
 type Config struct {
-	ServerPort        string
-	DBPath            string
-	TMDBAPIKey        string
-	TVDBAPIKey        string
-	RadarrURL         string
-	SonarrURL         string
-	ScanInterval      int      // hours between scans (0 = disabled)
-	MediaLibraryPaths []string // directories to scan for media files
-	SkipFolders       []string // folder names to skip during scanning
-	MediainfoPath     string   // path to mediainfo binary
-	ScanTimeout       int      // timeout in seconds per file
+	ServerPort         string
+	DBPath             string
+	TMDBAPIKey         string
+	TVDBAPIKey         string
+	RadarrURL          string
+	SonarrURL          string
+	RadarrAPIKey       string
+	SonarrAPIKey       string
+	RadarrPathMapping  string   // path mapping for Radarr (format: "from:to")
+	SonarrPathMapping  string   // path mapping for Sonarr (format: "from:to")
+	ScanInterval       int      // hours between scans (0 = disabled)
+	MediaLibraryPaths  []string // directories to scan for media files
+	MoviesLibraryPaths []string // directories to scan for movies (optional)
+	SeriesLibraryPaths []string // directories to scan for series (optional)
+	SkipFolders        []string // folder names to skip during scanning
+	MediainfoPath      string   // path to mediainfo binary
+	ScanTimeout        int      // timeout in seconds per file
 }
 
 func Load() *Config {
 	return &Config{
-		ServerPort:        getEnv("SERVER_PORT", "8080"),
-		DBPath:            getEnv("DB_PATH", "./indexarr.db"),
-		TMDBAPIKey:        getEnv("TMDB_API_KEY", ""),
-		TVDBAPIKey:        getEnv("TVDB_API_KEY", ""),
-		RadarrURL:         getEnv("RADARR_URL", ""),
-		SonarrURL:         getEnv("SONARR_URL", ""),
-		ScanInterval:      getEnvInt("SCAN_INTERVAL", 24),
-		MediaLibraryPaths: getEnvList("MEDIA_LIBRARY_PATHS", []string{}),
-		SkipFolders:       getEnvList("SKIP_FOLDERS", []string{}),
-		MediainfoPath:     getEnv("MEDIAINFO_PATH", "mediainfo"),
-		ScanTimeout:       getEnvInt("SCAN_TIMEOUT", 30),
+		ServerPort:         getEnv("SERVER_PORT", "8080"),
+		DBPath:             getEnv("DB_PATH", "./indexarr.db"),
+		TMDBAPIKey:         getEnv("TMDB_API_KEY", ""),
+		TVDBAPIKey:         getEnv("TVDB_API_KEY", ""),
+		RadarrURL:          getEnv("RADARR_URL", ""),
+		SonarrURL:          getEnv("SONARR_URL", ""),
+		RadarrAPIKey:       getEnv("RADARR_API_KEY", ""),
+		SonarrAPIKey:       getEnv("SONARR_API_KEY", ""),
+		RadarrPathMapping:  getEnv("RADARR_PATH_MAPPING", ""),
+		SonarrPathMapping:  getEnv("SONARR_PATH_MAPPING", ""),
+		ScanInterval:       getEnvInt("SCAN_INTERVAL", 24),
+		MediaLibraryPaths:  getEnvList("MEDIA_LIBRARY_PATHS", []string{}),
+		MoviesLibraryPaths: getEnvList("MOVIES_LIBRARY_PATHS", []string{}),
+		SeriesLibraryPaths: getEnvList("SERIES_LIBRARY_PATHS", []string{}),
+		SkipFolders:        getEnvList("SKIP_FOLDERS", []string{}),
+		MediainfoPath:      getEnv("MEDIAINFO_PATH", "mediainfo"),
+		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
 	}
 }
 
@@ -65,4 +77,87 @@ func getEnvList(key string, defaultValue []string) []string {
 		return result
 	}
 	return defaultValue
+}
+
+// HasRadarrConfig returns true if Radarr API is configured
+func (c *Config) HasRadarrConfig() bool {
+	return c.RadarrURL != "" && c.RadarrAPIKey != ""
+}
+
+// HasSonarrConfig returns true if Sonarr API is configured
+func (c *Config) HasSonarrConfig() bool {
+	return c.SonarrURL != "" && c.SonarrAPIKey != ""
+}
+
+// UseFilesystemScan returns true if filesystem scanning should be used
+// (when no Radarr/Sonarr config is present but media paths are configured)
+func (c *Config) UseFilesystemScan() bool {
+	return !c.HasRadarrConfig() && len(c.MediaLibraryPaths) > 0
+}
+
+// GetScanMode returns the current scan mode as a string (legacy, for backward compatibility)
+func (c *Config) GetScanMode() string {
+	if c.HasRadarrConfig() {
+		return "radarr"
+	}
+	if len(c.MediaLibraryPaths) > 0 {
+		return "filesystem"
+	}
+	return "disabled"
+}
+
+// GetMoviesImportMode returns the import mode for movies
+func (c *Config) GetMoviesImportMode() string {
+	if c.HasRadarrConfig() {
+		return "radarr"
+	}
+	if len(c.MoviesLibraryPaths) > 0 {
+		return "filesystem"
+	}
+	if len(c.MediaLibraryPaths) > 0 {
+		return "filesystem"
+	}
+	return "disabled"
+}
+
+// GetSeriesImportMode returns the import mode for series
+func (c *Config) GetSeriesImportMode() string {
+	if c.HasSonarrConfig() {
+		return "sonarr"
+	}
+	if len(c.SeriesLibraryPaths) > 0 {
+		return "filesystem"
+	}
+	if len(c.MediaLibraryPaths) > 0 {
+		return "filesystem"
+	}
+	return "disabled"
+}
+
+// GetMovieLibraryPaths returns the paths to scan for movies
+func (c *Config) GetMovieLibraryPaths() []string {
+	if len(c.MoviesLibraryPaths) > 0 {
+		return c.MoviesLibraryPaths
+	}
+	return c.MediaLibraryPaths
+}
+
+// GetSeriesLibraryPaths returns the paths to scan for series
+func (c *Config) GetSeriesLibraryPaths() []string {
+	if len(c.SeriesLibraryPaths) > 0 {
+		return c.SeriesLibraryPaths
+	}
+	return c.MediaLibraryPaths
+}
+
+// ParsePathMapping parses a path mapping string (format: "from:to") and returns from, to
+func ParsePathMapping(mapping string) (string, string) {
+	if mapping == "" {
+		return "", ""
+	}
+	parts := strings.SplitN(mapping, ":", 2)
+	if len(parts) != 2 {
+		return "", ""
+	}
+	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 }

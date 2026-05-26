@@ -141,8 +141,10 @@ func GetStats(db *sql.DB) http.HandlerFunc {
 func GetConfig(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		respond(w, map[string]interface{}{
-			"radarrUrl": cfg.RadarrURL,
-			"sonarrUrl": cfg.SonarrURL,
+			"radarrUrl":        cfg.RadarrURL,
+			"sonarrUrl":        cfg.SonarrURL,
+			"moviesImportMode": cfg.GetMoviesImportMode(),
+			"seriesImportMode": cfg.GetSeriesImportMode(),
 		})
 	}
 }

@@ -24,6 +24,34 @@ func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
 	}
 }
 
+// TriggerMoviesScan starts a manual scan for movies only
+func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		go func() {
+			scheduler.TriggerMoviesScan()
+		}()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Movies scan started",
+		})
+	}
+}
+
+// TriggerSeriesScan starts a manual scan for series only
+func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		go func() {
+			scheduler.TriggerSeriesScan()
+		}()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Series scan started",
+		})
+	}
+}
+
 // GetScanStatus returns the current scan status
 func GetScanStatus(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +85,7 @@ func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 			return
 		}
 
-		result, err := scheduler.TriggerMovieScan(id)
+		result, err := scheduler.TriggerSingleMovieScan(id)
 		if err != nil {
 			respondError(w, 500, "Failed to refresh movie: "+err.Error())
 			return
@@ -79,7 +107,7 @@ func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
 			return
 		}
 
-		result, err := scheduler.TriggerSeriesScan(id)
+		result, err := scheduler.TriggerSingleSeriesScan(id)
 		if err != nil {
 			respondError(w, 500, "Failed to refresh series: "+err.Error())
 			return

@@ -18,7 +18,9 @@ type Series struct {
 	TMDBId       int64    `json:"tmdbId"`
 	TVDBId       int64    `json:"tvdbId"`
 	IMDbId       string   `json:"imdbId"`
-	Poster       *string  `json:"poster"` // Poster URL
+	SonarrID     int64    `json:"sonarrId"`   // Sonarr internal ID for linking
+	TitleSlug    string   `json:"titleSlug"` // Sonarr title slug for URL building
+	Poster       *string  `json:"poster"`    // Poster URL
 	Cast         []Cast   `json:"cast"`
 	Seasons      []Season `json:"seasons"`
 }
