@@ -1,77 +1,60 @@
 # Indexarr (Mediarr)
 
-Indexarr is a media library management application inspired by Sonarr and Radarr. It provides centralized catalog management for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
-
-> [!WARNING]
-> **Disclaimer:** This software is provided as-is, without any warranty. Use at your own risk. The authors and contributors are not responsible for any data loss, damage, or issues resulting from the use of this application.
->
-> **Note:** This application has been developed with intensive help from AI coding agents (including GitHub Copilot and similar tools).
-
+**Indexarr** is a media library application inspired by Sonarr and Radarr. It provides a centralized catalog for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
 
 ![Main movie page screenshot](ux-ui/movies.png)
 
+
+## Table of contents
+
+  - [Features](#features)
+  - [Getting started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation steps](#installation-steps)
+    - [Configuration reference](#configuration-reference)
+    - [Common operations](#common-operations)
+    - [Using pre-built image from GitHub Container Registry](#using-pre-built-image-from-github-container-registry)
+  - [Development setup](#development-setup)
+    - [Prerequisites](#prerequisites)
+    - [Backend setup](#backend-setup)
+    - [Frontend setup](#frontend-setup)
+    - [Building Docker image locally](#building-docker-image-locally)
+    - [Project Structure](#project-structure)
+    - [Design & implementation](#design--implementation)
+  - [Common issues](#common-issues)
+    - [Incorrect matching](#incorrect-matching)
+    - [Media permissions](#media-permissions)
+    - [Extra files](#extra-files)
+  - [License](#license)
+
+
 ## Features
 - Centralized movie and TV series catalog
-- Advanced multi-criteria filtering (status, resolution, codec, audio, HDR)
+- Advanced multi-criteria filtering (title, status, resolution, codec, audio, HDR)
 - Real-time statistics (total count, disk space, 4K %, problems)
-- Detailed media info (video/audio/subtitle tracks)
-- Responsive UI with grid/list views
+- Detailed media info (video, audio, and subtitle tracks)
+- esponsive UI with grid/list views
 - RESTful API backend
 
-## Project Structure
 
-```
-indexarr/
-├── AGENTS.md                # Chat customization guide
-├── LICENSE                  # GPL v3
-├── backend/                 # Go backend
-│   └── go/
-│       ├── cmd/server/      # Entry point
-│       ├── internal/
-│       │   ├── api/         # HTTP handlers
-│       │   ├── config/      # Configuration
-│       │   ├── models/      # Data models
-│       │   ├── repository/  # Database layer
-│       │   └── services/    # Business logic
-│       ├── go.mod           # Go module
-│       └── README.md        # Backend docs
-├── frontend/                # React frontend
-│   └── react/
-│       ├── src/
-│       │   ├── components/  # UI components
-│       │   ├── pages/       # Page components
-│       │   ├── api/         # API client
-│       │   ├── hooks/       # Custom hooks
-│       │   ├── styles/      # CSS modules
-│       │   ├── types/       # TypeScript types
-│       │   └── App.tsx      # Root component
-│       ├── package.json     # Dependencies
-│       └── README.md        # Frontend docs
-├── ux-ui/                   # UI/UX design
-│   ├── medialib_v4_detail_pages.html  # Full HTML/CSS mockup
-│   └── prompt.md            # Implementation specs
-```
-
-## Getting Started
-
-### Quick Start installation
+## Getting started
 
 The easiest and recommended way to run Indexarr is with Docker Compose. The provided `docker-compose.yml` is production-ready with automatic restarts, data persistence, and proper networking.
 
-#### Prerequisites
+### Prerequisites
 - Docker and Docker Compose installed
 - TMDB and TVDB API keys (optional, but recommended for full metadata)
 
 
-#### Installation Steps
+### Installation steps
 
 1. **Create docker-compose file:**
 
-   Download or copy content from https://github.com/pschmucker/indexarr/blob/main/docker-compose.yml
+   Download or copy content from https://github.com/techn0phil/indexarr/blob/main/docker-compose.yml
    
 2. **Configure environment variables:**
    
-   Download or copy content from https://github.com/pschmucker/indexarr/blob/main/.env.example
+   Download or copy content from https://github.com/techn0phil/indexarr/blob/main/.env.example
 
    Create a `.env` file with your configuration:
    ```bash
@@ -101,7 +84,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
    - **API:** http://localhost:8787/api
    - **Health check:** http://localhost:8787/health
 
-#### Configuration Reference
+### Configuration reference
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
@@ -125,69 +108,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `UID` | 1000 | No | User ID inside container (match your media library owner) |
 | `GID` | 1000 | No | Group ID inside container (match your media library owner) |
 
-#### Media Permissions Setup
-
-Indexarr runs as a non-root user inside the container for security. By default, it uses UID 1000 and GID 1000. **If your media library is owned by a different user** (e.g., Radarr, Sonarr, or another service), you must configure `UID` and `GID` to match the owner, or the container won't be able to read your files.
-
-**Why this matters:**
-- Indexarr reads media files from mounted volumes (read-only)
-- If the container user doesn't have read permission on these files, scans will fail
-
-**How to fix it:**
-
-1. **Find your media library owner:**
-   ```bash
-   # Check media library ownership
-   ls -ld /mnt/media/movies
-   # Example output: drwxr-x--- 1220 radarr media-center 77824 May  6 movies
-   
-   # Get UID and GID of the owner
-   id radarr
-   # Example output: uid=1041(radarr) gid=100(users) groups=100(users),65541(media-center)
-   ```
-
-2. **Update `.env` file:**
-   ```bash
-   # For Radarr (UID 1041, GID 65541)
-   UID=1041
-   GID=65541
-   
-   # Or for Sonarr (UID 1042, GID 65541)
-   UID=1042
-   GID=65541
-   ```
-
-3. **Rebuild and restart (dev setup):**
-   ```bash
-   # With docker-compose.dev.yml (local build)
-   docker compose -f docker-compose.dev.yml build --no-cache
-   docker compose -f docker-compose.dev.yml up -d
-   ```
-
-4. **Or restart with pre-built image (production):**
-   ```bash
-   # With docker-compose.yml (pre-built image)
-   # Just restart - env vars apply at runtime
-   docker compose up -d
-   ```
-
-5. **Verify permissions are working:**
-   ```bash
-   # Check if app is running as correct user
-   docker exec indexarr id
-   # Should show: uid=1041(appuser) gid=65541(media-center)
-   
-   # Check if media files are readable
-   docker exec indexarr ls -la /data/movies/
-   # Should show files, not permission denied errors
-   ```
-
-**Note on local builds:**
-- When building locally with `docker-compose.dev.yml`, build args set the initial file ownership at build time
-- At runtime, the container adjusts file ownership to match `UID` and `GID`
-- With pre-built images from ghcr.io, only the runtime environment variables matter
-
-#### Common Operations
+### Common operations
 
 **View logs in real-time:**
 ```bash
@@ -215,10 +136,10 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Using Pre-built Image from GitHub Container Registry
+### Using pre-built image from GitHub Container Registry
 
 ```bash
-docker pull ghcr.io/pschmucker/indexarr:latest
+docker pull ghcr.io/techn0phil/indexarr:latest
 docker run -d -p 8787:8787 \
       -v indexarr_data:/app/data \
       -v /mnt/movies:/data/movies \
@@ -227,17 +148,17 @@ docker run -d -p 8787:8787 \
       -e TVDB_API_KEY=fffffffffffffffff \
       -e RADARR_URL=http://radarr:7878 \
       -e SONARR_URL=http://sonarr:8989 \
-      ghcr.io/pschmucker/indexarr:latest
+      ghcr.io/techn0phil/indexarr:latest
 ```
 
-### Manual Development Setup
+## Development setup
 
-#### Prerequisites
-- Node.js (>=18)
-- Go (>=1.21)
+### Prerequisites
+- Node.js (>=24)
+- Go (>=1.26)
 - mediainfo CLI
 
-#### Backend Setup
+### Backend setup
 1. Navigate to backend:
    ```bash
    cd backend/go
@@ -260,7 +181,7 @@ docker run -d -p 8787:8787 \
    go test ./...
    ```
 
-#### Frontend Setup
+### Frontend setup
 1. Navigate to frontend:
    ```bash
    cd frontend/react
@@ -278,7 +199,7 @@ docker run -d -p 8787:8787 \
    npm test
    ```
 
-### Building Docker Image Locally
+### Building Docker image locally
 
 ```bash
 # Build the image
@@ -288,10 +209,135 @@ docker build -t indexarr:latest .
 docker run -d -p 80:80 -v indexarr_data:/app/data indexarr:latest
 ```
 
-## Design & Implementation
-- **Design system:** See `ux-ui/medialib_v4_detail_pages.html` for full mockups and CSS variables.
+### Project Structure
+
+```
+indexarr/
+├── .github/                 # GitHub resources
+│   ├── agents/              # Specialized AI agents
+│   ├── skills/              # Custom AI skills
+│   └── workflows/           # GitHub actions
+├── backend/                 # Go backend
+│   └── go/
+│       ├── cmd/server/      # Entry point
+│       ├── internal/
+│       │   ├── api/         # HTTP handlers
+│       │   ├── config/      # Configuration
+│       │   ├── models/      # Data models
+│       │   ├── repository/  # Database layer
+│       │   │   └── migrations/  # Schema migrations scripts
+│       │   └── services/    # Business logic
+│       ├── go.mod           # Go module
+│       └── README.md        # Backend docs
+├── frontend/                # React frontend
+│   └── react/
+│       ├── src/
+│       │   ├── components/  # UI components
+│       │   ├── pages/       # Page components
+│       │   ├── api/         # API client
+│       │   ├── hooks/       # Custom hooks
+│       │   ├── styles/      # CSS modules
+│       │   ├── types/       # TypeScript types
+│       │   └── App.tsx      # Root component
+│       ├── package.json     # Dependencies
+│       └── README.md        # Frontend docs
+├── samples/                 # Data samples
+│   ├── tmdb/                # TheMovieDB samples
+│   │   ├── movies/          # Movies details
+│   │   └── series/          # Series details
+│   └── tvdb/                # TheTVDB samples
+│   │   ├── episodes/        # Episodes details
+│   │   ├── movies/          # Movies details
+│   │   └── series/          # Series details
+│   ├── fake-movies.sh       # Movies generator script
+│   └── fake-tv-shows.sh     # Series generator script
+├── ux-ui/                   # UI/UX design
+│   ├── medialib_v5.html     # Full HTML/CSS mockup
+│   └── prompt.md            # Implementation specs
+├── AGENTS.md                # Chat customization guide
+└── LICENSE                  # GPL v3
+```
+
+
+### Design & implementation
+- **Design system:** See `ux-ui/medialib_v5.html` for full mockups and CSS variables.
 - **Implementation guide:** See `ux-ui/prompt.md` for detailed frontend specs.
 - **Chat agent customization:** See `AGENTS.md` for agent and workflow details.
+
+
+## Common issues
+
+### Incorrect matching
+
+If your media files are not correctly detected (no poster, duration, wrong links, etc...), review the files and folders naming with the following recommendations:
+- **Movies**: file must be in a folder named `{movie title} ({year})`
+- **Series**: each series must have a folder named `{series name} ({year})`
+- **Episodes** : file must contain the season and episode number with a standard pattern like `S01E05` or `1x05`
+
+If the files and folders naming are correct but still have incorrect matches, check whether the title and year are correct on [TheMovieDB](https://www.themoviedb.org/).
+
+### Media permissions
+
+Indexarr runs as a non-root user inside the container for security. By default, it uses UID 1000 and GID 1000. **If your media library is owned by a different user** (e.g., Radarr, Sonarr, or another service), you must configure `UID` and `GID` to match the owner, or the container won't be able to read your files.
+
+**Why this matters:**
+- Indexarr reads media files from mounted volumes (read-only)
+- If the container user doesn't have read permission on these files, scans will fail
+
+**How to fix it:**
+
+1. **Find your media library owner:**
+   ```bash
+   # Check media library ownership
+   ls -ld /mnt/media/movies
+   # Example output: drwxr-x--- 1220 radarr media-center 77824 May  6 movies
+   
+   # Get UID and GID of the owner
+   id radarr
+   # Example output: uid=1041(radarr) gid=100(users) groups=100(users),65541(media-center)
+   ```
+
+2. **Override `UID` and `GID` environment variables:**
+   ```yaml
+   environment:
+     UID: 1041
+     GID: 65541
+   ```
+
+3. **Restart application:**
+   ```bash
+   # With docker-compose.yml (pre-built image)
+   docker compose up -d
+   ```
+
+4. **Verify permissions are working:**
+   ```bash
+   # Check if app is running as correct user
+   docker exec indexarr id
+   # Should show: uid=1041(appuser) gid=65541(media-center)
+   
+   # Check if media files are readable
+   docker exec indexarr ls -la /data/movies/
+   # Should show files, not permission denied errors
+   ```
+
+**Note on local builds:**
+- When building locally with `docker-compose.dev.yml`, build args set the initial file ownership at build time
+- At runtime, the container adjusts file ownership to match `UID` and `GID`
+- With pre-built images from ghcr.io, only the runtime environment variables matter
+
+
+### Extra files
+
+Extra files such as **Behind the scenes**, **interviews**, **trailers**, etc... will likely be incorrectly matched. To avoid that, you can exclude some folders from scanning by setting the `SKIP_FOLDERS` environment variable:
+
+```yaml
+environment:
+  # Skip the folders based on Plex extras list:
+  # https://support.plex.tv/articles/local-files-for-trailers-and-extras/
+  SKIP_FOLDERS: Behind The Scenes, Deleted Scenes, Featurettes, Interviews, Scenes, Shorts, Trailers, Other
+```
+
 
 ## License
 GPL v3 — see [LICENSE](LICENSE)
