@@ -17,6 +17,7 @@ type WSMessage struct {
 	ErrorMessage   string `json:"error,omitempty"`
 	MoviesAdded    int    `json:"moviesAdded,omitempty"`
 	EpisodesAdded  int    `json:"episodesAdded,omitempty"`
+	CompletedAt    string `json:"completedAt,omitempty"`
 }
 
 // Client represents a WebSocket client connection
@@ -128,12 +129,13 @@ func (b *Broadcaster) BroadcastScanProgress(filesProcessed, filesFound int) {
 }
 
 // BroadcastScanComplete sends scan completion event to all clients
-func (b *Broadcaster) BroadcastScanComplete(filesProcessed, moviesAdded, episodesAdded int) {
+func (b *Broadcaster) BroadcastScanComplete(filesProcessed, moviesAdded, episodesAdded int, completedAt string) {
 	msg := WSMessage{
 		Type:           "scan_complete",
 		FilesProcessed: filesProcessed,
 		MoviesAdded:    moviesAdded,
 		EpisodesAdded:  episodesAdded,
+		CompletedAt:    completedAt,
 	}
 	b.broadcastMessage(msg)
 }

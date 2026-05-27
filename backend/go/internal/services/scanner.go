@@ -362,7 +362,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 
 		// Broadcast completion to WebSocket clients
 		if s.broadcaster != nil {
-			s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+			s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, status.CompletedAt)
 		}
 	}
 

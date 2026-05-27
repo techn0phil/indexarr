@@ -256,7 +256,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 
 		// Broadcast completion
 		if ri.broadcaster != nil {
-			ri.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, 0)
+			ri.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, 0, status.CompletedAt)
 		}
 	}
 
