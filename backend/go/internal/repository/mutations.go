@@ -481,15 +481,16 @@ func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
 	return &series, nil
 }
 
-// UpdateSeriesCounts updates season_count and episode_count for a series
+// UpdateSeriesCounts updates season_count, episode_count, and file_size for a series
 func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`
 			UPDATE series SET
 				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?)
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?),
+				file_size = (SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE series_id = ?)
 			WHERE id = ?
-		`, seriesID, seriesID, seriesID)
+		`, seriesID, seriesID, seriesID, seriesID)
 		return err
 	})
 }
