@@ -130,6 +130,8 @@ export interface StatsResponse {
   totalSeries: number;
   totalEpisodes: number;
   diskSpaceGB: number;
+  moviesDiskSpaceGB: number;
+  seriesDiskSpaceGB: number;
   fourKCount: number;
   fourKPercent: number;
   problemsCount: number;

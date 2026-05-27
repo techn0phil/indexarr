@@ -494,9 +494,15 @@ func GetStats(db *sql.DB) (*models.StatsResponse, error) {
 	stats.ProblemsCount = stats.MissingMovies + stats.MissingEpisodes
 
 	// Disk space in GB
-	var totalBytes int64
-	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available' UNION ALL SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&totalBytes)
-	stats.DiskSpaceGB = float64(totalBytes) / (1024 * 1024 * 1024)
+	var movieBytes int64
+	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available'").Scan(&movieBytes)
+
+	var seriesBytes int64
+	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&seriesBytes)
+
+	stats.MoviesDiskSpaceGB = float64(movieBytes) / (1024 * 1024 * 1024)
+	stats.SeriesDiskSpaceGB = float64(seriesBytes) / (1024 * 1024 * 1024)
+	stats.DiskSpaceGB = stats.MoviesDiskSpaceGB + stats.SeriesDiskSpaceGB
 
 	// 4K count
 	query := `
