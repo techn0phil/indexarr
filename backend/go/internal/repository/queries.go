@@ -453,6 +453,22 @@ func GetMediaInfoForEpisode(db *sql.DB, episodeID int64) (*models.MediaInfo, err
 		mi.AudioTracks = append(mi.AudioTracks, at)
 	}
 
+	subRows, err := db.Query("SELECT id, language, format FROM subtitle_tracks WHERE episode_id=?", episodeID)
+	if err != nil {
+		return nil, err
+	}
+	defer subRows.Close()
+
+	for subRows.Next() {
+		var st models.SubtitleTrack
+		var id int64
+		err := subRows.Scan(&id, &st.Language, &st.Format)
+		if err != nil {
+			return nil, err
+		}
+		mi.SubtitleTracks = append(mi.SubtitleTracks, st)
+	}
+
 	return mi, nil
 }
 
