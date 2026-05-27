@@ -293,7 +293,7 @@ func (s *Scheduler) runImport() {
 	repository.UpdateScanStatus(s.db, status)
 
 	if s.broadcaster != nil {
-		s.broadcaster.BroadcastScanComplete(totalProcessed, moviesAdded, episodesAdded)
+		s.broadcaster.BroadcastScanComplete(totalProcessed, moviesAdded, episodesAdded, status.CompletedAt)
 	}
 
 	duration := time.Since(start)
@@ -494,7 +494,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	repository.UpdateScanStatus(s.db, status)
 
 	if s.broadcaster != nil {
-		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, status.CompletedAt)
 	}
 
 	duration := time.Since(start)

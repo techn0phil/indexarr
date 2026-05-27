@@ -251,7 +251,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 
 		// Broadcast completion
 		if si.broadcaster != nil {
-			si.broadcaster.BroadcastScanComplete(result.FilesProcessed, 0, result.EpisodesAdded)
+			si.broadcaster.BroadcastScanComplete(result.FilesProcessed, 0, result.EpisodesAdded, status.CompletedAt)
 		}
 	}
 
