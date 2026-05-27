@@ -436,7 +436,6 @@ func parseDuration(s string) int {
 	if s == "" {
 		return 0
 	}
-	// Duration in milliseconds
-	ms, _ := strconv.ParseFloat(strings.Split(s, " ")[0], 64)
-	return int(ms / 1000) // Convert to seconds
+	seconds, _ := strconv.ParseFloat(strings.Split(s, " ")[0], 64)
+	return int(seconds)
 }

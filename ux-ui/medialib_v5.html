@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mediarr</title>
+<style>
+/* ── CSS Variables ── */
+:root{
+  --color-background-primary:#FFFFFF;
+  --color-background-secondary:#F5F6F8;
+  --color-background-tertiary:#EDEEF1;
+  --color-text-primary:#111827;
+  --color-text-secondary:#374151;
+  --color-text-tertiary:#6B7280;
+  --color-border-tertiary:#E5E7EB;
+  --color-border-secondary:#D1D5DB;
+  --border-radius-md:6px;
+  --border-radius-lg:10px;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
+  --accent:#1D9E75;
+  --accent-light:#E1F5EE;
+  --accent-mid:#5DCAA5;
+  --red:#E24B4A;
+  --orange:#EF9F27;
+}
+
+/* ── Reset ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);font-size:13px;background:var(--color-background-tertiary);}
+
+/* ── Layout ── */
+.app{display:flex;height:100vh;min-height:600px;background:var(--color-background-tertiary);}
+.sidebar{width:210px;min-width:210px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;flex-shrink:0;}
+.logo{padding:16px 18px 14px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:8px;}
+.logo-mark{width:22px;height:22px;background:#1D9E75;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:13px;height:13px;fill:white;}
+.logo-name{font-size:15px;font-weight:500;color:var(--color-text-primary);}
+.nav{padding:10px 0;flex:1;overflow-y:auto;}
+.nav-group{padding:8px 14px 3px;font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.07em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 18px;color:var(--color-text-secondary);cursor:pointer;border-left:2px solid transparent;transition:background .1s;}
+.nav-item.active{color:#0F6E56;border-left-color:#1D9E75;background:#E1F5EE;font-weight:500;}
+.nav-item:hover:not(.active){background:var(--color-background-secondary);}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.75;}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:99px;background:var(--color-background-secondary);color:var(--color-text-tertiary);border:0.5px solid var(--color-border-tertiary);}
+.nav-item.active .nav-badge{background:#9FE1CB;color:#085041;border-color:#5DCAA5;}
+.sidebar-footer{padding:12px 18px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:6px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid transparent;transition:background .1s;}
+.back-btn:hover{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);}
+.back-btn svg{width:14px;height:14px;}
+.topbar-sep{width:0.5px;height:18px;background:var(--color-border-tertiary);}
+.breadcrumb{font-size:12px;color:var(--color-text-tertiary);}
+.breadcrumb span{color:var(--color-text-secondary);}
+
+/* ── Spotlight trigger (topbar field) ── */
+.search-trigger{position:relative;margin-left:auto;cursor:pointer;}
+.search-trigger-inner{width:200px;height:36px;background:var(--color-background-secondary);border:none;border-radius:99px;padding:0 14px 0 38px;font-size:12px;color:var(--color-text-tertiary);display:flex;align-items:center;cursor:pointer;user-select:none;transition:box-shadow .15s;}
+.search-trigger-inner:hover{box-shadow:0 0 0 1.5px var(--color-border-secondary);}
+.search-trigger .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.search-trigger .search-icon svg{width:14px;height:14px;color:var(--color-text-tertiary);}
+.search-trigger-kbd{margin-left:auto;display:flex;gap:3px;}
+.kbd-key{font-size:9px;padding:1px 4px;border-radius:3px;background:var(--color-border-secondary);color:var(--color-text-tertiary);line-height:1.6;}
+
+/* ── Spotlight overlay ── */
+.spotlight-overlay{position:fixed;inset:0;background:rgba(17,24,39,0.45);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding-top:80px;}
+.spotlight-overlay.active{display:flex;}
+.spotlight-box{width:600px;max-width:calc(100vw - 40px);background:var(--color-background-primary);border-radius:14px;border:0.5px solid var(--color-border-secondary);box-shadow:0 32px 80px rgba(0,0,0,0.25),0 0 0 0.5px rgba(0,0,0,0.05);overflow:hidden;animation:slightDown .18s ease;}
+@keyframes slightDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.spotlight-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.spotlight-input-wrap svg{width:18px;height:18px;color:var(--color-text-tertiary);flex-shrink:0;}
+.spotlight-input{flex:1;border:none;outline:none;font-size:15px;color:var(--color-text-primary);background:transparent;font-family:var(--font-sans);}
+.spotlight-input::placeholder{color:var(--color-text-tertiary);}
+.spotlight-esc{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-tertiary);cursor:pointer;white-space:nowrap;}
+.spotlight-results{max-height:440px;overflow-y:auto;}
+.spotlight-group{padding:6px 0;}
+.spotlight-group-label{font-size:10px;font-weight:600;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;padding:4px 16px 6px;display:flex;align-items:center;gap:6px;}
+.spotlight-group-label::after{content:'';flex:1;height:0.5px;background:var(--color-border-tertiary);}
+.spotlight-result{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;transition:background .08s;}
+.spotlight-result:hover,.spotlight-result.focused{background:var(--color-background-secondary);}
+.spotlight-result-icon{width:34px;height:34px;border-radius:6px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--color-text-secondary);flex-shrink:0;letter-spacing:-.5px;}
+.spotlight-result-info{flex:1;min-width:0;}
+.spotlight-result-title{font-size:13px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spotlight-result-meta{font-size:11px;color:var(--color-text-tertiary);margin-top:1px;}
+.spotlight-badges{display:flex;gap:4px;flex-shrink:0;}
+.spotlight-empty{padding:36px 20px;text-align:center;color:var(--color-text-tertiary);font-size:13px;}
+.spotlight-empty-icon{font-size:28px;margin-bottom:8px;opacity:.4;}
+.spotlight-footer{padding:8px 14px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:12px;align-items:center;}
+.spotlight-hint{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-tertiary);}
+.spotlight-hint .kbd-key{background:var(--color-background-tertiary);border:0.5px solid var(--color-border-secondary);}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;}
+.page{display:none;}.page.active{display:block;}
+.hidden{display:none!important;}
+
+/* ── Filter bar ── */
+.list-filters{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:8px 20px;display:flex;align-items:center;gap:6px;}
+.chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:11px;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;transition:border-color .1s;}
+.chip:hover{border-color:var(--color-border-secondary);}
+.chip.has-val{background:#E1F5EE;border-color:#5DCAA5;color:#085041;}
+.chip svg{width:11px;height:11px;opacity:.6;}
+.f-sep{width:0.5px;height:18px;background:var(--color-border-tertiary);flex-shrink:0;}
+.view-tog{display:flex;gap:2px;margin-left:auto;}
+.v-btn{width:28px;height:26px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-tertiary);}
+.v-btn svg{width:13px;height:13px;}
+.v-btn.active{background:#1D9E75;color:white;border-color:#1D9E75;}
+
+/* ── List pages ── */
+.list-content{padding:16px 20px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;}
+.stat-lbl{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.stat-val{font-size:20px;font-weight:500;color:var(--color-text-primary);}
+.stat-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:1px;}
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;}
+.mcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.mcard:hover{border-color:#5DCAA5;}
+.poster{height:180px;background:var(--color-background-secondary);position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
+.sbar{position:absolute;bottom:0;left:0;right:0;height:3px;}
+.sbar.ok{background:#1D9E75;}.sbar.warn{background:#EF9F27;}.sbar.miss{background:#E24B4A;}
+.cbody{padding:9px 10px;}
+.ctitle{font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.cmeta{display:flex;flex-wrap:wrap;gap:3px;}
+
+/* ── Badges ── */
+.b{font-size:9px;padding:2px 6px;border-radius:99px;font-weight:500;}
+.b-4k{background:#FAEEDA;color:#633806;}.b-hd{background:#EAF3DE;color:#27500A;}.b-dv{background:#EEEDFE;color:#3C3489;}.b-hdr{background:#E6F1FB;color:#0C447C;}.b-miss{background:#FCEBEB;color:#791F1F;}.b-codec{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);}
+.b-warn{background:#FEF3CD;color:#7A4800;}
+.b-ok{background:#E1F5EE;color:#085041;}
+
+/* ── Movie detail ── */
+.detail-hero{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:24px 24px 20px;}
+.hero-inner{display:flex;gap:20px;align-items:flex-start;}
+.hero-poster{width:110px;min-width:110px;height:160px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+.hero-info{flex:1;min-width:0;}
+.hero-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;}
+.hero-sub{font-size:13px;color:var(--color-text-tertiary);margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;}
+.hero-sub span{display:flex;align-items:center;gap:4px;}
+.hero-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.hero-synopsis{font-size:12px;color:var(--color-text-secondary);line-height:1.6;max-width:560px;}
+.hero-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.btn-act{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;font-weight:500;}
+.btn-prim{background:#1D9E75;color:white;border:none;}
+.btn-sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);}
+.btn-act svg{width:13px;height:13px;}
+.rating-pill{display:flex;align-items:center;gap:4px;background:#FAEEDA;color:#633806;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:500;}
+.detail-body{padding:20px 24px;display:grid;grid-template-columns:1fr 260px;gap:20px;}
+.section-title{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.info-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.meta-row{display:flex;flex-direction:column;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.meta-row:nth-last-child(-n+2){border-bottom:none;}
+.meta-lbl{font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px;}
+.meta-val{font-size:12px;color:var(--color-text-primary);font-weight:500;}
+.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;}
+.cast-card{text-align:center;cursor:pointer;}
+.cast-avatar{width:44px;height:44px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--color-text-tertiary);margin:0 auto 6px;}
+.cast-name{font-size:10px;font-weight:500;color:var(--color-text-primary);text-align:center;}
+.cast-role{font-size:9px;color:var(--color-text-tertiary);text-align:center;}
+.mediainfo-table{width:100%;border-collapse:collapse;}
+.mediainfo-table th{font-size:10px;color:var(--color-text-tertiary);font-weight:500;padding:6px 8px;text-align:left;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);}
+.mediainfo-table td{font-size:11px;color:var(--color-text-secondary);padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.mediainfo-table tr:last-child td{border-bottom:none;}
+.mediainfo-table td:first-child{color:var(--color-text-tertiary);width:38%;}
+.track-sep{font-size:10px;font-weight:600;color:var(--color-text-tertiary);padding:8px 8px 4px;background:var(--color-background-tertiary);display:block;letter-spacing:.04em;}
+.side-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;}
+.tmdb-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px;}
+.tmdb-row:last-child{border-bottom:none;}
+.tmdb-lbl{color:var(--color-text-tertiary);}
+.tmdb-val{color:var(--color-text-primary);font-weight:500;}
+.source-badge{font-size:9px;padding:2px 6px;border-radius:99px;background:#E6F1FB;color:#0C447C;font-weight:500;}
+
+/* ── Series detail ── */
+.series-hero{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:24px;}
+.season-tabs{display:flex;gap:4px;padding:0 24px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);overflow-x:auto;}
+.s-tab{padding:10px 14px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .1s;}
+.s-tab.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:500;}
+.s-tab:hover:not(.active){color:var(--color-text-primary);}
+.season-content{padding:16px 24px;}
+.season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.season-stats{display:flex;gap:12px;font-size:11px;color:var(--color-text-tertiary);}
+.ep-list{display:flex;flex-direction:column;gap:6px;}
+
+/* ── Episode row with expandable metadata ── */
+.ep-item{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary);transition:border-color .12s;}
+.ep-item:hover{border-color:var(--color-border-secondary);}
+.ep-item.expanded{border-color:#5DCAA5;}
+.ep-row{padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.ep-num{font-size:11px;font-weight:500;color:var(--color-text-tertiary);min-width:28px;}
+.ep-info{flex:1;min-width:0;}
+.ep-title{font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ep-meta{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;}
+.ep-badges{display:flex;gap:4px;flex-shrink:0;}
+.ep-size{font-size:10px;color:var(--color-text-tertiary);min-width:55px;text-align:right;}
+.ep-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ep-expand-btn{width:22px;height:22px;border:0.5px solid var(--color-border-tertiary);border-radius:4px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .2s,background .15s,border-color .15s;}
+.ep-expand-btn svg{width:9px;height:9px;color:var(--color-text-tertiary);transition:transform .2s;}
+.ep-item.expanded .ep-expand-btn{background:#E1F5EE;border-color:#5DCAA5;}
+.ep-item.expanded .ep-expand-btn svg{transform:rotate(90deg);color:#1D9E75;}
+
+.ep-detail{display:none;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);}
+.ep-detail.open{display:block;}
+.ep-detail-inner{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.ep-meta-section{}
+.ep-meta-section-hd{font-size:9px;font-weight:600;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.ep-meta-section-hd::after{content:'';flex:1;height:0.5px;background:var(--color-border-secondary);}
+.ep-meta-row{display:flex;justify-content:space-between;padding:3px 0;font-size:10px;}
+.ep-meta-lbl{color:var(--color-text-tertiary);}
+.ep-meta-val{color:var(--color-text-primary);font-weight:500;text-align:right;max-width:55%;}
+.ep-detail-path{grid-column:1/-1;font-size:9px;color:var(--color-text-tertiary);font-family:var(--font-mono);padding:6px 8px;background:var(--color-background-tertiary);border-radius:4px;border:0.5px solid var(--color-border-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── Récents page ── */
+.recents-page{padding:0 0 24px;}
+.recents-topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;}
+.recents-topbar-title{font-size:13px;font-weight:500;color:var(--color-text-primary);}
+.recents-section{padding:16px 20px 0;}
+.recents-section-hd{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.recents-see-all{font-size:11px;color:#1D9E75;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;}
+.scroll-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.scroll-row::-webkit-scrollbar{display:none;}
+.recent-card{min-width:130px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.recent-card:hover{border-color:#5DCAA5;}
+.recent-poster{height:155px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;position:relative;}
+.recent-added-badge{position:absolute;top:6px;right:6px;font-size:8px;padding:2px 5px;border-radius:99px;background:rgba(29,158,117,.9);color:white;font-weight:600;}
+.recent-body{padding:8px 9px;}
+.recent-title{font-size:11px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.recent-date{font-size:10px;color:var(--color-text-tertiary);}
+.activity-feed{display:flex;flex-direction:column;gap:0;}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.activity-item:last-child{border-bottom:none;}
+.activity-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.activity-icon.add{background:#E1F5EE;}.activity-icon.add svg{color:#1D9E75;}
+.activity-icon.warn{background:#FEF3CD;}.activity-icon.warn svg{color:#EF9F27;}
+.activity-icon svg{width:14px;height:14px;}
+.activity-body{flex:1;min-width:0;}
+.activity-title{font-size:12px;font-weight:500;color:var(--color-text-primary);}
+.activity-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:1px;}
+.activity-time{font-size:10px;color:var(--color-text-tertiary);white-space:nowrap;margin-top:2px;}
+.trending-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.trending-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;display:flex;gap:10px;cursor:pointer;transition:border-color .15s;}
+.trending-card:hover{border-color:#5DCAA5;}
+.trending-rank{font-size:22px;font-weight:700;color:var(--color-border-secondary);min-width:24px;}
+.trending-info{flex:1;min-width:0;}
+.trending-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;}
+.trending-meta{font-size:10px;color:var(--color-text-tertiary);}
+.trending-score{font-size:11px;font-weight:500;color:#1D9E75;white-space:nowrap;}
+
+/* ── Statistiques page ── */
+.stats-page{padding:20px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.kpi-icon svg{width:15px;height:15px;}
+.kpi-icon.green{background:#E1F5EE;color:#1D9E75;}
+.kpi-icon.blue{background:#E6F1FB;color:#0C447C;}
+.kpi-icon.purple{background:#EEEDFE;color:#3C3489;}
+.kpi-icon.amber{background:#FAEEDA;color:#633806;}
+.kpi-val{font-size:26px;font-weight:600;color:var(--color-text-primary);letter-spacing:-.5px;line-height:1;}
+.kpi-lbl{font-size:11px;color:var(--color-text-tertiary);margin-top:4px;}
+.kpi-delta{font-size:10px;margin-top:6px;display:flex;align-items:center;gap:3px;}
+.kpi-delta.up{color:#1D9E75;}.kpi-delta.neutral{color:var(--color-text-tertiary);}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;}
+.chart-title{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;}
+.bar-chart-item{margin-bottom:9px;}
+.bar-chart-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;}
+.bar-chart-label span:first-child{color:var(--color-text-secondary);}
+.bar-chart-label span:last-child{color:var(--color-text-primary);font-weight:500;}
+.bar-track{height:6px;background:var(--color-background-tertiary);border-radius:99px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;background:#1D9E75;transition:width .6s ease;}
+.bar-fill.blue{background:#3B82F6;}.bar-fill.purple{background:#8B5CF6;}.bar-fill.orange{background:#F59E0B;}.bar-fill.red{background:#EF4444;}.bar-fill.teal{background:#14B8A6;}
+.donut-wrap{display:flex;align-items:center;gap:16px;}
+.donut-svg{flex-shrink:0;}
+.donut-legend{flex:1;}
+.donut-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;}
+.donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.donut-legend-label{color:var(--color-text-secondary);flex:1;}
+.donut-legend-pct{color:var(--color-text-primary);font-weight:500;}
+.area-chart{margin-top:4px;}
+.area-chart svg{display:block;}
+.area-x-labels{display:flex;justify-content:space-between;padding:0 4px;margin-top:4px;}
+.area-x-label{font-size:9px;color:var(--color-text-tertiary);}
+.genre-list{display:flex;flex-direction:column;gap:7px;}
+.genre-item{display:flex;align-items:center;gap:8px;font-size:11px;}
+.genre-name{min-width:90px;color:var(--color-text-secondary);}
+.genre-bar{flex:1;height:6px;background:var(--color-background-tertiary);border-radius:99px;overflow:hidden;}
+.genre-fill{height:100%;background:var(--color-background-tertiary);border-radius:99px;}
+.genre-count{min-width:28px;text-align:right;color:var(--color-text-primary);font-weight:500;}
+
+/* ── Problèmes page ── */
+.issues-page{padding:0;}
+.issues-topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.issues-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);}
+.issue-kpi{padding:10px 14px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);}
+.issue-kpi.red-kpi{background:#FCEBEB;border-color:#F09595;}
+.issue-kpi.orange-kpi{background:#FEF3CD;border-color:#F5C842;}
+.issue-kpi.blue-kpi{background:#E6F1FB;border-color:#93C3EA;}
+.issue-kpi.gray-kpi{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);}
+.issue-kpi-val{font-size:22px;font-weight:600;}
+.issue-kpi.red-kpi .issue-kpi-val{color:#C0392B;}
+.issue-kpi.orange-kpi .issue-kpi-val{color:#7A4800;}
+.issue-kpi.blue-kpi .issue-kpi-val{color:#0C447C;}
+.issue-kpi.gray-kpi .issue-kpi-val{color:var(--color-text-primary);}
+.issue-kpi-lbl{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;}
+.issues-filter-tabs{display:flex;gap:0;padding:0 20px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);}
+.issue-tab{padding:9px 14px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.issue-tab.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:500;}
+.issue-tab:hover:not(.active){color:var(--color-text-primary);}
+.issues-list{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+.issue-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;}
+.issue-card.issue-miss{border-left:3px solid #E24B4A;}
+.issue-card.issue-warn{border-left:3px solid #EF9F27;}
+.issue-card.issue-info{border-left:3px solid #3B82F6;}
+.issue-sev{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.issue-sev svg{width:13px;height:13px;}
+.issue-sev.sev-miss{background:#FCEBEB;color:#C0392B;}
+.issue-sev.sev-warn{background:#FEF3CD;color:#7A4800;}
+.issue-sev.sev-info{background:#E6F1FB;color:#0C447C;}
+.issue-body{flex:1;min-width:0;}
+.issue-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;}
+.issue-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5;}
+.issue-path{font-size:10px;font-family:var(--font-mono);color:var(--color-text-tertiary);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.issue-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;}
+.issue-btn{padding:5px 10px;border-radius:var(--border-radius-md);font-size:11px;cursor:pointer;font-weight:500;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);}
+.issue-btn.prim{background:#1D9E75;color:white;border-color:#1D9E75;}
+.issue-btn.danger{background:#FCEBEB;color:#C0392B;border-color:#F09595;}
+.issue-tags{display:flex;gap:4px;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 14 14"><path d="M2 11L7 3L12 11Z"/></svg></div>
+      <span class="logo-name">Mediarr</span>
+    </div>
+    <div class="nav">
+      <div class="nav-group">Librairie</div>
+      <div class="nav-item" id="nav-films" onclick="goPage('list-films')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3v10M11 3v10M2 7h12"/></svg>
+        Films
+        <span class="nav-badge">347</span>
+      </div>
+      <div class="nav-item active" id="nav-series" onclick="goPage('list-series')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg>
+        Séries
+        <span class="nav-badge">83</span>
+      </div>
+      <div class="nav-item" id="nav-recents" onclick="goPage('recents')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 5v3l2 2"/></svg>
+        Récents
+        <span class="nav-badge" style="background:#E1F5EE;color:#085041;border-color:#5DCAA5;">12</span>
+      </div>
+      <div class="nav-group" style="margin-top:6px;">Analyse</div>
+      <div class="nav-item" id="nav-stats" onclick="goPage('stats')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-5 3 3 3-4 2 2"/></svg>
+        Statistiques
+      </div>
+      <div class="nav-item" id="nav-issues" onclick="goPage('issues')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11h.01"/></svg>
+        Problèmes
+        <span class="nav-badge" style="background:#FCEBEB;color:#791F1F;border-color:#F09595;">11</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="status-dot"></div>
+      <span style="font-size:11px;color:var(--color-text-tertiary);">Système opérationnel</span>
+    </div>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <div class="topbar" id="topbar">
+      <div class="back-btn hidden" id="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+        Retour
+      </div>
+      <div class="topbar-sep hidden" id="top-sep"></div>
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <!-- Spotlight trigger -->
+      <div class="search-trigger" style="margin-left:auto;" onclick="openSpotlight()">
+        <span class="search-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l2.5 2.5"/></svg></span>
+        <div class="search-trigger-inner">
+          <span style="font-size:12px;">Rechercher…</span>
+          <div class="search-trigger-kbd" style="margin-left:auto;">
+            <span class="kbd-key">⌘</span><span class="kbd-key">K</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── LIST FILMS ── -->
+      <div class="page" id="page-list-films">
+        <div class="list-filters">
+          <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Filtres</span>
+          <div class="chip has-val"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/></svg>Statut<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/></svg>Résolution<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"/></svg>Codec<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"/></svg>Audio<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="f-sep"></div>
+          <div class="view-tog">
+            <div class="v-btn active"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg></div>
+            <div class="v-btn"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h11M1 6.5h11M1 10h11"/></svg></div>
+          </div>
+        </div>
+        <div class="list-content">
+          <div class="stats-row">
+            <div class="stat"><div class="stat-lbl">Films</div><div class="stat-val">347</div><div class="stat-sub">343 disponibles</div></div>
+            <div class="stat"><div class="stat-lbl">Espace</div><div class="stat-val">8,4 To</div><div class="stat-sub">moy. 24,7 Go</div></div>
+            <div class="stat"><div class="stat-lbl">4K UHD</div><div class="stat-val">128</div><div class="stat-sub">37% de la librairie</div></div>
+            <div class="stat"><div class="stat-lbl">Problèmes</div><div class="stat-val" style="color:#E24B4A;">4</div><div class="stat-sub">fichiers manquants</div></div>
+          </div>
+          <div class="grid-view">
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">I</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Interstellar</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Interstellar</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span><span class="b b-codec">H.265</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">D</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Dune Part Two</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Dune: Deuxième partie</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10+</span><span class="b b-codec">AV1</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">O</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Oppenheimer</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Oppenheimer</div><div class="cmeta"><span class="b b-hd">1080p</span><span class="b b-codec">H.264</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">P</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Poor Things</div><div class="sbar miss"></div></div>
+              <div class="cbody"><div class="ctitle">Poor Things</div><div class="cmeta"><span class="b b-miss">Manquant</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">P</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Parasite</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Parasite</div><div class="cmeta"><span class="b b-hd">1080p</span><span class="b b-codec">H.265</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-movie')">
+              <div class="poster"><div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">EE</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">EEAAO</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Everything Everywhere…</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LIST SERIES ── -->
+      <div class="page active" id="page-list-series">
+        <div class="list-filters">
+          <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Filtres</span>
+          <div class="chip has-val"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/></svg>Statut<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/></svg>Résolution<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"/></svg>Codec<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg></div>
+          <div class="f-sep"></div>
+          <div class="view-tog">
+            <div class="v-btn active"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg></div>
+            <div class="v-btn"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h11M1 6.5h11M1 10h11"/></svg></div>
+          </div>
+        </div>
+        <div class="list-content">
+          <div class="stats-row">
+            <div class="stat"><div class="stat-lbl">Séries</div><div class="stat-val">83</div><div class="stat-sub">79 complètes</div></div>
+            <div class="stat"><div class="stat-lbl">Épisodes</div><div class="stat-val">4 218</div><div class="stat-sub">4 190 disponibles</div></div>
+            <div class="stat"><div class="stat-lbl">Espace</div><div class="stat-val">12,3 To</div><div class="stat-sub">moy. 2,9 Go/ep</div></div>
+            <div class="stat"><div class="stat-lbl">Problèmes</div><div class="stat-val" style="color:#EF9F27;">7</div><div class="stat-sub">épisodes manquants</div></div>
+          </div>
+          <div class="grid-view">
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">BB</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Breaking Bad</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Breaking Bad</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">SS</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Severance</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Severance</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">SH</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Shogun</div><div class="sbar warn"></div></div>
+              <div class="cbody"><div class="ctitle">Shōgun</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-warn">3 ep. manq.</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">TL</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">The Last of Us</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">The Last of Us</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-dv">DV</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">SU</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">Succession</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">Succession</div><div class="cmeta"><span class="b b-hd">1080p</span><span class="b b-codec">H.265</span></div></div>
+            </div>
+            <div class="mcard" onclick="goPage('detail-series')">
+              <div class="poster"><div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">TB</div><div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;">The Bear</div><div class="sbar ok"></div></div>
+              <div class="cbody"><div class="ctitle">The Bear</div><div class="cmeta"><span class="b b-4k">4K</span><span class="b b-hdr">HDR10</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MOVIE DETAIL ── -->
+      <div class="page" id="page-detail-movie">
+        <div class="detail-hero">
+          <div class="hero-inner">
+            <div class="hero-poster">
+              <div style="font-size:30px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">I</div>
+              <div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;text-align:center;padding:0 6px;">Interstellar</div>
+            </div>
+            <div class="hero-info">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div class="hero-title">Interstellar</div>
+                <div class="rating-pill"><svg width="11" height="11" viewBox="0 0 12 12" fill="#BA7517"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"/></svg>8,7</div>
+                <span class="source-badge">TMDB</span>
+              </div>
+              <div class="hero-sub">
+                <span>2014</span><span>·</span><span>2h 49min</span><span>·</span><span>Science-fiction · Aventure</span><span>·</span><span style="color:#1D9E75;font-weight:500;">Disponible</span>
+              </div>
+              <div class="hero-badges">
+                <span class="b b-4k" style="font-size:10px;padding:3px 8px;">4K UHD</span>
+                <span class="b b-dv" style="font-size:10px;padding:3px 8px;">Dolby Vision</span>
+                <span class="b b-hdr" style="font-size:10px;padding:3px 8px;">HDR10</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">H.265</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">TrueHD Atmos</span>
+              </div>
+              <div class="hero-synopsis">Un groupe d'explorateurs emprunte un tunnel de ver récemment découvert pour dépasser les limites de l'exploration spatiale humaine et partir à la conquête d'immensités de l'univers encore inconnues.</div>
+              <div class="hero-actions">
+                <button class="btn-act btn-prim"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>Rechercher upgrade</button>
+                <button class="btn-act btn-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M8 4l3 3-3 3"/></svg>Ouvrir dans Radarr</button>
+                <button class="btn-act btn-sec">TMDB</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div>
+            <div class="section-title">Cast principal</div>
+            <div class="info-card">
+              <div class="cast-grid">
+                <div class="cast-card"><div class="cast-avatar">MM</div><div class="cast-name">Matthew McConaughey</div><div class="cast-role">Cooper</div></div>
+                <div class="cast-card"><div class="cast-avatar">AH</div><div class="cast-name">Anne Hathaway</div><div class="cast-role">Brand</div></div>
+                <div class="cast-card"><div class="cast-avatar">JC</div><div class="cast-name">Jessica Chastain</div><div class="cast-role">Murph (adulte)</div></div>
+                <div class="cast-card"><div class="cast-avatar">MK</div><div class="cast-name">Michael Caine</div><div class="cast-role">Prof. Brand</div></div>
+                <div class="cast-card"><div class="cast-avatar">MD</div><div class="cast-name">Matt Damon</div><div class="cast-role">Dr. Mann</div></div>
+              </div>
+            </div>
+            <div class="section-title" style="margin-top:4px;">Métadonnées du fichier</div>
+            <div class="info-card" style="padding:0;overflow:hidden;">
+              <span class="track-sep">Vidéo — piste 1</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>H.265 / HEVC (Main 10)</td></tr>
+                <tr><td>Résolution</td><td>3840 × 2160 (4K UHD)</td></tr>
+                <tr><td>Bitrate</td><td>35,2 Mbps</td></tr>
+                <tr><td>HDR</td><td>Dolby Vision + HDR10 (SMPTE ST 2086)</td></tr>
+                <tr><td>Frame rate</td><td>23,976 fps</td></tr>
+                <tr><td>Color space</td><td>BT.2020 / bt2020nc</td></tr>
+              </table>
+              <span class="track-sep">Audio — piste 1</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>TrueHD Atmos</td></tr>
+                <tr><td>Canaux</td><td>7.1 (L R C LFE Ls Rs Lss Rss)</td></tr>
+                <tr><td>Sample rate</td><td>48 000 Hz</td></tr>
+                <tr><td>Bitrate</td><td>4,8 Mbps</td></tr>
+              </table>
+              <span class="track-sep">Audio — piste 2</span>
+              <table class="mediainfo-table">
+                <tr><td>Codec</td><td>AC-3 (Dolby Digital)</td></tr>
+                <tr><td>Canaux</td><td>5.1</td></tr>
+                <tr><td>Langue</td><td>Français</td></tr>
+              </table>
+              <span class="track-sep">Sous-titres</span>
+              <table class="mediainfo-table">
+                <tr><td>Piste 1</td><td>Français (SRT)</td></tr>
+                <tr><td>Piste 2</td><td>Anglais (SRT)</td></tr>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="section-title">Informations générales</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">Réalisateur</span><span class="tmdb-val">C. Nolan</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Studio</span><span class="tmdb-val">Warner Bros.</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Pays</span><span class="tmdb-val">États-Unis / UK</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Langue orig.</span><span class="tmdb-val">Anglais</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Budget</span><span class="tmdb-val">165 M$</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Box-office</span><span class="tmdb-val">701 M$</span></div>
+            </div>
+            <div class="section-title">Fichier</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">Taille</span><span class="tmdb-val">58,3 Go</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Durée</span><span class="tmdb-val">2:49:22</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Conteneur</span><span class="tmdb-val">MKV</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Chemin</span><span class="tmdb-val" style="font-size:10px;font-family:var(--font-mono);">/media/films/Interstellar (2014)/</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Ajouté le</span><span class="tmdb-val">12 jan. 2024</span></div>
+            </div>
+            <div class="section-title">Sources externes</div>
+            <div class="side-card">
+              <div class="tmdb-row"><span class="tmdb-lbl">TMDB ID</span><span class="tmdb-val" style="color:#185FA5;">157336</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">IMDb</span><span class="tmdb-val" style="color:#185FA5;">tt0816692</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Note TMDB</span><span class="tmdb-val">8,7 / 10</span></div>
+              <div class="tmdb-row"><span class="tmdb-lbl">Popularité</span><span class="tmdb-val">97,4</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SERIES DETAIL ── -->
+      <div class="page" id="page-detail-series">
+        <div class="series-hero">
+          <div class="hero-inner">
+            <div class="hero-poster">
+              <div style="font-size:26px;font-weight:500;color:var(--color-text-tertiary);opacity:.18;">BB</div>
+              <div style="font-size:10px;color:var(--color-text-tertiary);opacity:.4;text-align:center;padding:0 6px;">Breaking Bad</div>
+            </div>
+            <div class="hero-info">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div class="hero-title">Breaking Bad</div>
+                <div class="rating-pill"><svg width="11" height="11" viewBox="0 0 12 12" fill="#BA7517"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"/></svg>9,5</div>
+                <span class="source-badge">TVDB</span>
+              </div>
+              <div class="hero-sub">
+                <span>2008 – 2013</span><span>·</span><span>5 saisons · 62 épisodes</span><span>·</span><span>Drame · Crime</span><span>·</span><span style="color:#1D9E75;font-weight:500;">Complète</span>
+              </div>
+              <div class="hero-badges">
+                <span class="b b-4k" style="font-size:10px;padding:3px 8px;">4K UHD</span>
+                <span class="b b-dv" style="font-size:10px;padding:3px 8px;">Dolby Vision</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">H.265</span>
+                <span class="b b-codec" style="font-size:10px;padding:3px 8px;">DTS-HD MA 5.1</span>
+              </div>
+              <div class="hero-synopsis">Walter White, professeur de chimie dans un lycée d'Albuquerque, apprend qu'il est atteint d'un cancer du poumon en phase terminale. Pour assurer l'avenir financier de sa famille, il se lance dans la fabrication et la vente de méthamphétamine.</div>
+              <div class="hero-actions">
+                <button class="btn-act btn-prim"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>Rechercher épisodes</button>
+                <button class="btn-act btn-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M8 4l3 3-3 3"/></svg>Ouvrir dans Sonarr</button>
+                <button class="btn-act btn-sec">TVDB</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="season-tabs" id="season-tabs">
+          <div class="s-tab active" onclick="switchSeason(0,this)">Saison 1</div>
+          <div class="s-tab" onclick="switchSeason(1,this)">Saison 2</div>
+          <div class="s-tab" onclick="switchSeason(2,this)">Saison 3</div>
+          <div class="s-tab" onclick="switchSeason(3,this)">Saison 4</div>
+          <div class="s-tab" onclick="switchSeason(4,this)">Saison 5</div>
+        </div>
+        <div class="season-content" id="season-content"></div>
+      </div>
+
+      <!-- ── RÉCENTS ── -->
+      <div class="page" id="page-recents">
+        <div class="recents-page">
+          <div class="recents-topbar">
+            <span class="recents-topbar-title">Activité récente</span>
+            <span style="font-size:11px;color:var(--color-text-tertiary);">Dernière synchronisation il y a 4 min</span>
+          </div>
+
+          <!-- Ajoutés cette semaine -->
+          <div class="recents-section">
+            <div class="recents-section-hd">
+              Ajoutés cette semaine
+              <span class="recents-see-all">Voir tout →</span>
+            </div>
+            <div class="scroll-row">
+              <div class="recent-card" onclick="goPage('detail-movie')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#E1F5EE,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">CI</div>
+                  <div class="recent-added-badge">Nouveau</div>
+                  <div class="sbar ok"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Civil War</div><div class="recent-date">Ajouté hier · 4K DV</div></div>
+              </div>
+              <div class="recent-card" onclick="goPage('detail-movie')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#EEEDFE,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">FU</div>
+                  <div class="recent-added-badge">Nouveau</div>
+                  <div class="sbar ok"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Furiosa</div><div class="recent-date">Ajouté hier · 4K HDR10+</div></div>
+              </div>
+              <div class="recent-card" onclick="goPage('detail-series')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#E6F1FB,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">AN</div>
+                  <div class="recent-added-badge">Série</div>
+                  <div class="sbar ok"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Andor S02</div><div class="recent-date">3 épisodes · 2 mai</div></div>
+              </div>
+              <div class="recent-card" onclick="goPage('detail-movie')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#FAEEDA,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">GL</div>
+                  <div class="recent-added-badge">Nouveau</div>
+                  <div class="sbar ok"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Gladiator II</div><div class="recent-date">Ajouté 30 avr. · 4K DV</div></div>
+              </div>
+              <div class="recent-card" onclick="goPage('detail-series')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#E1F5EE,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">PE</div>
+                  <div class="recent-added-badge">Série</div>
+                  <div class="sbar warn"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Peaky Blinders</div><div class="recent-date">S06 incomplet · 28 avr.</div></div>
+              </div>
+              <div class="recent-card" onclick="goPage('detail-movie')">
+                <div class="recent-poster" style="background:linear-gradient(145deg,#FCEBEB,#F5F6F8);">
+                  <div style="font-size:22px;font-weight:700;color:var(--color-text-tertiary);opacity:.2;">CO</div>
+                  <div class="recent-added-badge">Nouveau</div>
+                  <div class="sbar ok"></div>
+                </div>
+                <div class="recent-body"><div class="recent-title">Conclave</div><div class="recent-date">Ajouté 27 avr. · 1080p</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tendances -->
+          <div class="recents-section" style="margin-top:6px;">
+            <div class="recents-section-hd">
+              Tendances du moment
+            </div>
+            <div class="trending-grid">
+              <div class="trending-card" onclick="goPage('detail-movie')">
+                <div class="trending-rank">1</div>
+                <div class="trending-info">
+                  <div class="trending-title">Dune: Deuxième partie</div>
+                  <div class="trending-meta">Film · 2024 · 4K HDR10+</div>
+                </div>
+                <div class="trending-score">8,8</div>
+              </div>
+              <div class="trending-card" onclick="goPage('detail-series')">
+                <div class="trending-rank">2</div>
+                <div class="trending-info">
+                  <div class="trending-title">Andor — Saison 2</div>
+                  <div class="trending-meta">Série · 2025 · 4K DV</div>
+                </div>
+                <div class="trending-score">9,1</div>
+              </div>
+              <div class="trending-card" onclick="goPage('detail-movie')">
+                <div class="trending-rank">3</div>
+                <div class="trending-info">
+                  <div class="trending-title">Conclave</div>
+                  <div class="trending-meta">Film · 2024 · 1080p</div>
+                </div>
+                <div class="trending-score">7,9</div>
+              </div>
+              <div class="trending-card" onclick="goPage('detail-series')">
+                <div class="trending-rank">4</div>
+                <div class="trending-info">
+                  <div class="trending-title">Shōgun — Saison 1</div>
+                  <div class="trending-meta">Série · 2024 · 4K HDR</div>
+                </div>
+                <div class="trending-score">9,0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Journal d'activité -->
+          <div class="recents-section" style="margin-top:6px;">
+            <div class="recents-section-hd">Journal d'activité</div>
+            <div class="info-card" style="padding:4px 14px;">
+              <div class="activity-feed">
+                <div class="activity-item">
+                  <div class="activity-icon add"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-title">Civil War ajouté à la librairie</div>
+                    <div class="activity-sub">4K UHD · Dolby Vision · H.265 · 42,1 Go</div>
+                  </div>
+                  <div class="activity-time">Il y a 1j</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon add"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-title">Andor S02E05 ajouté</div>
+                    <div class="activity-sub">4K UHD · Dolby Vision · 7,3 Go</div>
+                  </div>
+                  <div class="activity-time">Il y a 2j</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon warn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5v5M8 12h.01"/><path d="M3 13L8 3l5 10H3z"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-title">Shōgun — 3 épisodes manquants détectés</div>
+                    <div class="activity-sub">S01E04, S01E07, S01E10 introuvables</div>
+                  </div>
+                  <div class="activity-time">Il y a 3j</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon add"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-title">Furiosa ajouté à la librairie</div>
+                    <div class="activity-sub">4K UHD · HDR10+ · H.265 · 51,8 Go</div>
+                  </div>
+                  <div class="activity-time">Il y a 4j</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon add"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-title">Gladiator II ajouté à la librairie</div>
+                    <div class="activity-sub">4K UHD · Dolby Vision · H.265 · 55,2 Go</div>
+                  </div>
+                  <div class="activity-time">Il y a 5j</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STATISTIQUES ── -->
+      <div class="page" id="page-stats">
+        <div class="stats-page">
+          <!-- KPIs -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3v10M11 3v10M2 7h12"/></svg></div>
+              <div class="kpi-val">347</div>
+              <div class="kpi-lbl">Films</div>
+              <div class="kpi-delta up">↑ 12 ce mois-ci</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div>
+              <div class="kpi-val">83</div>
+              <div class="kpi-lbl">Séries · 4 218 épisodes</div>
+              <div class="kpi-delta up">↑ 3 séries ce mois-ci</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7l2 2 4-4"/></svg></div>
+              <div class="kpi-val">20,7</div>
+              <div class="kpi-lbl">To stockage total</div>
+              <div class="kpi-delta neutral">Films 8,4 To · Séries 12,3 To</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11h.01"/></svg></div>
+              <div class="kpi-val" style="color:#E24B4A;">11</div>
+              <div class="kpi-lbl">Problèmes actifs</div>
+              <div class="kpi-delta neutral">4 manquants · 7 ep. manquants</div>
+            </div>
+          </div>
+
+          <!-- Charts row 1 -->
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-title">Codec vidéo — distribution</div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>H.265 / HEVC</span><span>62%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:62%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>H.264 / AVC</span><span>26%</span></div>
+                <div class="bar-track"><div class="bar-fill blue" style="width:26%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>AV1</span><span>9%</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width:9%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>VP9</span><span>3%</span></div>
+                <div class="bar-track"><div class="bar-fill teal" style="width:3%"></div></div>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-title">Résolution — répartition</div>
+              <div class="donut-wrap">
+                <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#E5E7EB" stroke-width="14"/>
+                  <!-- 4K: 35% = 238.76 * .35 = 83.6 -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#1D9E75" stroke-width="14" stroke-dasharray="83.6 155.4" stroke-dashoffset="0" stroke-linecap="butt" transform="rotate(-90 50 50)"/>
+                  <!-- 1080p: 50% = 119.38, offset = -83.6 -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#3B82F6" stroke-width="14" stroke-dasharray="119.4 119.4" stroke-dashoffset="-83.6" stroke-linecap="butt" transform="rotate(-90 50 50)"/>
+                  <!-- 720p: 15% = 35.8, offset = -83.6-119.4 = -203 -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#8B5CF6" stroke-width="14" stroke-dasharray="35.8 203.0" stroke-dashoffset="-203.0" stroke-linecap="butt" transform="rotate(-90 50 50)"/>
+                  <text x="50" y="46" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">35%</text>
+                  <text x="50" y="58" text-anchor="middle" font-size="8" fill="#6B7280">4K</text>
+                </svg>
+                <div class="donut-legend">
+                  <div class="donut-legend-item"><div class="donut-dot" style="background:#1D9E75"></div><span class="donut-legend-label">4K UHD</span><span class="donut-legend-pct">35%</span></div>
+                  <div class="donut-legend-item"><div class="donut-dot" style="background:#3B82F6"></div><span class="donut-legend-label">1080p</span><span class="donut-legend-pct">50%</span></div>
+                  <div class="donut-legend-item"><div class="donut-dot" style="background:#8B5CF6"></div><span class="donut-legend-label">720p ou moins</span><span class="donut-legend-pct">15%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts row 2 -->
+          <div class="chart-row">
+            <div class="chart-card" style="grid-column:1/-1;">
+              <div class="chart-title">Ajouts à la librairie — 12 derniers mois</div>
+              <div class="area-chart">
+                <svg width="100%" height="90" viewBox="0 0 700 90" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#1D9E75" stop-opacity="0.25"/>
+                      <stop offset="100%" stop-color="#1D9E75" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,72 L58,66 L116,60 L175,55 L233,48 L291,42 L350,35 L408,30 L466,22 L525,18 L583,12 L641,8 L700,5 L700,90 L0,90 Z" fill="url(#areaGrad)"/>
+                  <path d="M0,72 L58,66 L116,60 L175,55 L233,48 L291,42 L350,35 L408,30 L466,22 L525,18 L583,12 L641,8 L700,5" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linejoin="round"/>
+                  <!-- dots -->
+                  <circle cx="700" cy="5" r="3.5" fill="#1D9E75"/>
+                  <circle cx="641" cy="8" r="2.5" fill="#1D9E75" opacity=".6"/>
+                  <circle cx="583" cy="12" r="2.5" fill="#1D9E75" opacity=".6"/>
+                </svg>
+              </div>
+              <div class="area-x-labels">
+                <span class="area-x-label">Mai 24</span><span class="area-x-label">Juin</span><span class="area-x-label">Juil.</span><span class="area-x-label">Août</span><span class="area-x-label">Sep.</span><span class="area-x-label">Oct.</span><span class="area-x-label">Nov.</span><span class="area-x-label">Déc.</span><span class="area-x-label">Jan. 25</span><span class="area-x-label">Fév.</span><span class="area-x-label">Mar.</span><span class="area-x-label">Avr.</span><span class="area-x-label" style="font-weight:600;color:#1D9E75;">Mai</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts row 3 -->
+          <div class="chart-row-3">
+            <div class="chart-card">
+              <div class="chart-title">Audio — formats</div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>TrueHD Atmos</span><span>28%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:28%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>DTS-HD MA</span><span>32%</span></div>
+                <div class="bar-track"><div class="bar-fill teal" style="width:32%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>AC-3 / EAC-3</span><span>24%</span></div>
+                <div class="bar-track"><div class="bar-fill blue" style="width:24%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>AAC</span><span>16%</span></div>
+                <div class="bar-track"><div class="bar-fill orange" style="width:16%"></div></div>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-title">HDR — couverture</div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>Dolby Vision</span><span>22%</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width:22%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>HDR10+</span><span>18%</span></div>
+                <div class="bar-track"><div class="bar-fill blue" style="width:18%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>HDR10</span><span>31%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:31%"></div></div>
+              </div>
+              <div class="bar-chart-item">
+                <div class="bar-chart-label"><span>SDR uniquement</span><span>29%</span></div>
+                <div class="bar-track"><div class="bar-fill orange" style="width:29%"></div></div>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-title">Genres — top 6</div>
+              <div class="genre-list">
+                <div class="genre-item"><span class="genre-name">Drame</span><div class="genre-bar"><div class="genre-fill" style="width:82%;background:#1D9E75;height:100%;border-radius:99px;"></div></div><span class="genre-count">178</span></div>
+                <div class="genre-item"><span class="genre-name">Sci-Fi</span><div class="genre-bar"><div class="genre-fill" style="width:54%;background:#3B82F6;height:100%;border-radius:99px;"></div></div><span class="genre-count">114</span></div>
+                <div class="genre-item"><span class="genre-name">Action</span><div class="genre-bar"><div class="genre-fill" style="width:48%;background:#8B5CF6;height:100%;border-radius:99px;"></div></div><span class="genre-count">104</span></div>
+                <div class="genre-item"><span class="genre-name">Thriller</span><div class="genre-bar"><div class="genre-fill" style="width:38%;background:#F59E0B;height:100%;border-radius:99px;"></div></div><span class="genre-count">81</span></div>
+                <div class="genre-item"><span class="genre-name">Comédie</span><div class="genre-bar"><div class="genre-fill" style="width:28%;background:#14B8A6;height:100%;border-radius:99px;"></div></div><span class="genre-count">60</span></div>
+                <div class="genre-item"><span class="genre-name">Crime</span><div class="genre-bar"><div class="genre-fill" style="width:22%;background:#EF4444;height:100%;border-radius:99px;"></div></div><span class="genre-count">47</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROBLÈMES ── -->
+      <div class="page" id="page-issues">
+        <div class="issues-page">
+          <div class="issues-topbar">
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">11 problèmes détectés</span>
+            <button class="btn-act btn-sec" style="font-size:11px;padding:5px 10px;">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px;"><path d="M2 7h10M8 4l3 3-3 3"/></svg>
+              Lancer un scan
+            </button>
+          </div>
+
+          <div class="issues-summary">
+            <div class="issue-kpi red-kpi">
+              <div class="issue-kpi-val">4</div>
+              <div class="issue-kpi-lbl">Fichiers manquants</div>
+            </div>
+            <div class="issue-kpi orange-kpi">
+              <div class="issue-kpi-val">7</div>
+              <div class="issue-kpi-lbl">Épisodes manquants</div>
+            </div>
+            <div class="issue-kpi blue-kpi">
+              <div class="issue-kpi-val">2</div>
+              <div class="issue-kpi-lbl">Doublons détectés</div>
+            </div>
+            <div class="issue-kpi gray-kpi">
+              <div class="issue-kpi-val">1</div>
+              <div class="issue-kpi-lbl">Encodage incorrect</div>
+            </div>
+          </div>
+
+          <div class="issues-filter-tabs">
+            <div class="issue-tab active" onclick="filterIssues('all',this)">Tous (14)</div>
+            <div class="issue-tab" onclick="filterIssues('miss',this)">Manquants (11)</div>
+            <div class="issue-tab" onclick="filterIssues('dup',this)">Doublons (2)</div>
+            <div class="issue-tab" onclick="filterIssues('enc',this)">Encodage (1)</div>
+          </div>
+
+          <div class="issues-list" id="issues-list">
+            <div class="issue-card issue-miss" data-type="miss">
+              <div class="issue-sev sev-miss"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13L8 3l5 10H3z"/><path d="M8 7v3M8 12h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Poor Things — fichier introuvable</div>
+                <div class="issue-desc">Le fichier associé à ce film n'existe plus sur le disque. Il est possible qu'il ait été déplacé ou supprimé manuellement.</div>
+                <div class="issue-path">/media/films/Poor Things (2023)/Poor.Things.2023.2160p.mkv</div>
+                <div class="issue-tags"><span class="b b-miss">Manquant</span><span class="b b-4k">4K</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Rechercher</button>
+                <button class="issue-btn">Ignorer</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-miss" data-type="miss">
+              <div class="issue-sev sev-miss"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13L8 3l5 10H3z"/><path d="M8 7v3M8 12h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Shōgun — 3 épisodes manquants (S01)</div>
+                <div class="issue-desc">Les épisodes E04, E07 et E10 de la saison 1 n'ont pas été trouvés sur le disque lors du dernier scan.</div>
+                <div class="issue-path">/media/series/Shogun (2024)/Season 01/</div>
+                <div class="issue-tags"><span class="b b-miss">3 épisodes</span><span class="b b-4k">4K</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Rechercher</button>
+                <button class="issue-btn">Ignorer</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-miss" data-type="miss">
+              <div class="issue-sev sev-miss"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13L8 3l5 10H3z"/><path d="M8 7v3M8 12h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Breaking Bad — S02E04 manquant</div>
+                <div class="issue-desc">L'épisode "Down" (S02E04) est absent de la saison 2. Les autres épisodes de la saison sont disponibles.</div>
+                <div class="issue-path">/media/series/Breaking Bad/Season 02/</div>
+                <div class="issue-tags"><span class="b b-miss">1 épisode</span><span class="b b-4k">4K</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Rechercher</button>
+                <button class="issue-btn">Ignorer</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-miss" data-type="miss">
+              <div class="issue-sev sev-miss"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13L8 3l5 10H3z"/><path d="M8 7v3M8 12h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Inception — fichier introuvable</div>
+                <div class="issue-desc">Le film est référencé dans la librairie mais aucun fichier media ne lui est associé. Probablement supprimé.</div>
+                <div class="issue-path">/media/films/Inception (2010)/</div>
+                <div class="issue-tags"><span class="b b-miss">Manquant</span><span class="b b-hd">1080p attendu</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Rechercher</button>
+                <button class="issue-btn danger">Supprimer</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-warn" data-type="dup">
+              <div class="issue-sev sev-warn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M8 5v5M8 11h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">The Dark Knight — doublon détecté</div>
+                <div class="issue-desc">Deux fichiers distincts existent pour ce film: une version 1080p (H.264, 18,4 Go) et une version 4K (H.265, 52,1 Go). Conserver la meilleure qualité.</div>
+                <div class="issue-path">/media/films/The Dark Knight (2008)/</div>
+                <div class="issue-tags"><span class="b b-warn">Doublon</span><span class="b b-4k">4K</span><span class="b b-hd">1080p</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Garder 4K</button>
+                <button class="issue-btn danger">Supprimer 1080p</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-warn" data-type="dup">
+              <div class="issue-sev sev-warn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M8 5v5M8 11h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Interstellar — doublon détecté</div>
+                <div class="issue-desc">Une ancienne version 1080p SDR coexiste avec la version 4K DV actuellement indexée. Libérez 18,4 Go en supprimant la version inférieure.</div>
+                <div class="issue-path">/media/films/Interstellar (2014)/</div>
+                <div class="issue-tags"><span class="b b-warn">Doublon</span><span class="b b-codec">18,4 Go récupérables</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Garder 4K</button>
+                <button class="issue-btn danger">Supprimer 1080p</button>
+              </div>
+            </div>
+
+            <div class="issue-card issue-info" data-type="enc">
+              <div class="issue-sev sev-info"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11h.01"/></svg></div>
+              <div class="issue-body">
+                <div class="issue-title">Oppenheimer — codec non recommandé</div>
+                <div class="issue-desc">Ce fichier est encodé en H.264 8 bits malgré une résolution 1080p. Un réencodage H.265 permettrait d'économiser environ 40% d'espace sans perte de qualité visible.</div>
+                <div class="issue-path">/media/films/Oppenheimer (2023)/Oppenheimer.2023.1080p.mkv</div>
+                <div class="issue-tags"><span class="b b-hd">1080p</span><span class="b b-codec">H.264 → H.265 recommandé</span></div>
+              </div>
+              <div class="issue-actions">
+                <button class="issue-btn prim">Ré-encoder</button>
+                <button class="issue-btn">Ignorer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- .content -->
+  </div><!-- .main -->
+</div><!-- .app -->
+
+<!-- ── Spotlight overlay ── -->
+<div class="spotlight-overlay" id="spotlight" onclick="handleSpotlightClick(event)">
+  <div class="spotlight-box" id="spotlight-box">
+    <div class="spotlight-input-wrap">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l2.5 2.5"/></svg>
+      <input class="spotlight-input" id="spotlight-input" type="text" placeholder="Rechercher un film, une série…" autocomplete="off" oninput="onSpotlightInput()" onkeydown="onSpotlightKey(event)"/>
+      <span class="spotlight-esc" onclick="closeSpotlight()">Échap</span>
+    </div>
+    <div class="spotlight-results" id="spotlight-results">
+      <div class="spotlight-empty">
+        <div class="spotlight-empty-icon">🔍</div>
+        Commencez à saisir pour rechercher dans votre librairie
+      </div>
+    </div>
+    <div class="spotlight-footer">
+      <div class="spotlight-hint"><span class="kbd-key">↑</span><span class="kbd-key">↓</span> naviguer</div>
+      <div class="spotlight-hint"><span class="kbd-key">↵</span> ouvrir</div>
+      <div class="spotlight-hint"><span class="kbd-key">Échap</span> fermer</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Data ── */
+const MEDIA_DB = [
+  {id:'detail-movie', type:'film', abbr:'I', title:'Interstellar', year:'2014', meta:'4K DV · H.265 · 2h49', badges:['b-4k','b-dv']},
+  {id:'detail-movie', type:'film', abbr:'D', title:'Dune: Deuxième partie', year:'2024', meta:'4K HDR10+ · AV1 · 2h46', badges:['b-4k','b-hdr']},
+  {id:'detail-movie', type:'film', abbr:'O', title:'Oppenheimer', year:'2023', meta:'1080p · H.264 · 3h01', badges:['b-hd']},
+  {id:'detail-movie', type:'film', abbr:'P', title:'Poor Things', year:'2023', meta:'Manquant', badges:['b-miss']},
+  {id:'detail-movie', type:'film', abbr:'P', title:'Parasite', year:'2019', meta:'1080p · H.265 · 2h12', badges:['b-hd']},
+  {id:'detail-movie', type:'film', abbr:'EE', title:'Everything Everywhere All at Once', year:'2022', meta:'4K HDR10 · H.265', badges:['b-4k','b-hdr']},
+  {id:'detail-movie', type:'film', abbr:'TK', title:'The Dark Knight', year:'2008', meta:'4K DV · H.265 · 2h32', badges:['b-4k','b-dv']},
+  {id:'detail-movie', type:'film', abbr:'INC', title:'Inception', year:'2010', meta:'Manquant', badges:['b-miss']},
+  {id:'detail-movie', type:'film', abbr:'GL', title:'Gladiator II', year:'2024', meta:'4K DV · H.265 · 2h28', badges:['b-4k','b-dv']},
+  {id:'detail-movie', type:'film', abbr:'FU', title:'Furiosa', year:'2024', meta:'4K HDR10+ · H.265 · 2h28', badges:['b-4k','b-hdr']},
+  {id:'detail-movie', type:'film', abbr:'CO', title:'Conclave', year:'2024', meta:'1080p · H.265 · 2h01', badges:['b-hd']},
+  {id:'detail-series', type:'série', abbr:'BB', title:'Breaking Bad', year:'2008–2013', meta:'5 saisons · 62 épisodes · 4K DV', badges:['b-4k','b-dv']},
+  {id:'detail-series', type:'série', abbr:'SE', title:'Severance', year:'2022–', meta:'2 saisons · 19 épisodes · 4K HDR', badges:['b-4k','b-hdr']},
+  {id:'detail-series', type:'série', abbr:'SH', title:'Shōgun', year:'2024', meta:'1 saison · 10 épisodes · 3 manquants', badges:['b-4k','b-warn']},
+  {id:'detail-series', type:'série', abbr:'TL', title:'The Last of Us', year:'2023–', meta:'2 saisons · 17 épisodes · 4K DV', badges:['b-4k','b-dv']},
+  {id:'detail-series', type:'série', abbr:'SU', title:'Succession', year:'2018–2023', meta:'4 saisons · 39 épisodes · 1080p', badges:['b-hd']},
+  {id:'detail-series', type:'série', abbr:'TB', title:'The Bear', year:'2022–', meta:'3 saisons · 28 épisodes · 4K HDR', badges:['b-4k','b-hdr']},
+  {id:'detail-series', type:'série', abbr:'AN', title:'Andor', year:'2022–', meta:'2 saisons · 24 épisodes · 4K DV', badges:['b-4k','b-dv']},
+  {id:'detail-series', type:'série', abbr:'HD', title:'House of the Dragon', year:'2022–', meta:'2 saisons · 18 épisodes · 4K DV', badges:['b-4k','b-dv']},
+];
+
+const SEASONS=[
+  {n:1,eps:[
+    {n:1,title:"Pilot",dur:"58min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"8,2 Go",status:"ok", meta:{bitrate:"26,8 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E01.mkv"}},
+    {n:2,title:"Cat's in the Bag",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,8 Go",status:"ok", meta:{bitrate:"22,4 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E02.mkv"}},
+    {n:3,title:"...And the Bag's in the River",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok", meta:{bitrate:"22,8 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E03.mkv"}},
+    {n:4,title:"Cancer Man",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok", meta:{bitrate:"23,5 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E04.mkv"}},
+    {n:5,title:"Gray Matter",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,6 Go",status:"ok", meta:{bitrate:"21,8 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E05.mkv"}},
+    {n:6,title:"Crazy Handful of Nothin'",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,4 Go",status:"ok", meta:{bitrate:"24,5 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E06.mkv"}},
+    {n:7,title:"A No-Rough-Stuff-Type Deal",dur:"48min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,0 Go",status:"ok", meta:{bitrate:"23,1 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français"],container:"MKV",path:"/media/series/Breaking Bad/Season 01/Breaking.Bad.S01E07.mkv"}},
+  ]},
+  {n:2,eps:[
+    {n:1,title:"Seven Thirty-Seven",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok", meta:{bitrate:"22,8 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 02/Breaking.Bad.S02E01.mkv"}},
+    {n:2,title:"Grilled",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,2 Go",status:"ok", meta:{bitrate:"23,8 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 02/Breaking.Bad.S02E02.mkv"}},
+    {n:3,title:"Bit by a Dead Bee",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,8 Go",status:"ok", meta:{bitrate:"22,5 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français"],container:"MKV",path:"/media/series/Breaking Bad/Season 02/Breaking.Bad.S02E03.mkv"}},
+    {n:4,title:"Down",dur:"47min",res:"—",codec:"—",audio:"—",size:"—",status:"miss", meta:null},
+    {n:5,title:"Breakage",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,0 Go",status:"ok", meta:{bitrate:"23,1 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 02/Breaking.Bad.S02E05.mkv"}},
+  ]},
+  {n:3,eps:[
+    {n:1,title:"No Más",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok", meta:{bitrate:"23,5 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 03/Breaking.Bad.S03E01.mkv"}},
+    {n:2,title:"Caballo sin Nombre",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"6,9 Go",status:"ok", meta:{bitrate:"22,8 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 03/Breaking.Bad.S03E02.mkv"}},
+  ]},
+  {n:4,eps:[
+    {n:1,title:"Box Cutter",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,4 Go",status:"ok", meta:{bitrate:"24,5 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 04/Breaking.Bad.S04E01.mkv"}},
+    {n:2,title:"Thirty-Eight Snub",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,2 Go",status:"ok", meta:{bitrate:"23,8 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français"],container:"MKV",path:"/media/series/Breaking Bad/Season 04/Breaking.Bad.S04E02.mkv"}},
+  ]},
+  {n:5,eps:[
+    {n:1,title:"Live Free or Die",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,5 Go",status:"ok", meta:{bitrate:"24,8 Mbps",hdr:"Dolby Vision + HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 05/Breaking.Bad.S05E01.mkv"}},
+    {n:2,title:"Madrigal",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,3 Go",status:"ok", meta:{bitrate:"24,1 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français","Anglais"],container:"MKV",path:"/media/series/Breaking Bad/Season 05/Breaking.Bad.S05E02.mkv"}},
+    {n:3,title:"Hazard Pay",dur:"47min",res:"4K",codec:"H.265",audio:"DTS-HD MA",size:"7,1 Go",status:"ok", meta:{bitrate:"23,5 Mbps",hdr:"HDR10",fps:"23,976",colorspace:"BT.2020",audio2:"AC-3 5.1 · Français",subs:["Français"],container:"MKV",path:"/media/series/Breaking Bad/Season 05/Breaking.Bad.S05E03.mkv"}},
+  ]},
+];
+
+/* ── Navigation ── */
+let navHistory = [];
+let currentSeason = 0;
+
+function setNavActive(id) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  navHistory.push(id);
+  updateTopbar(id);
+  if (id === 'detail-series') renderSeason(0);
+  closeSpotlight();
+}
+
+function goBack() {
+  if (navHistory.length > 1) {
+    navHistory.pop();
+    const prev = navHistory[navHistory.length - 1];
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + prev).classList.add('active');
+    updateTopbar(prev);
+  }
+}
+
+function updateTopbar(id) {
+  const backBtn = document.getElementById('back-btn');
+  const sep = document.getElementById('top-sep');
+  const bc = document.getElementById('breadcrumb');
+  const isDetail = id.startsWith('detail-');
+  backBtn.classList.toggle('hidden', !isDetail);
+  sep.classList.toggle('hidden', !isDetail);
+  if (id === 'detail-movie') { bc.innerHTML = 'Films <span>/ Interstellar</span>'; setNavActive('nav-films'); }
+  else if (id === 'detail-series') { bc.innerHTML = 'Séries <span>/ Breaking Bad</span>'; setNavActive('nav-series'); }
+  else if (id === 'list-films') { bc.innerHTML = ''; setNavActive('nav-films'); }
+  else if (id === 'list-series') { bc.innerHTML = ''; setNavActive('nav-series'); }
+  else if (id === 'recents') { bc.innerHTML = ''; setNavActive('nav-recents'); }
+  else if (id === 'stats') { bc.innerHTML = ''; setNavActive('nav-stats'); }
+  else if (id === 'issues') { bc.innerHTML = ''; setNavActive('nav-issues'); }
+}
+
+/* ── Season / Episode rendering ── */
+function switchSeason(idx, el) {
+  currentSeason = idx;
+  document.querySelectorAll('.s-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderSeason(idx);
+}
+
+function toggleEpisode(itemId) {
+  const item = document.getElementById(itemId);
+  const detail = item.querySelector('.ep-detail');
+  const isOpen = item.classList.contains('expanded');
+  // Close all
+  document.querySelectorAll('.ep-item.expanded').forEach(el => {
+    el.classList.remove('expanded');
+    el.querySelector('.ep-detail').classList.remove('open');
+  });
+  if (!isOpen) {
+    item.classList.add('expanded');
+    detail.classList.add('open');
+  }
+}
+
+function renderEpisodeMeta(ep) {
+  if (!ep.meta) return '';
+  const m = ep.meta;
+  return `
+  <div class="ep-detail-inner">
+    <div class="ep-meta-section">
+      <div class="ep-meta-section-hd">Vidéo</div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Codec</span><span class="ep-meta-val">${ep.codec} (Main 10)</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Résolution</span><span class="ep-meta-val">3840 × 2160 (4K)</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Bitrate</span><span class="ep-meta-val">${m.bitrate}</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">HDR</span><span class="ep-meta-val">${m.hdr}</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Frame rate</span><span class="ep-meta-val">${m.fps} fps</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Color space</span><span class="ep-meta-val">${m.colorspace}</span></div>
+    </div>
+    <div class="ep-meta-section">
+      <div class="ep-meta-section-hd">Audio</div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Piste 1</span><span class="ep-meta-val">${ep.audio} 5.1</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Sample rate</span><span class="ep-meta-val">48 000 Hz</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Piste 2</span><span class="ep-meta-val">${m.audio2}</span></div>
+      <div class="ep-meta-section-hd" style="margin-top:8px;">Sous-titres</div>
+      ${m.subs.map((s,i)=>`<div class="ep-meta-row"><span class="ep-meta-lbl">Piste ${i+1}</span><span class="ep-meta-val">${s} (SRT)</span></div>`).join('')}
+    </div>
+    <div class="ep-meta-section">
+      <div class="ep-meta-section-hd">Fichier</div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Conteneur</span><span class="ep-meta-val">${m.container}</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Taille</span><span class="ep-meta-val">${ep.size}</span></div>
+      <div class="ep-meta-row"><span class="ep-meta-lbl">Durée</span><span class="ep-meta-val">${ep.dur}</span></div>
+    </div>
+    <div class="ep-detail-path">${m.path}</div>
+  </div>`;
+}
+
+function renderSeason(idx) {
+  const s = SEASONS[idx];
+  const ok = s.eps.filter(e => e.status === 'ok').length;
+  const miss = s.eps.filter(e => e.status === 'miss').length;
+  const totalSize = s.eps.filter(e => e.size !== '—').reduce((a, e) => {
+    const n = parseFloat(e.size.replace(',', '.'));
+    return isNaN(n) ? a : a + n;
+  }, 0);
+
+  document.getElementById('season-content').innerHTML = `
+    <div class="season-header">
+      <div class="section-title" style="margin:0;">Saison ${s.n} — ${s.eps.length} épisodes</div>
+      <div class="season-stats">
+        <span style="color:#1D9E75;">${ok} disponibles</span>
+        ${miss > 0 ? `<span style="color:#E24B4A;">${miss} manquant${miss > 1 ? 's' : ''}</span>` : ''}
+        <span>${totalSize.toFixed(1).replace('.', ',')} Go</span>
+      </div>
+    </div>
+    <div class="ep-list">
+      ${s.eps.map((ep, i) => {
+        const itemId = `ep-s${s.n}-e${ep.n}`;
+        const hasMeta = ep.status === 'ok' && ep.meta;
+        return `
+      <div class="ep-item" id="${itemId}">
+        <div class="ep-row" onclick="${hasMeta ? `toggleEpisode('${itemId}')` : ''}">
+          <div class="ep-num">E${String(ep.n).padStart(2, '0')}</div>
+          <div class="ep-info">
+            <div class="ep-title">${ep.title}</div>
+            <div class="ep-meta">${ep.dur}${ep.codec !== '—' ? ' · ' + ep.codec : ''}${ep.audio !== '—' ? ' · ' + ep.audio : ''}</div>
+          </div>
+          <div class="ep-badges">
+            ${ep.res === '4K' ? '<span class="b b-4k">4K</span>' : ep.res !== '—' ? '<span class="b b-hd">1080p</span>' : ''}
+            ${ep.status === 'miss' ? '<span class="b b-miss">Manquant</span>' : ''}
+          </div>
+          <div class="ep-size">${ep.size}</div>
+          <div class="ep-status" style="background:${ep.status === 'ok' ? '#1D9E75' : '#E24B4A'};"></div>
+          ${hasMeta ? `
+          <div class="ep-expand-btn" title="Voir les métadonnées">
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2l4 3-4 3"/></svg>
+          </div>` : `<div style="width:22px;"></div>`}
+        </div>
+        ${hasMeta ? `<div class="ep-detail" id="detail-${itemId}">${renderEpisodeMeta(ep)}</div>` : ''}
+      </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* ── Spotlight ── */
+let spotlightFocusIdx = -1;
+
+function openSpotlight() {
+  document.getElementById('spotlight').classList.add('active');
+  setTimeout(() => document.getElementById('spotlight-input').focus(), 50);
+  spotlightFocusIdx = -1;
+}
+
+function closeSpotlight() {
+  document.getElementById('spotlight').classList.remove('active');
+  document.getElementById('spotlight-input').value = '';
+  document.getElementById('spotlight-results').innerHTML = `
+    <div class="spotlight-empty">
+      <div class="spotlight-empty-icon">🔍</div>
+      Commencez à saisir pour rechercher dans votre librairie
+    </div>`;
+  spotlightFocusIdx = -1;
+}
+
+function handleSpotlightClick(e) {
+  if (e.target === document.getElementById('spotlight')) closeSpotlight();
+}
+
+function onSpotlightInput() {
+  const q = document.getElementById('spotlight-input').value.trim().toLowerCase();
+  const container = document.getElementById('spotlight-results');
+  spotlightFocusIdx = -1;
+
+  if (!q) {
+    container.innerHTML = `
+      <div class="spotlight-empty">
+        <div class="spotlight-empty-icon">🔍</div>
+        Commencez à saisir pour rechercher dans votre librairie
+      </div>`;
+    return;
+  }
+
+  const results = MEDIA_DB.filter(m =>
+    m.title.toLowerCase().includes(q) ||
+    m.year.toLowerCase().includes(q) ||
+    m.meta.toLowerCase().includes(q)
+  );
+
+  if (!results.length) {
+    container.innerHTML = `
+      <div class="spotlight-empty">
+        <div class="spotlight-empty-icon">😶</div>
+        Aucun résultat pour "<strong>${escHtml(q)}</strong>"
+      </div>`;
+    return;
+  }
+
+  const films = results.filter(r => r.type === 'film');
+  const series = results.filter(r => r.type === 'série');
+  let html = '';
+
+  if (films.length) {
+    html += `<div class="spotlight-group"><div class="spotlight-group-label">Films</div>`;
+    films.forEach(item => {
+      const badgeHtml = item.badges.slice(0, 2).map(b => `<span class="b ${b}" style="font-size:9px;padding:2px 5px;">${badgeLabel(b)}</span>`).join('');
+      html += `
+      <div class="spotlight-result" onclick="goPage('${item.id}')" data-page="${item.id}">
+        <div class="spotlight-result-icon">${escHtml(item.abbr)}</div>
+        <div class="spotlight-result-info">
+          <div class="spotlight-result-title">${highlightMatch(item.title, q)}</div>
+          <div class="spotlight-result-meta">${escHtml(item.year)} · ${escHtml(item.meta)}</div>
+        </div>
+        <div class="spotlight-badges">${badgeHtml}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (series.length) {
+    html += `<div class="spotlight-group"><div class="spotlight-group-label">Séries</div>`;
+    series.forEach(item => {
+      const badgeHtml = item.badges.slice(0, 2).map(b => `<span class="b ${b}" style="font-size:9px;padding:2px 5px;">${badgeLabel(b)}</span>`).join('');
+      html += `
+      <div class="spotlight-result" onclick="goPage('${item.id}')" data-page="${item.id}">
+        <div class="spotlight-result-icon">${escHtml(item.abbr)}</div>
+        <div class="spotlight-result-info">
+          <div class="spotlight-result-title">${highlightMatch(item.title, q)}</div>
+          <div class="spotlight-result-meta">${escHtml(item.year)} · ${escHtml(item.meta)}</div>
+        </div>
+        <div class="spotlight-badges">${badgeHtml}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function onSpotlightKey(e) {
+  const results = document.querySelectorAll('.spotlight-result');
+  if (e.key === 'Escape') { closeSpotlight(); return; }
+  if (!results.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    spotlightFocusIdx = Math.min(spotlightFocusIdx + 1, results.length - 1);
+    updateSpotlightFocus(results);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    spotlightFocusIdx = Math.max(spotlightFocusIdx - 1, 0);
+    updateSpotlightFocus(results);
+  } else if (e.key === 'Enter') {
+    if (spotlightFocusIdx >= 0 && results[spotlightFocusIdx]) {
+      results[spotlightFocusIdx].click();
+    } else if (results[0]) {
+      results[0].click();
+    }
+  }
+}
+
+function updateSpotlightFocus(results) {
+  results.forEach((r, i) => r.classList.toggle('focused', i === spotlightFocusIdx));
+  if (results[spotlightFocusIdx]) results[spotlightFocusIdx].scrollIntoView({block:'nearest'});
+}
+
+function highlightMatch(text, query) {
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escHtml(text).replace(new RegExp(escaped, 'gi'), m => `<mark style="background:#9FE1CB;border-radius:2px;padding:0 1px;">${m}</mark>`);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function badgeLabel(cls) {
+  const map = {'b-4k':'4K','b-hd':'1080p','b-dv':'DV','b-hdr':'HDR','b-miss':'Manquant','b-codec':'','b-warn':'!'};
+  return map[cls] || cls;
+}
+
+/* ── Issues filter ── */
+function filterIssues(type, el) {
+  document.querySelectorAll('.issue-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.issue-card').forEach(card => {
+    if (type === 'all') card.style.display = '';
+    else card.style.display = card.dataset.type === type ? '' : 'none';
+  });
+}
+
+/* ── Keyboard shortcut ── */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    openSpotlight();
+  }
+});
+
+/* ── Init ── */
+goPage('list-series');
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [expandedEpisodeId, setExpandedEpisodeId] = useState<number | null>(null);
   const appContext = useContext(AppContext);
 
   // Slugify function to create URL-friendly strings
@@ -36,6 +37,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Toggle episode expansion
+  const toggleEpisode = (episodeId: number) => {
+    setExpandedEpisodeId(expandedEpisodeId === episodeId ? null : episodeId);
   };
 
   // Refresh handler for menu
@@ -332,124 +338,379 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {(season.episodes || []).map((ep) => (
-              <div
-                key={ep.id}
-                style={{
-                  background: 'var(--color-background-primary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', minWidth: '28px' }}>
-                  E{String(ep.episodeNum).padStart(2, '0')}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {ep.title}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
-                    {Math.round(ep.duration / 60)} min
-                  </div>
-                </div>
-
-                <div style={{ flex: '1', fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
-                  {(ep.mediaInfo?.videoTracks ?? []).map((track, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '7px', translate: '-3px 0' }}>
-                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
-                        <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
-                        <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
-                      </svg>
-                      <span>{track.resolution || 'N/A'} · {track.bitrate || 'N/A'} · {track.fps || 'N/A'} fps · {track.colorSpace || 'N/A'}</span>
-                    </div>
-                  ))}
-                  {(ep.mediaInfo?.audioTracks ?? []).map((track, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
-                        <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
-                      </svg>
-                      <span>{track.channels || 'N/A'} · {track.language || 'N/A'} · {track.bitrate || 'N/A'} · {track.sampleRate || 'N/A'}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
-                    <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      4K
-                    </span>
-                  )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
-                    <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      1080p
-                    </span>
-                  )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
-                    <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      Dolby Vision
-                    </span>
-                  )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
-                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      HDR10+
-                    </span>
-                  )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
-                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      HDR10
-                    </span>
-                  )}
-                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
-                    <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      TrueHD
-                    </span>
-                  )}
-                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
-                    <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      Dolby Digital Plus
-                    </span>
-                  )}
-                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
-                    <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      Atmos
-                    </span>
-                  )}
-                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
-                    <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      DTS
-                    </span>
-                  )}
-                  {ep.mediaInfo?.videoTracks?.[0]?.codec && (
-                    <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                      {ep.mediaInfo.videoTracks?.[0]?.codec}
-                    </span>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                  {ep.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
-                </div>
-                <div title={ep.filePath} style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right' }}>
-                  {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
-                </div>
+            {(season.episodes || []).map((ep) => {
+              const isExpanded = expandedEpisodeId === ep.id;
+              return (
                 <div
+                  key={ep.id}
                   style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '50%',
-                    background: ep.status === 'available' ? '#1D9E75' : '#E24B4A',
-                    flexShrink: 0,
+                    border: `0.5px solid ${isExpanded ? '#5DCAA5' : 'var(--color-border-tertiary)'}`,
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: 'var(--color-background-primary)',
+                    transition: 'border-color 0.12s',
                   }}
-                />
-              </div>
-            ))}
+                >
+                  {/* Episode Row */}
+                  <div
+                    onClick={() => toggleEpisode(ep.id)}
+                    style={{
+                      padding: '10px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', minWidth: '28px' }}>
+                      E{String(ep.episodeNum).padStart(2, '0')}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {ep.title}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                        {Math.round(ep.duration / 60)} min
+                      </div>
+                    </div>
+
+                    {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flexShrink: 0 }}>
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+                        <span className={comStyles['badge-4k']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          4K
+                        </span>
+                      )}
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                        <span className={comStyles['badge-1080p']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          1080p
+                        </span>
+                      )}
+                      {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                        <span className={comStyles['badge-dv']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DV
+                        </span>
+                      )}
+                      {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                        <span className={comStyles['badge-hdr']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          HDR10+
+                        </span>
+                      )}
+                      {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                        <span className={comStyles['badge-hdr']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          HDR10
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                        <span className={comStyles['badge-truehd']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          TrueHD
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                        <span className={comStyles['badge-ddplus']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DD+
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                        <span className={comStyles['badge-atmos']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          Atmos
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                        <span className={comStyles['badge-dts']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DTS
+                        </span>
+                      )}
+                      {ep.mediaInfo?.videoTracks?.[0]?.codec && (
+                        <span className={comStyles['badge-codec']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          {ep.mediaInfo.videoTracks?.[0]?.codec}
+                        </span>
+                      )}
+                      {ep.status === 'missing' && <span className={comStyles['badge-missing']} style={{ fontSize: '9px', padding: '2px 6px' }}>Manquant</span>}
+                    </div>
+
+                    <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right', flexShrink: 0 }}>
+                      {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
+                    </div>
+
+                    <div
+                      style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '50%',
+                        background: ep.status === 'available' ? '#1D9E75' : '#E24B4A',
+                        flexShrink: 0,
+                      }}
+                    />
+
+                    {/* Expand button */}
+                    <div
+                      style={{
+                        width: '22px',
+                        height: '22px',
+                        border: `0.5px solid ${isExpanded ? 'var(--color-primary-accent)' : 'var(--color-border-tertiary)'}`,
+                        borderRadius: '4px',
+                        background: isExpanded ? 'var(--color-background-secondary)' : 'var(--color-background-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <svg
+                        width="9"
+                        height="9"
+                        viewBox="0 0 9 9"
+                        fill="none"
+                        stroke={isExpanded ? '#1D9E75' : 'var(--color-text-tertiary)'}
+                        strokeWidth="1.5"
+                        style={{
+                          transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s',
+                        }}
+                      >
+                        <path d="M3 1.5L6 4.5L3 7.5" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Expandable Detail Panel */}
+                  {isExpanded && ep.status === 'available' && ep.mediaInfo && (
+                    <div
+                      style={{
+                        borderTop: '0.5px solid var(--color-border-tertiary)',
+                        background: 'var(--color-background-secondary)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: '12px 14px',
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr 1fr',
+                          gap: '12px',
+                        }}
+                      >
+
+                        {/* Video Section */}
+                        <div>
+                          <div
+                            style={{
+                              fontSize: '9px',
+                              fontWeight: 600,
+                              color: 'var(--color-text-tertiary)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.08em',
+                              marginBottom: '6px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                              <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
+                              <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
+                            </svg>
+                            Vidéo
+                            <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
+                          </div>
+                          {ep.mediaInfo.videoTracks?.[0] && (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
+                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].codec || '—'}</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>Résolution</span>
+                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].resolution || '—'}</span>
+                              </div>
+                              {ep.mediaInfo.videoTracks[0].hdr && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>HDR</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].hdr}</span>
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
+                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].bitrate || '—'}</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>Fréquence d'images</span>
+                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].fps || '—'} fps</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>Espace colorimétrique</span>
+                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].colorSpace || '—'}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Audio Section */}
+                        <div>
+                          {ep.mediaInfo.audioTracks && ep.mediaInfo.audioTracks.length > 0 ? (
+                            ep.mediaInfo.audioTracks.map((track, trackIdx) => (
+                              <div key={trackIdx} style={{ marginBottom: trackIdx < (ep.mediaInfo?.audioTracks?.length || 0) - 1 ? '12px' : '0' }}>
+                                <div
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-tertiary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.08em',
+                                    marginBottom: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                  }}
+                                >
+                                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                                    <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
+                                  </svg>
+                                  Audio {(ep.mediaInfo?.audioTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.codec || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Canaux</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.channels || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Échantillonnage</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.sampleRate || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.bitrate || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (<>
+                            <div
+                              style={{
+                                fontSize: '9px',
+                                fontWeight: 600,
+                                color: 'var(--color-text-tertiary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                                marginBottom: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                                <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
+                              </svg>
+                              Audio
+                              <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
+                            </div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                          </>)}
+                        </div>
+
+                        {/* Subtitles Section */}
+                        <div>
+                          {ep.mediaInfo.subtitleTracks && ep.mediaInfo.subtitleTracks.length > 0 ? (
+                            ep.mediaInfo.subtitleTracks.map((track, trackIdx) => (
+                              <div key={trackIdx} style={{ marginBottom: trackIdx < (ep.mediaInfo?.subtitleTracks?.length || 0) - 1 ? '12px' : '0' }}>
+                                <div
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-tertiary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.08em',
+                                    marginBottom: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                  }}
+                                >
+                                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                                    <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
+                                    <path d="M5 8h6M5 10h4" />
+                                  </svg>
+                                  Sous-titres {(ep.mediaInfo?.subtitleTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Format</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.format || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Forcé</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.forced ? 'Oui' : 'Non'}</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (<>
+                            <div
+                              style={{
+                                fontSize: '9px',
+                                fontWeight: 600,
+                                color: 'var(--color-text-tertiary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                                marginBottom: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                                <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
+                                <path d="M5 8h6M5 10h4" />
+                              </svg>
+                              Sous-titres
+                              <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
+                            </div>
+
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                          </>)}
+                        </div>
+
+                        {/* File Path */}
+                        <div
+                          style={{
+                            gridColumn: '1 / -1',
+                            fontSize: '9px',
+                            color: 'var(--color-text-tertiary)',
+                            fontFamily: 'var(--font-mono)',
+                            padding: '6px 8px',
+                            background: 'var(--color-background-tertiary)',
+                            borderRadius: '4px',
+                            border: '0.5px solid var(--color-border-tertiary)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                          title={ep.filePath}
+                        >
+                          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75, marginRight: 5 }}>
+                            <path d="M4.5 2h5l3 3v9a1 1 0 01-1 1h-7a1 1 0 01-1-1V3a1 1 0 011-1z"></path>
+                            <path d="M9.5 2v3h3"></path>
+                          </svg>
+                          {ep.filePath || '—'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
