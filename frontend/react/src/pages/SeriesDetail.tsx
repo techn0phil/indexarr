@@ -130,7 +130,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               )}
 
               {/* Popup contextual menu */}
-              {(appContext?.authMode === 'none' || appContext?.user?.role === 'admin') && (
+              {(appContext?.authMode === 'disabled' || appContext?.user?.role === 'admin') && (
                 <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
                   <button
                     style={{

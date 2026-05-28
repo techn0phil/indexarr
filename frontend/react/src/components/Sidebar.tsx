@@ -99,14 +99,14 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           </span>
         </div> */}
 
-        {/* Administration section - only visible for admin users with simple auth */}
-        {(context?.authMode === 'none' || context?.user?.role === 'admin') && (
+        {/* Administration section - only visible for admin users */}
+        {(context?.authMode === 'disabled' || context?.user?.role === 'admin') && (
           <>
             <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
               Administration
             </div>
 
-            {context?.authMode !== 'none' && (
+            {context?.authMode !== 'disabled' && (
               <div
                 className={`${styles['nav-item']} ${activeNav === 'admin-users' ? styles.active : ''}`}
                 onClick={() => onNavClick('admin-users')}

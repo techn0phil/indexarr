@@ -115,7 +115,7 @@ func main() {
 	authService := services.NewAuthService(cfg, userRepo)
 	if cfg.HasAuthEnabled() {
 		log.Printf("🔐 Authentication mode: %s", cfg.AuthMode)
-		if cfg.IsSimpleAuth() && cfg.AuthAdminUsername != "" {
+		if cfg.IsLocalAuth() && cfg.AuthAdminUsername != "" {
 			log.Printf("👤 Admin user: %s (env)", cfg.AuthAdminUsername)
 		}
 	} else {

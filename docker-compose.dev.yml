@@ -39,6 +39,24 @@ services:
       RADARR_PATH_MAPPING: ${RADARR_PATH_MAPPING:-}
       SONARR_URL: ${SONARR_URL:-http://sonarr:8989}
       SONARR_PATH_MAPPING: ${SONARR_PATH_MAPPING:-}
+
+      # Authentication (optional, adjust as needed)
+      # AUTH_MODE: ${AUTH_MODE:-disabled} # disabled, local, or oidc
+      # For local auth:
+      # AUTH_ADMIN_USERNAME: ${AUTH_ADMIN_USERNAME:-admin}
+      # AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD:-admin}
+      # AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-}
+      # AUTH_SESSION_MAX_AGE: ${AUTH_SESSION_MAX_AGE:-168} # 7 days in hours
+      # For OIDC auth:
+      # OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      # OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      # OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      # OIDC_REDIRECT_URL: ${OIDC_REDIRECT_URL:-}
+      # OIDC_SCOPES: ${OIDC_SCOPES:-openid,profile,email}
+      # OIDC_ROLES_CLAIM: ${OIDC_ROLES_CLAIM:-}
+      # OIDC_ADMIN_ROLE_VALUE: ${OIDC_ADMIN_ROLE_VALUE:-}
+      # OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-preferred_username}
+      # OIDC_AUTO_CREATE_USER: ${OIDC_AUTO_CREATE_USER:-true}
       
       # Scan configuration
       SCAN_INTERVAL: ${SCAN_INTERVAL:-24}

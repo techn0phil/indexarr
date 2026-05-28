@@ -114,7 +114,7 @@ const AppRouter = () => {
   }
 
   // Show login page if auth required and not authenticated
-  if ((authMode === 'simple' || authMode === 'oidc') && !isAuthenticated) {
+  if ((authMode === 'local' || authMode === 'oidc') && !isAuthenticated) {
     return <LoginPage />;
   }
 

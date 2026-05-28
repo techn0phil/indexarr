@@ -58,7 +58,7 @@ interface AppContextProviderProps {
 
 export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   // Auth state
-  const [authMode, setAuthMode] = useState<AuthMode>('none');
+  const [authMode, setAuthMode] = useState<AuthMode>('disabled');
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -210,12 +210,12 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         const authConfig = await apiClient.getAuthConfig();
         setAuthMode(authConfig.authMode);
         
-        if (authConfig.authMode === 'none') {
+        if (authConfig.authMode === 'disabled') {
           // No auth required, mark as authenticated
           setIsAuthenticated(true);
           setAuthLoading(false);
-        } else if (authConfig.authMode === 'simple' || authConfig.authMode === 'oidc') {
-          // Check if we have a valid session (both simple and OIDC use the same session mechanism)
+        } else if (authConfig.authMode === 'local' || authConfig.authMode === 'oidc') {
+          // Check if we have a valid session (both local and OIDC use the same session mechanism)
           try {
             const response = await apiClient.getCurrentUser();
             if (response.success && response.user) {
@@ -228,15 +228,15 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
           }
           setAuthLoading(false);
         } else {
-          // Unknown auth mode, fallback to no auth
-          setAuthMode('none');
+          // Unknown auth mode, fallback to disabled auth
+          setAuthMode('disabled');
           setIsAuthenticated(true);
           setAuthLoading(false);
         }
       } catch (error) {
         console.error('Failed to fetch auth config:', error);
-        // Fallback to no auth mode
-        setAuthMode('none');
+        // Fallback to disabled auth mode
+        setAuthMode('disabled');
         setIsAuthenticated(true);
         setAuthLoading(false);
       }

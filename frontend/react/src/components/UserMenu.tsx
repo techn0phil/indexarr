@@ -16,12 +16,12 @@ export const UserMenu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Don't render if no auth or no user
-  if (authMode === 'none' || !user) {
+  if (authMode === 'disabled' || !user) {
     return null;
   }
 
   // Check if user can change password (not env admin)
-  const canChangePassword = authMode === 'simple' && user.id !== undefined && user.id !== 0;
+  const canChangePassword = authMode === 'local' && user.id !== undefined && user.id !== 0;
 
   // Close menu when clicking outside
   useEffect(() => {

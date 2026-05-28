@@ -28,9 +28,9 @@ type Config struct {
 	ScanTimeout        int      // timeout in seconds per file
 
 	// Authentication settings
-	AuthMode          string // none, simple, oidc
-	AuthAdminUsername string // admin username (for simple auth)
-	AuthAdminPassword string // admin password (for simple auth)
+	AuthMode          string // disabled, local, oidc
+	AuthAdminUsername string // admin username (for local auth)
+	AuthAdminPassword string // admin password (for local auth)
 	AuthSessionSecret string // secret for signing session tokens
 	AuthSessionMaxAge int    // session duration in hours (default: 168 = 7 days)
 
@@ -80,7 +80,7 @@ func Load() *Config {
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
 
 		// Authentication
-		AuthMode:          getEnv("AUTH_MODE", "none"),
+		AuthMode:          getEnv("AUTH_MODE", "disabled"),
 		AuthAdminUsername: getEnv("AUTH_ADMIN_USERNAME", ""),
 		AuthAdminPassword: getEnv("AUTH_ADMIN_PASSWORD", ""),
 		AuthSessionSecret: sessionSecret,
@@ -238,12 +238,12 @@ func generateRandomSecret() string {
 
 // HasAuthEnabled returns true if authentication is enabled
 func (c *Config) HasAuthEnabled() bool {
-	return c.AuthMode == "simple" || c.AuthMode == "oidc"
+	return c.AuthMode == "local" || c.AuthMode == "oidc"
 }
 
-// IsSimpleAuth returns true if simple authentication mode is enabled
-func (c *Config) IsSimpleAuth() bool {
-	return c.AuthMode == "simple"
+// IsLocalAuth returns true if local authentication mode is enabled
+func (c *Config) IsLocalAuth() bool {
+	return c.AuthMode == "local"
 }
 
 // IsOIDCAuth returns true if OIDC authentication mode is enabled

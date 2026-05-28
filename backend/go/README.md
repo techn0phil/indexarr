@@ -100,18 +100,66 @@ See `.env.example` for all options.
 - Migration scripts in `internal/repository/migrations/`
 - See [MIGRATIONS.md](MIGRATIONS.md) for migration workflow
 
-## API Endpoints (Main)
-- `GET /api/movies` — List/filter movies
-- `GET /api/movies/:id` — Movie details
-- `GET /api/series` — List/filter series
-- `GET /api/series/:id` — Series details
-- `GET /api/series/:id/seasons/:season/episodes` — List episodes
-- `POST /api/scan` — Trigger media scan
-- `GET /api/scan/status` — Scan status
-- `POST /api/scan/stop` — Stop scan
-- `GET /api/stats` — Library statistics
-- `GET /api/config` — Current config
-- `POST /api/purge` — Purge all data
+
+## Authentication & User Management
+
+Indexarr backend supports authentication and user management with two modes:
+
+- **local**: Local users stored in the database. Admin user can be bootstrapped via environment variables.
+- **oidc**: Login via an external OIDC provider (e.g., Auth0, Google, Keycloak). Local users are disabled in this mode.
+- **disabled**: No authentication (open access, not recommended for production).
+
+Set the mode with the `AUTH_MODE` environment variable.
+
+### User management
+
+- **Admin user**: The first admin user can be created via environment variables (`AUTH_ADMIN_USERNAME`, `AUTH_ADMIN_PASSWORD`) or via the API if no users exist.
+- **User roles**: Each user has a role (either `admin` or `guest`). Only admins can manage users and perform destructive actions (purge, create/delete users, etc).
+- **User management API**: Admins can create, update, enable/disable, or delete users via the `/api/users` endpoints.
+- **Password management**: Users can change their own password; admins can reset any user's password.
+
+### API endpoints (auth & users)
+
+**Public (no auth required):**
+- `GET /api/auth/config` — Get current authentication mode/config
+- `POST /api/auth/login` — Login (returns JWT)
+- `POST /api/auth/logout` — Logout (client-side only)
+- `GET /api/auth/oidc/login` — Start OIDC login (if enabled)
+- `GET /api/auth/oidc/callback` — OIDC callback (if enabled)
+
+**Authenticated:**
+- `GET /api/auth/me` — Get current user info
+- `POST /api/auth/change-password` — Change own password
+
+**Admin only:**
+- `GET /api/users` — List all users
+- `POST /api/users` — Create user
+- `PUT /api/users/{id}` — Update user (username, role, enabled)
+- `DELETE /api/users/{id}` — Delete user
+- `POST /api/users/{id}/password` — Set/reset user password
+
+### Environment variables (auth)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AUTH_MODE` | local | Authentication mode: `disabled`, `local`, or `oidc` |
+| `AUTH_ADMIN_USERNAME` | - | Bootstrap admin username (only used if no users exist) |
+| `AUTH_ADMIN_PASSWORD` | - | Bootstrap admin password (only used if no users exist) |
+| `AUTH_SESSION_SECRET` | - | Secret for signing JWT sessions (required for auth) |
+| `AUTH_SESSION_MAX_AGE` | 168 | Session maximum duration (7 days by default) |
+| `OIDC_ISSUER_URL` | - | OIDC issuer URL (if using OIDC) |
+| `OIDC_CLIENT_ID` | - | OIDC client ID (if using OIDC) |
+| `OIDC_CLIENT_SECRET` | - | OIDC client secret (if using OIDC) |
+| `OIDC_REDIRECT_URL` | - | OIDC redirect/callback URL (if using OIDC) |
+| `OIDC_SCOPES` | - | OIDC scopes (if using OIDC) |
+| `OIDC_ROLES_CLAIM` | - | OIDC claim containing roles (if using OIDC) |
+| `OIDC_ADMIN_ROLE_VALUE` | - | Value of the admin role (if using OIDC) |
+| `OIDC_USERNAME_CLAIM` | - | OIDC claim containing the username (if using OIDC) |
+| `OIDC_AUTO_CREATE_USER` | - | Whether user should be auto-created in local database (if using OIDC) |
+
+
+See `.env.example` for all options and details.
+
 
 ## Conventions
 - Packages: lowercase, no underscores

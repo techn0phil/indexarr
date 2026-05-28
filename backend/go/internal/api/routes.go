@@ -55,7 +55,7 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 			r.Get("/auth/me", HandleMe(authService))
 			r.Post("/auth/change-password", HandleChangePassword(authService))
 
-			// User management (admin only, simple auth mode only)
+			// User management (admin only)
 			r.Route("/users", func(r chi.Router) {
 				r.Get("/", HandleListUsers(authService))
 				r.Post("/", HandleCreateUser(authService))

@@ -1,4 +1,4 @@
--- Users table for simple authentication
+-- Users table for local authentication
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,

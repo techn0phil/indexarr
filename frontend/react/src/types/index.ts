@@ -156,7 +156,7 @@ export interface ScanResponse {
 }
 
 // Authentication types
-export type AuthMode = 'none' | 'simple' | 'oidc';
+export type AuthMode = 'disabled' | 'local' | 'oidc';
 
 export interface AuthConfig {
   authMode: AuthMode;

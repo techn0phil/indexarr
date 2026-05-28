@@ -14,6 +14,9 @@
     - [Configuration reference](#configuration-reference)
     - [Common operations](#common-operations)
     - [Using pre-built image from GitHub Container Registry](#using-pre-built-image-from-github-container-registry)
+  - [Authentication](#authentication)
+    - [Authentication modes](#authentication-modes)
+    - [User management](#user-management)
   - [Development setup](#development-setup)
     - [Prerequisites](#prerequisites)
     - [Backend setup](#backend-setup)
@@ -33,8 +36,9 @@
 - Advanced multi-criteria filtering (title, status, resolution, codec, audio, HDR)
 - Real-time statistics (total count, disk space, 4K %, problems)
 - Detailed media info (video, audio, and subtitle tracks)
-- esponsive UI with grid/list views
+- Responsive UI with grid/list views
 - RESTful API backend
+- Authentication (local or OIDC)
 
 
 ## Getting started
@@ -102,6 +106,20 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
 | `SONARR_API_KEY` | - | No | Sonarr API key for importing series from Sonarr |
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
+| `AUTH_MODE` | disabled | No | Authentication mode: `disabled`, `local`, or `oidc` |
+| `AUTH_ADMIN_USERNAME` | - | No | Bootstrap admin username (only used if no users exist) |
+| `AUTH_ADMIN_PASSWORD` | - | No | Bootstrap admin password (only used if no users exist) |
+| `AUTH_SESSION_SECRET` | - | No | Secret for signing JWT sessions (auto-generated if not provided) |
+| `AUTH_SESSION_MAX_AGE` | 168 | No | Session maximum duration (7 days by default) |
+| `OIDC_ISSUER_URL` | - | No | OIDC issuer URL (if using OIDC) |
+| `OIDC_CLIENT_ID` | - | No | OIDC client ID (if using OIDC) |
+| `OIDC_CLIENT_SECRET` | - | No | OIDC client secret (if using OIDC) |
+| `OIDC_REDIRECT_URL` | - | No | OIDC redirect/callback URL (if using OIDC) |
+| `OIDC_SCOPES` | - | No | OIDC scopes (if using OIDC) |
+| `OIDC_ROLES_CLAIM` | - | No | OIDC claim containing roles (if using OIDC) |
+| `OIDC_ADMIN_ROLE_VALUE` | - | No | Value of the admin role (if using OIDC) |
+| `OIDC_USERNAME_CLAIM` | - | No | OIDC claim containing the username (if using OIDC) |
+| `OIDC_AUTO_CREATE_USER` | - | No | Whether user should be auto-created in local database (if using OIDC) |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
@@ -150,6 +168,26 @@ docker run -d -p 8787:8787 \
       -e SONARR_URL=http://sonarr:8989 \
       ghcr.io/techn0phil/indexarr:latest
 ```
+
+## Authentication
+
+Indexarr supports authentication and user management out of the box. You can secure your instance with either local authentication or OpenID Connect (OIDC) for SSO integration.
+
+### Authentication modes
+
+- **Disabled** (default): No authentication (open access, not recommended for production).
+- **Local**: Simple authentication with local users stored in the database. Admin user can be bootstrapped via environment variables.
+- **OpenID Connect**: Login via an external OIDC provider (e.g., Auth0, Google, Keycloak). Local users are disabled in this mode.
+
+Set the mode with the `AUTH_MODE` environment variable.
+
+### User management
+
+- **Admin user**: The first admin user can be created via environment variables (`AUTH_ADMIN_USERNAME`, `AUTH_ADMIN_PASSWORD`).
+- **User roles**: Each user has a role (either `admin` or `guest`). Only admins can manage users and perform destructive actions (purge, create/delete users, etc).
+- **User management API**: Admins can create, update, enable/disable, or delete users.
+- **Password management**: Users can change their own password; admins can reset any user's password.
+
 
 ## Development setup
 

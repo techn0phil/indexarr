@@ -63,12 +63,36 @@ frontend/react/
 - **Sidebar, Topbar**: Navigation and search
 - **ThemeToggle, ViewToggle**: Dark mode and grid/list toggle
 
+
 ## API & Data
 
 - All API calls are defined in `src/api/client.ts` and use `/api` endpoints (proxied to backend)
 - TypeScript interfaces for all entities in `src/types/index.ts`
 - Infinite scroll and filtering handled by `useInfiniteList` hook
-- App-wide state (theme, navigation, stats, scan status) managed by `useAppContext` hook
+- App-wide state (theme, navigation, stats, scan status, and user session) managed by `useAppContext` hook
+
+## Authentication & User Management
+
+Indexarr frontend supports login/logout, user roles, and user management features:
+
+- **Login/logout**: Users authenticate via the login page. Supports both local and OIDC modes.
+- **User roles**: UI adapts based on user role (either `admin` or `guest`). Only admins see user management features.
+- **User management**: Admins can create, update, enable/disable, or delete users from the Users page (if enabled by backend config).
+- **Password management**: Users can change their own password; admins can reset any user's password.
+
+### Relevant API endpoints
+
+- `POST /api/auth/login` — Login (returns JWT)
+- `POST /api/auth/logout` — Logout (client-side only)
+- `GET /api/auth/me` — Get current user info
+- `POST /api/auth/change-password` — Change own password
+- `GET /api/users` — List all users (admin only)
+- `POST /api/users` — Create user (admin only)
+- `PUT /api/users/{id}` — Update user (admin only)
+- `DELETE /api/users/{id}` — Delete user (admin only)
+- `POST /api/users/{id}/password` — Set/reset user password (admin only)
+
+See backend README for full details on authentication modes and environment variables.
 
 ## Design System
 

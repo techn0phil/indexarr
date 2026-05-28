@@ -55,7 +55,7 @@ func (s *AuthService) GetAuthMode() string {
 // ValidateCredentials checks if the provided credentials are valid
 // Returns the user info if valid, or an error if not
 func (s *AuthService) ValidateCredentials(username, password string) (*models.User, error) {
-	if s.cfg.AuthMode != "simple" {
+	if s.cfg.AuthMode != "local" {
 		return nil, ErrInvalidCredentials
 	}
 
