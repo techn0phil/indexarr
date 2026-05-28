@@ -100,7 +100,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         </div> */}
 
         {/* Administration section - only visible for admin users with simple auth */}
-        {context?.authMode === 'simple' && context?.user?.role === 'admin' && (
+        {(context?.authMode === 'simple' || context?.authMode === 'oidc') && context?.user?.role === 'admin' && (
           <>
             <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
               Administration

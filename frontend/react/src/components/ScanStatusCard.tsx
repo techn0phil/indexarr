@@ -9,7 +9,7 @@ interface ScanStatusProps {
 }
 
 export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
-  const { scanStatus: wsStatus } = useAppContext();
+  const { scanStatus: wsStatus, authMode, user } = useAppContext();
   const [status, setStatus] = useState<ScanStatusType | null>(null);
   const [triggering, setTriggering] = useState(false);
   const onScanCompleteRef = useRef(onScanComplete);
@@ -151,48 +151,52 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
         </div>
       )}
 
-      <div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
-        {status?.status === 'running' ? (
-          <button
-            onClick={handleStopScan}
-            style={{
-              fontSize: '11px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: '0.5px solid #E24B4A',
-              backgroundColor: 'transparent',
-              color: '#E24B4A',
-              cursor: 'pointer',
-            }}
-          >
-            Arrêter
-          </button>
-        ) : (
-          <button
-            onClick={handleTriggerScan}
-            disabled={triggering}
-            style={{
-              fontSize: '11px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor: '#1D9E75',
-              color: 'white',
-              cursor: triggering ? 'wait' : 'pointer',
-              opacity: triggering ? 0.7 : 1,
-            }}
-          >
-            {triggering ? 'Démarrage...' : 'Lancer un scan'}
-          </button>
-        )}
-      </div>
+      {(authMode === 'simple' || authMode === 'oidc') && user?.role === 'admin' && (
+        <>
+          <div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
+            {status?.status === 'running' ? (
+              <button
+                onClick={handleStopScan}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '0.5px solid #E24B4A',
+                  backgroundColor: 'transparent',
+                  color: '#E24B4A',
+                  cursor: 'pointer',
+                }}
+              >
+                Arrêter
+              </button>
+            ) : (
+              <button
+                onClick={handleTriggerScan}
+                disabled={triggering}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: '#1D9E75',
+                  color: 'white',
+                  cursor: triggering ? 'wait' : 'pointer',
+                  opacity: triggering ? 0.7 : 1,
+                }}
+              >
+                {triggering ? 'Démarrage...' : 'Lancer un scan'}
+              </button>
+            )}
+          </div>
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+          <style>{`
+            @keyframes pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.5; }
+            }
+          `}</style>
+        </>
+      )}
     </div>
   );
 };

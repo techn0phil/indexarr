@@ -100,78 +100,80 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             )}
 
             {/* Popup contextual menu */}
-            <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
-              <button
-                style={{
-                  background: 'var(--color-background-primary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  padding: 0,
-                  position: 'relative',
-                }}
-                aria-label="Menu"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpen((open) => !open);
-                }}
-                onBlur={() => {
-                  setTimeout(() => setMenuOpen(false), 120);
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ verticalAlign: 'middle' }}>
-                  <line x1="2" y1="4" x2="14" y2="4" />
-                  <line x1="2" y1="8" x2="14" y2="8" />
-                  <line x1="2" y1="12" x2="14" y2="12" />
-                </svg>
-              </button>
-              {menuOpen && (
-                <div
+            {(appContext?.authMode === 'simple' || appContext?.authMode === 'oidc') && appContext?.user?.role === 'admin' && (
+              <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+                <button
                   style={{
-                    position: 'absolute',
-                    top: '36px',
-                    right: 0,
-                    background: 'var(--color-background-secondary)',
+                    background: 'var(--color-background-primary)',
                     border: '0.5px solid var(--color-border-tertiary)',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-                    zIndex: 10,
-                    minWidth: '120px',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    padding: 0,
+                    position: 'relative',
                   }}
-                  tabIndex={-1}
+                  aria-label="Menu"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((open) => !open);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setMenuOpen(false), 120);
+                  }}
                 >
-                  <button
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ verticalAlign: 'middle' }}>
+                    <line x1="2" y1="4" x2="14" y2="4" />
+                    <line x1="2" y1="8" x2="14" y2="8" />
+                    <line x1="2" y1="12" x2="14" y2="12" />
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div
                     style={{
-                      width: '100%',
-                      background: 'none',
-                      border: 'none',
-                      padding: '10px 16px',
-                      textAlign: 'left',
-                      fontSize: '13px',
-                      color: 'var(--color-text-primary)',
-                      cursor: 'pointer',
+                      position: 'absolute',
+                      top: '36px',
+                      right: 0,
+                      background: 'var(--color-background-secondary)',
+                      border: '0.5px solid var(--color-border-tertiary)',
                       borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                      zIndex: 10,
+                      minWidth: '120px',
                     }}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleRefresh();
-                    }}
+                    tabIndex={-1}
                   >
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: 7, verticalAlign: 'center' }}>
-                      <path d="M2.5 8A5.5 5.5 0 018 2.5c1.5 0 2.9.6 3.9 1.6M13.5 8A5.5 5.5 0 018 13.5c-1.5 0-2.9-.6-3.9-1.6" />
-                      <path d="M12 2.5v2.5H9.5" />
-                      <path d="M4 13.5v-2.5H6.5" />
-                    </svg>
-                    Rafraîchir
-                  </button>
-                </div>
-              )}
-            </div>
+                    <button
+                      style={{
+                        width: '100%',
+                        background: 'none',
+                        border: 'none',
+                        padding: '10px 16px',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: 'var(--color-text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                      }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleRefresh();
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: 7, verticalAlign: 'center' }}>
+                        <path d="M2.5 8A5.5 5.5 0 018 2.5c1.5 0 2.9.6 3.9 1.6M13.5 8A5.5 5.5 0 018 13.5c-1.5 0-2.9-.6-3.9-1.6" />
+                        <path d="M12 2.5v2.5H9.5" />
+                        <path d="M4 13.5v-2.5H6.5" />
+                      </svg>
+                      Rafraîchir
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </h1>
           <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <span>{movie.year}</span>

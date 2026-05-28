@@ -160,13 +160,8 @@ func HandleMe(authService *services.AuthService) http.HandlerFunc {
 		}
 
 		// Get user from context (set by middleware)
-		claims := GetUserFromContext(r)
+		claims := requireAuth(w, r)
 		if claims == nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(LoginResponse{
-				Success: false,
-				Error:   "Not authenticated",
-			})
 			return
 		}
 
@@ -186,13 +181,8 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		claims := GetUserFromContext(r)
+		claims := requireAuth(w, r)
 		if claims == nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Not authenticated",
-			})
 			return
 		}
 
@@ -309,6 +299,20 @@ func requireAdmin(w http.ResponseWriter, r *http.Request) *services.UserClaims {
 		return nil
 	}
 
+	return claims
+}
+
+// requireAuth is a helper that checks if the user is authenticated
+func requireAuth(w http.ResponseWriter, r *http.Request) *services.UserClaims {
+	claims := GetUserFromContext(r)
+	if claims == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Not authenticated",
+		})
+		return nil
+	}
 	return claims
 }
 

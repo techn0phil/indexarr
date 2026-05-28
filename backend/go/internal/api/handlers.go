@@ -165,6 +165,10 @@ func respondError(w http.ResponseWriter, code int, message string) {
 
 func Purge(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		err := repository.PurgeDatabase(db)
 		if err != nil {
 			respondError(w, 500, "Failed to purge database: "+err.Error())

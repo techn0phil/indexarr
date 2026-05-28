@@ -12,6 +12,10 @@ import (
 // TriggerScan starts a manual scan
 func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		// Start scan in goroutine so we can return immediately
 		go func() {
 			scheduler.TriggerScan()
@@ -27,6 +31,10 @@ func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
 // TriggerMoviesScan starts a manual scan for movies only
 func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		go func() {
 			scheduler.TriggerMoviesScan()
 		}()
@@ -41,6 +49,10 @@ func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
 // TriggerSeriesScan starts a manual scan for series only
 func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		go func() {
 			scheduler.TriggerSeriesScan()
 		}()
@@ -68,6 +80,10 @@ func GetScanStatus(scheduler *services.Scheduler) http.HandlerFunc {
 // StopScan stops the currently running scan
 func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		scheduler.StopCurrentScan()
 
 		respond(w, map[string]interface{}{
@@ -79,6 +95,10 @@ func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
 
 func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 		if err != nil {
 			respondError(w, 400, "Invalid movie ID")
@@ -101,6 +121,10 @@ func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 
 func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 		if err != nil {
 			respondError(w, 400, "Invalid series ID")
