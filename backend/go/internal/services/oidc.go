@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -155,20 +156,33 @@ func (s *OIDCService) ExchangeCode(ctx context.Context, code string) (*OIDCClaim
 	}
 
 	// Verify ID token
-	idToken, err := s.verifier.Verify(ctx, rawIDToken)
+	_, err = s.verifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify ID token: %w", err)
 	}
 
+	// Get access token
+	rawAccessToken := token.AccessToken
+	if rawAccessToken == "" {
+		return nil, fmt.Errorf("no access token in response")
+	}
+
+	// Verify access token
+	accessToken, err := s.verifier.Verify(ctx, rawAccessToken)
+	if err != nil {
+		log.Printf("[OIDC] Warning: failed to verify access token: %v", err)
+		return nil, fmt.Errorf("failed to verify access token: %w", err)
+	}
+
 	// Extract claims
 	var claims OIDCClaims
-	if err := idToken.Claims(&claims); err != nil {
+	if err := accessToken.Claims(&claims); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrClaimsExtraction, err)
 	}
 
 	// Also extract raw claims for custom admin claim checking
 	var rawClaims map[string]interface{}
-	if err := idToken.Claims(&rawClaims); err == nil {
+	if err := accessToken.Claims(&rawClaims); err == nil {
 		claims.CustomClaims = rawClaims
 	}
 
@@ -275,13 +289,31 @@ func (s *OIDCService) getRoleFromClaims(claims *OIDCClaims) string {
 	default:
 		// Check custom claims
 		if claims.CustomClaims != nil {
-			if val, ok := claims.CustomClaims[s.cfg.OIDCAdminClaim]; ok {
-				// Check if it's a string
-				if strVal, ok := val.(string); ok && strVal == adminValue {
+			// Handle structured claim case (e.g. "resource_access.indexarr.roles") by searching for the claim key in the raw claims map
+			claimParts := strings.Split(s.cfg.OIDCAdminClaim, ".")
+
+			var currentVal interface{} = claims.CustomClaims
+			for _, part := range claimParts {
+				if m, ok := currentVal.(map[string]interface{}); ok {
+					if val, exists := m[part]; exists {
+						currentVal = val
+					} else {
+						currentVal = nil
+						break
+					}
+				} else {
+					currentVal = nil
+					break
+				}
+			}
+
+			if currentVal != nil {
+				// Check if the final value is a string that matches adminValue
+				if strVal, ok := currentVal.(string); ok && strVal == adminValue {
 					return "admin"
 				}
-				// Check if it's a slice of strings
-				if sliceVal, ok := val.([]interface{}); ok {
+				// Check if the final value is a slice of strings that contains adminValue
+				if sliceVal, ok := currentVal.([]interface{}); ok {
 					for _, v := range sliceVal {
 						if strV, ok := v.(string); ok && strV == adminValue {
 							return "admin"
