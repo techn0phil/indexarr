@@ -40,8 +40,8 @@ type Config struct {
 	OIDCClientSecret   string   // OIDC client secret
 	OIDCRedirectURL    string   // Redirect URL after OIDC authentication
 	OIDCScopes         []string // OIDC scopes (defaults to openid, profile, email)
-	OIDCAdminClaim     string   // Claim name to check for admin role (e.g., "groups" or "roles")
-	OIDCAdminValue     string   // Claim value that grants admin role (e.g., "admins" or "indexarr-admin")
+	OIDCRolesClaim     string   // Roles claim name to check for admin role (e.g., "groups" or "roles")
+	OIDCAdminRoleValue string   // Claim value that grants admin role (e.g., "admins" or "indexarr-admin")
 	OIDCUsernameClaim  string   // Claim to use for username (default: "preferred_username" or "email")
 	OIDCAutoCreateUser bool     // Automatically create users on first OIDC login
 }
@@ -92,8 +92,8 @@ func Load() *Config {
 		OIDCClientSecret:   getEnv("OIDC_CLIENT_SECRET", ""),
 		OIDCRedirectURL:    getEnv("OIDC_REDIRECT_URL", ""),
 		OIDCScopes:         oidcScopes,
-		OIDCAdminClaim:     getEnv("OIDC_ADMIN_CLAIM", ""),
-		OIDCAdminValue:     getEnv("OIDC_ADMIN_VALUE", ""),
+		OIDCRolesClaim:     getEnv("OIDC_ROLES_CLAIM", ""),
+		OIDCAdminRoleValue: getEnv("OIDC_ADMIN_ROLE_VALUE", ""),
 		OIDCUsernameClaim:  getEnv("OIDC_USERNAME_CLAIM", "preferred_username"),
 		OIDCAutoCreateUser: getEnvBool("OIDC_AUTO_CREATE_USER", true),
 	}

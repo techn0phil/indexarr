@@ -266,14 +266,14 @@ func (s *OIDCService) getUsernameFromClaims(claims *OIDCClaims) string {
 // getRoleFromClaims determines the user role from claims
 func (s *OIDCService) getRoleFromClaims(claims *OIDCClaims) string {
 	// If no admin claim configured, everyone is a guest
-	if s.cfg.OIDCAdminClaim == "" || s.cfg.OIDCAdminValue == "" {
+	if s.cfg.OIDCRolesClaim == "" || s.cfg.OIDCAdminRoleValue == "" {
 		return "guest"
 	}
 
-	adminValue := s.cfg.OIDCAdminValue
+	adminValue := s.cfg.OIDCAdminRoleValue
 
 	// Check known claim types
-	switch s.cfg.OIDCAdminClaim {
+	switch s.cfg.OIDCRolesClaim {
 	case "groups":
 		for _, group := range claims.Groups {
 			if group == adminValue {
@@ -290,7 +290,7 @@ func (s *OIDCService) getRoleFromClaims(claims *OIDCClaims) string {
 		// Check custom claims
 		if claims.CustomClaims != nil {
 			// Handle structured claim case (e.g. "resource_access.indexarr.roles") by searching for the claim key in the raw claims map
-			claimParts := strings.Split(s.cfg.OIDCAdminClaim, ".")
+			claimParts := strings.Split(s.cfg.OIDCRolesClaim, ".")
 
 			var currentVal interface{} = claims.CustomClaims
 			for _, part := range claimParts {
