@@ -52,7 +52,7 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 		where += fmt.Sprintf(" AND status='%s'", filters.Status)
 	}
 	if filters.Search != "" {
-		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
+		where += fmt.Sprintf(" AND (title LIKE '%%%s%%' OR year LIKE '%%%s%%')", filters.Search, filters.Search)
 	}
 
 	// Filters requiring joins to related tables - support comma-separated values with OR logic
@@ -225,7 +225,7 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		where += fmt.Sprintf(" AND status='%s'", filters.Status)
 	}
 	if filters.Search != "" {
-		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
+		where += fmt.Sprintf(" AND (title LIKE '%%%s%%' OR year_start LIKE '%%%s%%')", filters.Search, filters.Search)
 	}
 
 	// Filters requiring joins to related tables (episodes -> video/audio tracks) - support comma-separated values with OR logic
