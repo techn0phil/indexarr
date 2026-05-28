@@ -28,11 +28,22 @@ type Config struct {
 	ScanTimeout        int      // timeout in seconds per file
 
 	// Authentication settings
-	AuthMode           string // none, simple, oidc
-	AuthAdminUsername  string // admin username (for simple auth)
-	AuthAdminPassword  string // admin password (for simple auth)
-	AuthSessionSecret  string // secret for signing session tokens
-	AuthSessionMaxAge  int    // session duration in hours (default: 168 = 7 days)
+	AuthMode          string // none, simple, oidc
+	AuthAdminUsername string // admin username (for simple auth)
+	AuthAdminPassword string // admin password (for simple auth)
+	AuthSessionSecret string // secret for signing session tokens
+	AuthSessionMaxAge int    // session duration in hours (default: 168 = 7 days)
+
+	// OIDC settings
+	OIDCIssuerURL      string   // OIDC issuer URL (e.g., https://accounts.google.com)
+	OIDCClientID       string   // OIDC client ID
+	OIDCClientSecret   string   // OIDC client secret
+	OIDCRedirectURL    string   // Redirect URL after OIDC authentication
+	OIDCScopes         []string // OIDC scopes (defaults to openid, profile, email)
+	OIDCAdminClaim     string   // Claim name to check for admin role (e.g., "groups" or "roles")
+	OIDCAdminValue     string   // Claim value that grants admin role (e.g., "admins" or "indexarr-admin")
+	OIDCUsernameClaim  string   // Claim to use for username (default: "preferred_username" or "email")
+	OIDCAutoCreateUser bool     // Automatically create users on first OIDC login
 }
 
 func Load() *Config {
@@ -40,6 +51,13 @@ func Load() *Config {
 	sessionSecret := getEnv("AUTH_SESSION_SECRET", "")
 	if sessionSecret == "" {
 		sessionSecret = generateRandomSecret()
+	}
+
+	// Default OIDC scopes
+	defaultScopes := []string{"openid", "profile", "email"}
+	oidcScopes := getEnvList("OIDC_SCOPES", defaultScopes)
+	if len(oidcScopes) == 0 {
+		oidcScopes = defaultScopes
 	}
 
 	return &Config{
@@ -67,6 +85,17 @@ func Load() *Config {
 		AuthAdminPassword: getEnv("AUTH_ADMIN_PASSWORD", ""),
 		AuthSessionSecret: sessionSecret,
 		AuthSessionMaxAge: getEnvInt("AUTH_SESSION_MAX_AGE", 168), // 7 days
+
+		// OIDC
+		OIDCIssuerURL:      getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:       getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret:   getEnv("OIDC_CLIENT_SECRET", ""),
+		OIDCRedirectURL:    getEnv("OIDC_REDIRECT_URL", ""),
+		OIDCScopes:         oidcScopes,
+		OIDCAdminClaim:     getEnv("OIDC_ADMIN_CLAIM", ""),
+		OIDCAdminValue:     getEnv("OIDC_ADMIN_VALUE", ""),
+		OIDCUsernameClaim:  getEnv("OIDC_USERNAME_CLAIM", "preferred_username"),
+		OIDCAutoCreateUser: getEnvBool("OIDC_AUTO_CREATE_USER", true),
 	}
 }
 
@@ -81,6 +110,19 @@ func getEnvInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
+		}
+	}
+	return defaultValue
+}
+
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		lower := strings.ToLower(value)
+		if lower == "true" || lower == "1" || lower == "yes" {
+			return true
+		}
+		if lower == "false" || lower == "0" || lower == "no" {
+			return false
 		}
 	}
 	return defaultValue
@@ -207,4 +249,9 @@ func (c *Config) IsSimpleAuth() bool {
 // IsOIDCAuth returns true if OIDC authentication mode is enabled
 func (c *Config) IsOIDCAuth() bool {
 	return c.AuthMode == "oidc"
+}
+
+// HasOIDCConfig returns true if OIDC is properly configured
+func (c *Config) HasOIDCConfig() bool {
+	return c.OIDCIssuerURL != "" && c.OIDCClientID != "" && c.OIDCClientSecret != ""
 }

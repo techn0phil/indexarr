@@ -214,8 +214,8 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
           // No auth required, mark as authenticated
           setIsAuthenticated(true);
           setAuthLoading(false);
-        } else if (authConfig.authMode === 'simple') {
-          // Check if we have a valid session
+        } else if (authConfig.authMode === 'simple' || authConfig.authMode === 'oidc') {
+          // Check if we have a valid session (both simple and OIDC use the same session mechanism)
           try {
             const response = await apiClient.getCurrentUser();
             if (response.success && response.user) {
@@ -226,6 +226,11 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
             // Not authenticated, will show login
             setIsAuthenticated(false);
           }
+          setAuthLoading(false);
+        } else {
+          // Unknown auth mode, fallback to no auth
+          setAuthMode('none');
+          setIsAuthenticated(true);
           setAuthLoading(false);
         }
       } catch (error) {

@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, broadcaster *services.Broadcaster, authService *services.AuthService) *chi.Mux {
+func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, broadcaster *services.Broadcaster, authService *services.AuthService, oidcService *services.OIDCService) *chi.Mux {
 	r := chi.NewRouter()
 
 	// CORS middleware
@@ -35,9 +35,15 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 	r.Route("/api", func(r chi.Router) {
 		// Public auth routes (no middleware)
 		r.Route("/auth", func(r chi.Router) {
-			r.Get("/config", HandleAuthConfig(authService))
+			r.Get("/config", HandleAuthConfig(authService, oidcService))
 			r.Post("/login", HandleLogin(authService))
 			r.Post("/logout", HandleLogout())
+
+			// OIDC routes (public, only if OIDC is configured)
+			if oidcService != nil {
+				r.Get("/oidc/login", HandleOIDCLogin(oidcService))
+				r.Get("/oidc/callback", HandleOIDCCallback(oidcService, authService))
+			}
 		})
 
 		// Protected routes (require authentication if enabled)

@@ -164,3 +164,50 @@
     transform: rotate(360deg);
   }
 }
+
+/* OIDC Login Styles */
+.oidcContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.oidcText {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.oidcButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--color-primary);
+  background: #1D9E75;
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.oidcButton:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  background: #085041;
+}
+
+.oidcButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oidcIcon {
+  width: 18px;
+  height: 18px;
+}

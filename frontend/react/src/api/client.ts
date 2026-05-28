@@ -1,4 +1,4 @@
-import { Movie, Series, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse, AuthConfig, LoginResponse, UsersResponse, UserResponse, CreateUserRequest, UpdateUserRequest } from '../types/index';
+import { Movie, Series, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse, AuthConfig, LoginResponse, OIDCLoginResponse, UsersResponse, UserResponse, CreateUserRequest, UpdateUserRequest } from '../types/index';
 
 const API_BASE = '/api';
 
@@ -39,6 +39,12 @@ export const apiClient = {
       throw new Error('Not authenticated');
     }
     return response.json() as Promise<LoginResponse>;
+  },
+
+  // OIDC login - returns URL to redirect to
+  getOIDCLoginUrl: async () => {
+    const response = await fetchWithCredentials(`${API_BASE}/auth/oidc/login`);
+    return response.json() as Promise<OIDCLoginResponse>;
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {

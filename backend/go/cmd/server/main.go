@@ -38,7 +38,7 @@ func main() {
 	// Initialize WebSocket broadcaster
 	broadcaster := services.NewBroadcaster()
 	go broadcaster.Run()
-	log.Println("WebSocket broadcaster started")
+	// log.Println("WebSocket broadcaster started")
 
 	// Initialize importers based on configuration
 	var movieImporter services.MovieImporter
@@ -108,18 +108,6 @@ func main() {
 		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)
 	}
 
-	// Initialize scheduler with both importers
-	scheduler := services.NewScheduler(db, movieImporter, seriesImporter, broadcaster, cfg.ScanInterval)
-
-	if movieImporter != nil || seriesImporter != nil {
-		if cfg.ScanInterval > 0 {
-			scheduler.Start()
-			log.Printf("⏱️  Scheduler started with %d hour interval", cfg.ScanInterval)
-		}
-	} else {
-		log.Println("⚠️  No importers configured, scanning disabled")
-	}
-
 	// Initialize user repository for database-backed users
 	userRepo := repository.NewUserRepository(db)
 
@@ -134,8 +122,32 @@ func main() {
 		log.Println("🔓 Authentication disabled")
 	}
 
+	// Initialize OIDC service if configured
+	var oidcService *services.OIDCService
+	if cfg.IsOIDCAuth() && cfg.HasOIDCConfig() {
+		var err error
+		oidcService, err = services.NewOIDCService(cfg, userRepo)
+		if err != nil {
+			log.Printf("⚠️  Failed to initialize OIDC service: %v", err)
+		} else {
+			log.Printf("🔑 OIDC provider: %s", cfg.OIDCIssuerURL)
+		}
+	}
+
+	// Initialize scheduler with both importers
+	scheduler := services.NewScheduler(db, movieImporter, seriesImporter, broadcaster, cfg.ScanInterval)
+
+	if movieImporter != nil || seriesImporter != nil {
+		if cfg.ScanInterval > 0 {
+			scheduler.Start()
+			log.Printf("⏱️  Scheduler started with %d hour interval", cfg.ScanInterval)
+		}
+	} else {
+		log.Println("⚠️  No importers configured, scanning disabled")
+	}
+
 	// Setup API router
-	router := api.SetupRoutes(db, cfg, scheduler, broadcaster, authService)
+	router := api.SetupRoutes(db, cfg, scheduler, broadcaster, authService, oidcService)
 
 	// Handle graceful shutdown
 	go func() {

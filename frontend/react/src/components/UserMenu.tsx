@@ -21,7 +21,7 @@ export const UserMenu = () => {
   }
 
   // Check if user can change password (not env admin)
-  const canChangePassword = user.id !== undefined && user.id !== 0;
+  const canChangePassword = authMode === 'simple' && user.id !== undefined && user.id !== 0;
 
   // Close menu when clicking outside
   useEffect(() => {

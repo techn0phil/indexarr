@@ -160,6 +160,13 @@ export type AuthMode = 'none' | 'simple' | 'oidc';
 
 export interface AuthConfig {
   authMode: AuthMode;
+  oidcEnabled?: boolean;
+}
+
+export interface OIDCLoginResponse {
+  success: boolean;
+  authUrl?: string;
+  error?: string;
 }
 
 export interface User {

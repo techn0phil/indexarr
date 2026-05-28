@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -40,12 +42,17 @@ type AuthConfigResponse struct {
 }
 
 // HandleAuthConfig returns the current authentication configuration (public endpoint)
-func HandleAuthConfig(authService *services.AuthService) http.HandlerFunc {
+func HandleAuthConfig(authService *services.AuthService, oidcService *services.OIDCService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		response := AuthConfigResponse{
-			AuthMode: authService.GetAuthMode(),
+		response := map[string]interface{}{
+			"authMode": authService.GetAuthMode(),
+		}
+
+		// Add OIDC login URL if OIDC is configured
+		if oidcService != nil && oidcService.IsConfigured() && authService.GetAuthMode() == "oidc" {
+			response["oidcEnabled"] = true
 		}
 
 		json.NewEncoder(w).Encode(response)
@@ -672,4 +679,148 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 			"message": "Mot de passe modifié",
 		})
 	}
+}
+
+// ============================================================================
+// OIDC Handlers
+// ============================================================================
+
+// HandleOIDCLogin initiates OIDC authentication flow
+func HandleOIDCLogin(oidcService *services.OIDCService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if oidcService == nil || !oidcService.IsConfigured() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"success": false,
+				"error":   "OIDC is not configured",
+			})
+			return
+		}
+
+		// Get authorization URL
+		authURL, state, err := oidcService.GetAuthorizationURL()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"success": false,
+				"error":   "Failed to generate authorization URL",
+			})
+			return
+		}
+
+		// Store state in a short-lived cookie for CSRF protection
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oidc_state",
+			Value:    state,
+			Path:     "/",
+			MaxAge:   600, // 10 minutes
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   r.TLS != nil,
+		})
+
+		// Return the authorization URL for frontend to redirect
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"authUrl": authURL,
+		})
+	}
+}
+
+// HandleOIDCCallback handles the OIDC callback after authentication
+func HandleOIDCCallback(oidcService *services.OIDCService, authService *services.AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get state and code from query params
+		state := r.URL.Query().Get("state")
+		code := r.URL.Query().Get("code")
+		errorParam := r.URL.Query().Get("error")
+		errorDesc := r.URL.Query().Get("error_description")
+
+		// Handle OIDC provider errors
+		if errorParam != "" {
+			redirectWithError(w, r, fmt.Sprintf("%s: %s", errorParam, errorDesc))
+			return
+		}
+
+		if code == "" {
+			redirectWithError(w, r, "No authorization code received")
+			return
+		}
+
+		// Validate state from cookie
+		stateCookie, err := r.Cookie("oidc_state")
+		if err != nil || stateCookie.Value != state {
+			redirectWithError(w, r, "Invalid state parameter")
+			return
+		}
+
+		// Validate state in OIDC service
+		if !oidcService.ValidateState(state) {
+			redirectWithError(w, r, "State validation failed")
+			return
+		}
+
+		// Clear state cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oidc_state",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+		})
+
+		// Exchange code for tokens
+		claims, err := oidcService.ExchangeCode(r.Context(), code)
+		if err != nil {
+			redirectWithError(w, r, "Failed to exchange authorization code")
+			return
+		}
+
+		// Get or create user from claims
+		user, err := oidcService.GetUserFromClaims(claims)
+		if err != nil {
+			if errors.Is(err, services.ErrUserDisabled) {
+				redirectWithError(w, r, "Account is disabled")
+			} else {
+				redirectWithError(w, r, "Failed to process user information")
+			}
+			return
+		}
+
+		// Generate JWT token
+		token, expiresAt, err := authService.GenerateToken(user)
+		if err != nil {
+			redirectWithError(w, r, "Failed to generate session token")
+			return
+		}
+
+		// Set auth cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "auth_token",
+			Value:    token,
+			Path:     "/",
+			Expires:  expiresAt,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   r.TLS != nil,
+		})
+
+		// Redirect to frontend
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+}
+
+// redirectWithError redirects to frontend with an error message
+func redirectWithError(w http.ResponseWriter, r *http.Request, message string) {
+	// URL encode the error message
+	encoded := url.QueryEscape(message)
+	http.Redirect(w, r, "/?auth_error="+encoded, http.StatusFound)
+}
+
+// OIDCAuthConfigResponse extends AuthConfigResponse for OIDC
+type OIDCAuthConfigResponse struct {
+	AuthMode     string `json:"authMode"`
+	OIDCLoginURL string `json:"oidcLoginUrl,omitempty"`
 }
