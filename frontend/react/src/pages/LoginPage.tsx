@@ -91,7 +91,7 @@ export const LoginPage = () => {
           // OIDC Login Mode
           <div className={styles.oidcContainer}>
             <p className={styles.oidcText}>
-              Utilisez votre compte d'entreprise pour vous connecter.
+              Utilisez votre compte d'authentification unique pour vous connecter.
             </p>
             <button 
               type="button"
@@ -104,8 +104,8 @@ export const LoginPage = () => {
               ) : (
                 <>
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className={styles.oidcIcon}>
-                    <rect x="2" y="4" width="12" height="8" rx="1" />
-                    <path d="M2 6l6 4 6-4" />
+                    <rect x="4" y="7" width="8" height="6" rx="1.5" />
+                    <path d="M6 7V5a2 2 0 114 0v2" />
                   </svg>
                   Se connecter avec SSO
                 </>
