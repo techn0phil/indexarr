@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext, ReactNode, useRef, useC
 import { apiClient } from '../api/client';
 import { StatsResponse, ScanStatus, AuthMode, User } from '../types';
 
-export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series';
+export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series' | 'admin-users';
 
 interface AppConfig {
   radarrUrl?: string;

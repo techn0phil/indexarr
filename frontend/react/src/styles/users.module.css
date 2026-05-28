@@ -1,0 +1,443 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: var(--color-primary);
+  background: #1D9E75;
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.createButton:hover {
+  background: var(--color-primary-dark);
+  background: #085041;
+}
+
+.buttonIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--color-badge-missing);
+  color: var(--color-badge-missing-text);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.emptySubtext {
+  font-size: 12px !important;
+  color: var(--color-text-tertiary) !important;
+  margin-top: 4px !important;
+}
+
+/* Table */
+.table {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  background: var(--color-background-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.tableRow {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  transition: background 0.2s;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: var(--color-background-secondary);
+}
+
+.colUsername {
+  flex: 2;
+  min-width: 150px;
+}
+
+.colRole {
+  flex: 1;
+  min-width: 120px;
+}
+
+.colStatus {
+  flex: 1;
+  min-width: 100px;
+}
+
+.colDate {
+  flex: 1;
+  min-width: 140px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.colActions {
+  flex: 0 0 120px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.username {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--border-radius-full);
+}
+
+.roleAdmin {
+  background: var(--color-badge-dv);
+  color: var(--color-badge-dv-text);
+}
+
+.roleGuest {
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+
+.statusToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--border-radius-full);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.statusToggle:hover {
+  opacity: 0.8;
+}
+
+.statusToggle.enabled {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.statusToggle.disabled {
+  background: var(--color-badge-missing);
+  color: var(--color-badge-missing-text);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.enabled .statusDot {
+  background: var(--color-status-ok);
+}
+
+.disabled .statusDot {
+  background: var(--color-status-missing);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.actionButton:hover {
+  background: var(--color-background-tertiary);
+  border-color: var(--color-border-secondary);
+}
+
+.actionButton svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-secondary);
+}
+
+.actionButton.deleteButton:hover {
+  background: var(--color-badge-missing);
+}
+
+.actionButton.deleteButton:hover svg {
+  color: var(--color-badge-missing-text);
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+}
+
+.modalText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.modalSubtext {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+}
+
+.formField {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.select:focus {
+  border-color: var(--color-primary);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.formError {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: var(--color-badge-missing);
+  color: var(--color-badge-missing-text);
+  border-radius: var(--border-radius-md);
+  font-size: 12px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: var(--color-background-tertiary);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: var(--color-primary);
+  background: #1D9E75;
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  background: #085041;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteSubmitButton {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: var(--color-status-missing);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.deleteSubmitButton:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.deleteSubmitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -5,6 +5,7 @@ import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
+import { UsersPage } from './pages/UsersPage';
 import { LoginPage } from './pages/LoginPage';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
 import layoutStyles from './styles/layout.module.css';
@@ -86,6 +87,11 @@ const AppContent = () => {
           {currentPage === 'detail-series' && selectedId && (
             <div className={layoutStyles.page + ' ' + layoutStyles.active}>
               <SeriesDetail seriesId={selectedId} />
+            </div>
+          )}
+          {currentPage === 'admin-users' && (
+            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+              <UsersPage />
             </div>
           )}
         </div>

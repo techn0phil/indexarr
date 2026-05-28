@@ -163,6 +163,7 @@ export interface AuthConfig {
 }
 
 export interface User {
+  id?: number;
   username: string;
   role: 'admin' | 'guest';
 }
@@ -175,5 +176,44 @@ export interface LoginRequest {
 export interface LoginResponse {
   success: boolean;
   user?: User;
+  error?: string;
+}
+
+// User management types
+export interface UserDetails {
+  id: number;
+  username: string;
+  role: 'admin' | 'guest';
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  role: 'admin' | 'guest';
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  role?: 'admin' | 'guest';
+  enabled?: boolean;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  data?: UserDetails[];
+  error?: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  data?: UserDetails;
   error?: string;
 }

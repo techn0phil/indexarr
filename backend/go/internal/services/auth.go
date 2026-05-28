@@ -6,18 +6,23 @@ import (
 	"time"
 
 	"indexarr/internal/config"
+	"indexarr/internal/models"
+	"indexarr/internal/repository"
 
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrTokenExpired       = errors.New("token expired")
+	ErrUserDisabled       = errors.New("user account is disabled")
 )
 
 // UserClaims represents the JWT claims for authenticated users
 type UserClaims struct {
+	UserID   int64  `json:"userId,omitempty"` // 0 for env admin
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
@@ -25,12 +30,16 @@ type UserClaims struct {
 
 // AuthService handles authentication operations
 type AuthService struct {
-	cfg *config.Config
+	cfg      *config.Config
+	userRepo *repository.UserRepository
 }
 
 // NewAuthService creates a new auth service
-func NewAuthService(cfg *config.Config) *AuthService {
-	return &AuthService{cfg: cfg}
+func NewAuthService(cfg *config.Config, userRepo *repository.UserRepository) *AuthService {
+	return &AuthService{
+		cfg:      cfg,
+		userRepo: userRepo,
+	}
 }
 
 // IsEnabled returns true if authentication is enabled
@@ -44,25 +53,55 @@ func (s *AuthService) GetAuthMode() string {
 }
 
 // ValidateCredentials checks if the provided credentials are valid
-func (s *AuthService) ValidateCredentials(username, password string) bool {
+// Returns the user info if valid, or an error if not
+func (s *AuthService) ValidateCredentials(username, password string) (*models.User, error) {
 	if s.cfg.AuthMode != "simple" {
-		return false
+		return nil, ErrInvalidCredentials
 	}
 
-	// Use constant-time comparison to prevent timing attacks
-	usernameMatch := subtle.ConstantTimeCompare([]byte(username), []byte(s.cfg.AuthAdminUsername)) == 1
-	passwordMatch := subtle.ConstantTimeCompare([]byte(password), []byte(s.cfg.AuthAdminPassword)) == 1
+	// First, check env admin credentials (constant-time comparison)
+	if s.cfg.AuthAdminUsername != "" && s.cfg.AuthAdminPassword != "" {
+		usernameMatch := subtle.ConstantTimeCompare([]byte(username), []byte(s.cfg.AuthAdminUsername)) == 1
+		passwordMatch := subtle.ConstantTimeCompare([]byte(password), []byte(s.cfg.AuthAdminPassword)) == 1
 
-	return usernameMatch && passwordMatch
+		if usernameMatch && passwordMatch {
+			// Return a virtual user for env admin
+			return &models.User{
+				ID:       0, // ID 0 indicates env admin
+				Username: username,
+				Role:     "admin",
+				Enabled:  true,
+			}, nil
+		}
+	}
+
+	// Then, check database users
+	if s.userRepo != nil {
+		user, err := s.userRepo.GetByUsername(username)
+		if err == nil && user != nil {
+			// Check if user is enabled
+			if !user.Enabled {
+				return nil, ErrUserDisabled
+			}
+
+			// Verify password
+			if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err == nil {
+				return user, nil
+			}
+		}
+	}
+
+	return nil, ErrInvalidCredentials
 }
 
 // GenerateToken creates a JWT token for the authenticated user
-func (s *AuthService) GenerateToken(username string) (string, time.Time, error) {
+func (s *AuthService) GenerateToken(user *models.User) (string, time.Time, error) {
 	expiresAt := time.Now().Add(time.Duration(s.cfg.AuthSessionMaxAge) * time.Hour)
 
 	claims := &UserClaims{
-		Username: username,
-		Role:     "admin", // For Step 1, all authenticated users are admin
+		UserID:   user.ID,
+		Username: user.Username,
+		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -101,4 +140,29 @@ func (s *AuthService) ValidateToken(tokenString string) (*UserClaims, error) {
 	}
 
 	return nil, ErrInvalidToken
+}
+
+// HashPassword creates a bcrypt hash of a password
+func HashPassword(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
+}
+
+// VerifyPassword checks if a password matches a hash
+func VerifyPassword(hash, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
+// IsEnvAdmin checks if the user claims represent the env admin user
+func (s *AuthService) IsEnvAdmin(claims *UserClaims) bool {
+	return claims.UserID == 0 && claims.Username == s.cfg.AuthAdminUsername
+}
+
+// GetUserRepo returns the user repository (for use in handlers)
+func (s *AuthService) GetUserRepo() *repository.UserRepository {
+	return s.userRepo
 }

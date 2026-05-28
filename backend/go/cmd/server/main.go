@@ -120,12 +120,15 @@ func main() {
 		log.Println("⚠️  No importers configured, scanning disabled")
 	}
 
+	// Initialize user repository for database-backed users
+	userRepo := repository.NewUserRepository(db)
+
 	// Initialize authentication service
-	authService := services.NewAuthService(cfg)
+	authService := services.NewAuthService(cfg, userRepo)
 	if cfg.HasAuthEnabled() {
 		log.Printf("🔐 Authentication mode: %s", cfg.AuthMode)
 		if cfg.IsSimpleAuth() && cfg.AuthAdminUsername != "" {
-			log.Printf("👤 Admin user: %s", cfg.AuthAdminUsername)
+			log.Printf("👤 Admin user: %s (env)", cfg.AuthAdminUsername)
 		}
 	} else {
 		log.Println("🔓 Authentication disabled")
