@@ -10,9 +10,9 @@ import (
 )
 
 // TriggerScan starts a manual scan
-func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -29,9 +29,9 @@ func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // TriggerMoviesScan starts a manual scan for movies only
-func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerMoviesScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -47,9 +47,9 @@ func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // TriggerSeriesScan starts a manual scan for series only
-func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerSeriesScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -78,9 +78,9 @@ func GetScanStatus(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // StopScan stops the currently running scan
-func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
+func StopScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -93,9 +93,9 @@ func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
 	}
 }
 
-func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
+func RefreshMovie(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -119,9 +119,9 @@ func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 	}
 }
 
-func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
+func RefreshSeries(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 

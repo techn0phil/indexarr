@@ -9,6 +9,7 @@ import (
 	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
+	"indexarr/internal/services"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -163,9 +164,9 @@ func respondError(w http.ResponseWriter, code int, message string) {
 	})
 }
 
-func Purge(db *sql.DB) http.HandlerFunc {
+func Purge(db *sql.DB, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if requireAdmin(w, r) == nil {
+		if authService.IsEnabled() && requireAdmin(w, r) == nil {
 			return
 		}
 

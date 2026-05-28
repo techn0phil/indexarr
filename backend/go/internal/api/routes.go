@@ -79,18 +79,18 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 			r.Get("/stats", GetStats(db))
 
 			// Purge
-			r.Post("/purge", Purge(db))
+			r.Post("/purge", Purge(db, authService))
 
 			// Scan (only if scheduler is provided)
 			if scheduler != nil {
-				r.Post("/scan", TriggerScan(scheduler))
-				r.Post("/scan/movies", TriggerMoviesScan(scheduler))
-				r.Post("/scan/series", TriggerSeriesScan(scheduler))
+				r.Post("/scan", TriggerScan(scheduler, authService))
+				r.Post("/scan/movies", TriggerMoviesScan(scheduler, authService))
+				r.Post("/scan/series", TriggerSeriesScan(scheduler, authService))
 				r.Get("/scan/status", GetScanStatus(scheduler))
-				r.Post("/scan/stop", StopScan(scheduler))
+				r.Post("/scan/stop", StopScan(scheduler, authService))
 
-				r.Post("/movies/{id}/refresh", RefreshMovie(scheduler))
-				r.Post("/series/{id}/refresh", RefreshSeries(scheduler))
+				r.Post("/movies/{id}/refresh", RefreshMovie(scheduler, authService))
+				r.Post("/series/{id}/refresh", RefreshSeries(scheduler, authService))
 
 				// WebSocket endpoint for real-time scan updates
 				if broadcaster != nil {

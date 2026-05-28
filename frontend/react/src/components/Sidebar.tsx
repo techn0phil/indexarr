@@ -100,24 +100,26 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         </div> */}
 
         {/* Administration section - only visible for admin users with simple auth */}
-        {(context?.authMode === 'simple' || context?.authMode === 'oidc') && context?.user?.role === 'admin' && (
+        {(context?.authMode === 'none' || context?.user?.role === 'admin') && (
           <>
             <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
               Administration
             </div>
 
-            <div
-              className={`${styles['nav-item']} ${activeNav === 'admin-users' ? styles.active : ''}`}
-              onClick={() => onNavClick('admin-users')}
-            >
-              <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="6" cy="5" r="2.5" />
-                <path d="M1 13c0-2.5 2-4 5-4s5 1.5 5 4" />
-                <circle cx="12" cy="6" r="2" />
-                <path d="M15 13c0-2 -1.5-3-3.5-3" />
-              </svg>
-              Utilisateurs
-            </div>
+            {context?.authMode !== 'none' && (
+              <div
+                className={`${styles['nav-item']} ${activeNav === 'admin-users' ? styles.active : ''}`}
+                onClick={() => onNavClick('admin-users')}
+              >
+                <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="6" cy="5" r="2.5" />
+                  <path d="M1 13c0-2.5 2-4 5-4s5 1.5 5 4" />
+                  <circle cx="12" cy="6" r="2" />
+                  <path d="M15 13c0-2 -1.5-3-3.5-3" />
+                </svg>
+                Utilisateurs
+              </div>
+            )}
 
             <div style={{ padding: '6px 18px', marginTop: 'auto' }}>
               <button
