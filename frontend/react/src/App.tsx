@@ -5,9 +5,35 @@ import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
+import { LoginPage } from './pages/LoginPage';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
 import layoutStyles from './styles/layout.module.css';
 import './styles/variables.css';
+
+// Loading spinner for auth check
+const AuthLoadingSpinner = () => (
+  <div style={{
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--color-background-tertiary)',
+  }}>
+    <div style={{
+      width: '32px',
+      height: '32px',
+      border: '3px solid var(--color-border-tertiary)',
+      borderTopColor: 'var(--color-primary)',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite',
+    }} />
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
 
 const AppContent = () => {
   const context = useContext(AppContext);
@@ -68,10 +94,32 @@ const AppContent = () => {
   );
 };
 
+// Auth-aware router
+const AppRouter = () => {
+  const context = useContext(AppContext);
+  
+  if (!context) return null;
+
+  const { authLoading, isAuthenticated, authMode } = context;
+
+  // Show loading spinner while checking auth
+  if (authLoading) {
+    return <AuthLoadingSpinner />;
+  }
+
+  // Show login page if auth required and not authenticated
+  if (authMode === 'simple' && !isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Show main app content
+  return <AppContent />;
+};
+
 function App() {
   return (
     <AppContextProvider>
-      <AppContent />
+      <AppRouter />
     </AppContextProvider>
   );
 }

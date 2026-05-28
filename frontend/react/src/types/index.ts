@@ -154,3 +154,26 @@ export interface ScanResponse {
   success: boolean;
   message: string;
 }
+
+// Authentication types
+export type AuthMode = 'none' | 'simple' | 'oidc';
+
+export interface AuthConfig {
+  authMode: AuthMode;
+}
+
+export interface User {
+  username: string;
+  role: 'admin' | 'guest';
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  user?: User;
+  error?: string;
+}
