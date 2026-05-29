@@ -115,12 +115,15 @@ const DonutCard = ({ title, data }: DonutCardProps) => {
                   outerRadius={60}
                   stroke="none"
                   paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270}
                 >
                   {visibleData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--color-background-secondary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: 4, padding: '3px 10px' }}
                   formatter={(value, name) => [
                     `${Number(value ?? 0)} (${formatPct(Number(value ?? 0), total)})`,
                     String(name),
@@ -246,6 +249,7 @@ export const Statistics = () => {
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCard}>
           <div className={`${styles.kpiIcon} ${styles.iconGreen}`}>{renderKpiIcon('movies')}</div>
+          <div className={`${styles.kpiTitle}`}>Films</div>
           <div className={styles.kpiValue}>{stats.totalMovies}</div>
           <div className={styles.kpiLabel}>Films</div>
           <div className={`${styles.kpiDelta} ${styles.kpiDeltaUp}`}>{`${stats.availMovies} disponibles`}</div>
@@ -253,6 +257,7 @@ export const Statistics = () => {
 
         <div className={styles.kpiCard}>
           <div className={`${styles.kpiIcon} ${styles.iconBlue}`}>{renderKpiIcon('series')}</div>
+          <div className={`${styles.kpiTitle}`}>Séries</div>
           <div className={styles.kpiValue}>{stats.totalSeries}</div>
           <div className={styles.kpiLabel}>{`Séries · ${stats.totalEpisodes} épisodes`}</div>
           <div className={`${styles.kpiDelta} ${styles.kpiDeltaUp}`}>{`${stats.availEpisodes} épisodes disponibles`}</div>
@@ -260,16 +265,18 @@ export const Statistics = () => {
 
         <div className={styles.kpiCard}>
           <div className={`${styles.kpiIcon} ${styles.iconPurple}`}>{renderKpiIcon('storage')}</div>
+          <div className={`${styles.kpiTitle}`}>Stockage</div>
           <div className={styles.kpiValue}>{formatStorage(stats.diskSpaceGB)}</div>
-          <div className={styles.kpiLabel}>To stockage total</div>
+          <div className={styles.kpiLabel}>Stockage total</div>
           <div className={styles.kpiDelta}>{`${stats.fourKCount} titres 4K · ${Math.round(stats.fourKPercent)}% films`}</div>
         </div>
 
         <div className={styles.kpiCard}>
           <div className={`${styles.kpiIcon} ${styles.iconAmber}`}>{renderKpiIcon('problems')}</div>
+          <div className={`${styles.kpiTitle}`}>Problèmes</div>
           <div className={`${styles.kpiValue} ${styles.kpiError}`}>{stats.problemsCount}</div>
           <div className={styles.kpiLabel}>Problèmes actifs</div>
-          <div className={styles.kpiDelta}>{`${stats.missingMovies} manquants · ${stats.missingEpisodes} ep. manquants`}</div>
+          <div className={styles.kpiDelta}>{`${stats.missingMovies} films manquants · ${stats.missingEpisodes} ep. manquants`}</div>
         </div>
       </div>
 

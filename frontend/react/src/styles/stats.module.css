@@ -24,6 +24,8 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+
+  float: right;
 }
 
 .kpiIcon svg {
@@ -49,6 +51,14 @@
 .iconAmber {
   background: #FAEEDA;
   color: #633806;
+}
+
+.kpiTitle {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
 }
 
 .kpiValue {
