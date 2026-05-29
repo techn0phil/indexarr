@@ -3,6 +3,7 @@ import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
+import { Recents } from './pages/Recents';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
@@ -49,6 +50,14 @@ const AppContent = () => {
               <ListSeries 
                 onSelectSeries={(id) => goToPage('detail-series', id)}
                 searchQuery={searchQuery}
+              />
+            </div>
+          )}
+          {currentPage === 'list-recents' && (
+            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+              <Recents
+                onSelectMovie={(id) => goToPage('detail-movie', id)}
+                onSelectSeries={(id) => goToPage('detail-series', id)}
               />
             </div>
           )}

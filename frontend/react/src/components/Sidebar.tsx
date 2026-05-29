@@ -68,8 +68,10 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           <span className={styles['nav-badge']}>{context?.stats?.totalSeries ?? 0}</span>
         </div>
 
-        {/* Menus to be implemented in the future: */}
-        {/* <div className={styles['nav-item']}>
+        <div
+          className={`${styles['nav-item']} ${activeNav === 'list-recents' ? styles.active : ''}`}
+          onClick={() => onNavClick('list-recents')}
+        >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="5" />
             <path d="M8 5v3l2 2" />
@@ -77,7 +79,8 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           Récents
         </div>
 
-        <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
+        {/* Menus to be implemented in the future: */}
+        {/* <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
           Analyse
         </div>
 

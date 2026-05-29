@@ -88,8 +88,18 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 		return nil, 0, err
 	}
 
+	orderBy := "title"
+	switch filters.Sort {
+	case "added":
+		orderBy = "COALESCE(date_added, '') DESC, id DESC"
+	case "year":
+		orderBy = "year DESC, id DESC"
+	case "size":
+		orderBy = "file_size DESC, id DESC"
+	}
+
 	// Query movies
-	query := fmt.Sprintf(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster FROM movies WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
+	query := fmt.Sprintf(`SELECT id, title, year, duration, synopsis, genres, rating, popularity, status, file_size, file_path, container, date_added, tmdb_id, imdb_id, poster FROM movies WHERE %s ORDER BY %s LIMIT ? OFFSET ?`, where, orderBy)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
@@ -260,7 +270,17 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		return nil, 0, err
 	}
 
-	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE %s ORDER BY title LIMIT ? OFFSET ?`, where)
+	orderBy := "title"
+	switch filters.Sort {
+	case "added":
+		orderBy = "COALESCE(date_added, '') DESC, id DESC"
+	case "year":
+		orderBy = "year_start DESC, id DESC"
+	case "size":
+		orderBy = "file_size DESC, id DESC"
+	}
+
+	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE %s ORDER BY %s LIMIT ? OFFSET ?`, where, orderBy)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
