@@ -166,10 +166,11 @@ const DonutCard = ({ title, data }: DonutCardProps) => {
 interface ProgressCardProps {
   title: string;
   items: DonutDatum[];
+  totalMediaFiles?: number;
 }
 
-const ProgressCard = ({ title, items }: ProgressCardProps) => {
-  const total = items.reduce((sum, item) => sum + item.count, 0);
+const ProgressCard = ({ title, items, totalMediaFiles = 0 }: ProgressCardProps) => {
+  const total = totalMediaFiles || items.reduce((sum, item) => sum + item.count, 0);
   const [animateBars, setAnimateBars] = useState(false);
 
   useEffect(() => {
@@ -287,8 +288,8 @@ export const Statistics = () => {
       </div>
 
       <div className={styles.rowTwo}>
-        <ProgressCard title="Audio — formats" items={audioFormatData} />
-        <ProgressCard title="Audio — langues" items={audioLanguageData} />
+        <ProgressCard title="Audio — formats" items={audioFormatData} totalMediaFiles={stats.availMovies + stats.availEpisodes} />
+        <ProgressCard title="Audio — langues" items={audioLanguageData} totalMediaFiles={stats.availMovies + stats.availEpisodes} />
       </div>
     </div>
   );
