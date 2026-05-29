@@ -1,0 +1,245 @@
+.page {
+  padding: 20px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpiCard {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+}
+
+.kpiIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.kpiIcon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.iconGreen {
+  background: #E1F5EE;
+  color: #1D9E75;
+}
+
+.iconBlue {
+  background: #E6F1FB;
+  color: #0C447C;
+}
+
+.iconPurple {
+  background: #EEEDFE;
+  color: #3C3489;
+}
+
+.iconAmber {
+  background: #FAEEDA;
+  color: #633806;
+}
+
+.kpiValue {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.4px;
+  line-height: 1;
+}
+
+.kpiLabel {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
+}
+
+.kpiDelta {
+  font-size: 10px;
+  margin-top: 6px;
+  color: var(--color-text-tertiary);
+}
+
+.kpiDeltaUp {
+  color: #1D9E75;
+}
+
+.kpiError {
+  color: #E24B4A;
+}
+
+.rowThree {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.rowTwo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+}
+
+.cardTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 12px;
+}
+
+.donutWrap {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.donutCenter {
+  font-size: 18px;
+  font-weight: 600;
+  fill: var(--color-text-primary);
+}
+
+.donutCenterSub {
+  font-size: 10px;
+  fill: var(--color-text-tertiary);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legendItem {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  text-align: left;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.legendItemMuted {
+  opacity: 0.4;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+}
+
+.legendLabel {
+  font-size: 11px;
+}
+
+.legendPct {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.progressItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.progressLabel {
+  color: var(--color-text-secondary);
+}
+
+.progressValue {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.progressTrack {
+  height: 6px;
+  background: var(--color-background-tertiary);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.state {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-text-tertiary);
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rowThree {
+    grid-template-columns: 1fr;
+  }
+
+  .rowTwo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 14px;
+  }
+
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .donutWrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}

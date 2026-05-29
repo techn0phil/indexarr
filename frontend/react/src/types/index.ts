@@ -124,6 +124,11 @@ export interface PaginatedResponse<T> {
   error?: string;
 }
 
+export interface StatsDistributionItem {
+  name: string;
+  count: number;
+}
+
 export interface StatsResponse {
   success: boolean;
   totalMovies: number;
@@ -137,6 +142,11 @@ export interface StatsResponse {
   missingMovies: number;
   availEpisodes: number;
   missingEpisodes: number;
+  videoCodecDistribution: StatsDistributionItem[];
+  resolutionDistribution: StatsDistributionItem[];
+  hdrDistribution: StatsDistributionItem[];
+  audioFormatDistribution: StatsDistributionItem[];
+  audioLanguageDistribution: StatsDistributionItem[];
   error?: string;
 }
 

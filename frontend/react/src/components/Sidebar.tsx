@@ -79,19 +79,22 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           Récents
         </div>
 
-        {/* Menus to be implemented in the future: */}
-        {/* <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
+        <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
           Analyse
         </div>
 
-        <div className={styles['nav-item']}>
+        <div
+          className={`${styles['nav-item']} ${activeNav === 'statistics' ? styles.active : ''}`}
+          onClick={() => onNavClick('statistics')}
+        >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 12l4-5 3 3 3-4 2 2" />
           </svg>
           Statistiques
         </div>
 
-        <div className={styles['nav-item']}>
+        {/* Menu to be implemented in the future: */}
+        {/* <div className={styles['nav-item']}>
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="6" />
             <path d="M8 5v4M8 11h.01" />

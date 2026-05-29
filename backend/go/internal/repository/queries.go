@@ -515,7 +515,10 @@ func GetStats(db *sql.DB) (*models.StatsResponse, error) {
 
 	// Disk space in GB
 	var totalBytes int64
-	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available' UNION ALL SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&totalBytes)
+	db.QueryRow(`
+		SELECT COALESCE((SELECT SUM(file_size) FROM movies WHERE status='available'), 0)
+		     + COALESCE((SELECT SUM(file_size) FROM episodes WHERE status='available'), 0)
+	`).Scan(&totalBytes)
 	stats.DiskSpaceGB = float64(totalBytes) / (1024 * 1024 * 1024)
 
 	// 4K count
@@ -529,5 +532,220 @@ func GetStats(db *sql.DB) (*models.StatsResponse, error) {
 		stats.FourKPercent = float64(stats.FourKCount) / float64(stats.TotalMovies) * 100
 	}
 
+	videoCodecDistribution, err := queryStatsDistribution(db, `
+		SELECT codec_name, COUNT(*) AS item_count
+		FROM (
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%H.265%' OR UPPER(COALESCE(vt.codec, '')) LIKE '%HEVC%' THEN 'H.265 (HEVC)'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%H.264%' OR UPPER(COALESCE(vt.codec, '')) LIKE '%AVC%' THEN 'H.264 (AVC)'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%AV1%' THEN 'AV1'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%VP9%' THEN 'VP9'
+					ELSE TRIM(vt.codec)
+				END AS codec_name
+			FROM movies m
+			JOIN video_tracks vt ON vt.movie_id = m.id
+			WHERE m.status = 'available'
+			UNION ALL
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%H.265%' OR UPPER(COALESCE(vt.codec, '')) LIKE '%HEVC%' THEN 'H.265 (HEVC)'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%H.264%' OR UPPER(COALESCE(vt.codec, '')) LIKE '%AVC%' THEN 'H.264 (AVC)'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%AV1%' THEN 'AV1'
+					WHEN UPPER(COALESCE(vt.codec, '')) LIKE '%VP9%' THEN 'VP9'
+					ELSE TRIM(vt.codec)
+				END AS codec_name
+			FROM episodes e
+			JOIN video_tracks vt ON vt.episode_id = e.id
+			WHERE e.status = 'available'
+		)
+		WHERE codec_name IS NOT NULL AND codec_name != ''
+		GROUP BY codec_name
+		ORDER BY item_count DESC
+		LIMIT 8
+	`)
+	if err != nil {
+		return nil, err
+	}
+	stats.VideoCodecDistribution = videoCodecDistribution
+
+	resolutionDistribution, err := queryStatsDistribution(db, `
+		SELECT resolution_name, COUNT(*) AS item_count
+		FROM (
+			SELECT
+				CASE
+					WHEN vt.resolution LIKE '3840%' OR vt.resolution LIKE '%2160%' THEN '4K Ultra HD'
+					WHEN vt.resolution LIKE '1920%' OR vt.resolution LIKE '%1080%' THEN '1080p Full HD'
+					WHEN vt.resolution LIKE '1280%' OR vt.resolution LIKE '%720%' THEN '720p HD'
+					ELSE 'SD (480p ou moins)'
+				END AS resolution_name
+			FROM movies m
+			JOIN video_tracks vt ON vt.movie_id = m.id
+			WHERE m.status = 'available'
+			UNION ALL
+			SELECT
+				CASE
+					WHEN vt.resolution LIKE '3840%' OR vt.resolution LIKE '%2160%' THEN '4K Ultra HD'
+					WHEN vt.resolution LIKE '1920%' OR vt.resolution LIKE '%1080%' THEN '1080p Full HD'
+					WHEN vt.resolution LIKE '1280%' OR vt.resolution LIKE '%720%' THEN '720p HD'
+					ELSE 'SD (480p ou moins)'
+				END AS resolution_name
+			FROM episodes e
+			JOIN video_tracks vt ON vt.episode_id = e.id
+			WHERE e.status = 'available'
+		)
+		GROUP BY resolution_name
+		ORDER BY item_count DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	stats.ResolutionDistribution = resolutionDistribution
+
+	hdrDistribution, err := queryStatsDistribution(db, `
+		SELECT hdr_name, COUNT(*) AS item_count
+		FROM (
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%DOLBY%' AND UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10+%' THEN 'Dolby Vision / HDR10+'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%DOLBY%' AND UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10%' THEN 'Dolby Vision / HDR10'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10+%' THEN 'HDR10+'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10%' THEN 'HDR10'
+					ELSE 'SDR'
+				END AS hdr_name
+			FROM movies m
+			JOIN video_tracks vt ON vt.movie_id = m.id
+			WHERE m.status = 'available'
+			UNION ALL
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%DOLBY%' AND UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10+%' THEN 'Dolby Vision / HDR10+'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%DOLBY%' AND UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10%' THEN 'Dolby Vision / HDR10'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10+%' THEN 'HDR10+'
+					WHEN UPPER(COALESCE(vt.hdr, '')) LIKE '%HDR10%' THEN 'HDR10'
+					ELSE 'SDR'
+				END AS hdr_name
+			FROM episodes e
+			JOIN video_tracks vt ON vt.episode_id = e.id
+			WHERE e.status = 'available'
+		)
+		GROUP BY hdr_name
+		ORDER BY item_count DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	stats.HDRDistribution = hdrDistribution
+
+	audioFormatDistribution, err := queryStatsDistribution(db, `
+		SELECT audio_name, COUNT(*) AS item_count
+		FROM (
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%TRUEHD%' AND UPPER(COALESCE(at.codec, '')) LIKE '%ATMOS%' THEN 'Dolby TrueHD Atmos'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%TRUEHD%' THEN 'Dolby TrueHD'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%E-AC-3%' AND UPPER(COALESCE(at.codec, '')) LIKE '%ATMOS%' THEN 'Dolby Digital Plus Atmos'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%E-AC-3%' THEN 'Dolby Digital Plus'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%AC-3%' THEN 'Dolby Digital'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' AND UPPER(COALESCE(at.codec, '')) LIKE '%X%' THEN 'DTS:X'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' AND (UPPER(COALESCE(at.codec, '')) LIKE '%MA%' OR UPPER(COALESCE(at.codec, '')) LIKE '%MASTER%') THEN 'DTS-HD Master Audio'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' THEN 'DTS'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%AAC%' THEN 'AAC'
+					ELSE 'Autres'
+				END AS audio_name
+			FROM movies m
+			JOIN audio_tracks at ON at.movie_id = m.id
+			WHERE m.status = 'available'
+			UNION ALL
+			SELECT
+				CASE
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%TRUEHD%' AND UPPER(COALESCE(at.codec, '')) LIKE '%ATMOS%' THEN 'Dolby TrueHD Atmos'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%TRUEHD%' THEN 'Dolby TrueHD'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%E-AC-3%' AND UPPER(COALESCE(at.codec, '')) LIKE '%ATMOS%' THEN 'Dolby Digital Plus Atmos'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%E-AC-3%' THEN 'Dolby Digital Plus'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%AC-3%' THEN 'Dolby Digital'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' AND UPPER(COALESCE(at.codec, '')) LIKE '%X%' THEN 'DTS:X'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' AND (UPPER(COALESCE(at.codec, '')) LIKE '%MA%' OR UPPER(COALESCE(at.codec, '')) LIKE '%MASTER%') THEN 'DTS-HD Master Audio'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%DTS%' THEN 'DTS'
+					WHEN UPPER(COALESCE(at.codec, '')) LIKE '%AAC%' THEN 'AAC'
+					ELSE 'Autres'
+				END AS audio_name
+			FROM episodes e
+			JOIN audio_tracks at ON at.episode_id = e.id
+			WHERE e.status = 'available'
+		)
+		GROUP BY audio_name
+		ORDER BY item_count DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	stats.AudioFormatDistribution = audioFormatDistribution
+
+	audioLanguageDistribution, err := queryStatsDistribution(db, `
+		SELECT language_name, COUNT(*) AS item_count
+		FROM (
+			SELECT
+				CASE
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('fr', 'fre', 'fra', 'french', 'francais', 'français') THEN 'Français'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('en', 'eng', 'english', 'anglais') THEN 'Anglais'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('es', 'spa', 'spanish', 'espagnol') THEN 'Espagnol'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('ja', 'jpn', 'japanese', 'japonais') THEN 'Japonais'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('de', 'ger', 'deu', 'german', 'allemand') THEN 'Allemand'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('it', 'ita', 'italian', 'italien') THEN 'Italien'
+					WHEN TRIM(COALESCE(at.language, '')) = '' THEN 'Non renseignée'
+					ELSE 'Autres'
+				END AS language_name
+			FROM movies m
+			JOIN audio_tracks at ON at.movie_id = m.id
+			WHERE m.status = 'available'
+			UNION ALL
+			SELECT
+				CASE
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('fr', 'fre', 'fra', 'french', 'francais', 'français') THEN 'Français'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('en', 'eng', 'english', 'anglais') THEN 'Anglais'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('es', 'spa', 'spanish', 'espagnol') THEN 'Espagnol'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('ja', 'jpn', 'japanese', 'japonais') THEN 'Japonais'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('de', 'ger', 'deu', 'german', 'allemand') THEN 'Allemand'
+					WHEN LOWER(TRIM(COALESCE(at.language, ''))) IN ('it', 'ita', 'italian', 'italien') THEN 'Italien'
+					WHEN TRIM(COALESCE(at.language, '')) = '' THEN 'Non renseignée'
+					ELSE 'Autres'
+				END AS language_name
+			FROM episodes e
+			JOIN audio_tracks at ON at.episode_id = e.id
+			WHERE e.status = 'available'
+		)
+		GROUP BY language_name
+		ORDER BY item_count DESC
+		LIMIT 8
+	`)
+	if err != nil {
+		return nil, err
+	}
+	stats.AudioLanguageDistribution = audioLanguageDistribution
+
 	return stats, nil
+}
+
+func queryStatsDistribution(db *sql.DB, query string) ([]models.StatsDistributionItem, error) {
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]models.StatsDistributionItem, 0)
+	for rows.Next() {
+		var item models.StatsDistributionItem
+		if err := rows.Scan(&item.Name, &item.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

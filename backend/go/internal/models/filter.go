@@ -21,6 +21,11 @@ type PaginatedResponse struct {
 	Error    string      `json:"error,omitempty"`
 }
 
+type StatsDistributionItem struct {
+	Name  string `json:"name"`
+	Count int64  `json:"count"`
+}
+
 type StatsResponse struct {
 	Success         bool    `json:"success"`
 	TotalMovies     int64   `json:"totalMovies"`
@@ -34,5 +39,10 @@ type StatsResponse struct {
 	MissingMovies   int64   `json:"missingMovies"`
 	AvailEpisodes   int64   `json:"availEpisodes"`
 	MissingEpisodes int64   `json:"missingEpisodes"`
+	VideoCodecDistribution   []StatsDistributionItem `json:"videoCodecDistribution"`
+	ResolutionDistribution   []StatsDistributionItem `json:"resolutionDistribution"`
+	HDRDistribution          []StatsDistributionItem `json:"hdrDistribution"`
+	AudioFormatDistribution  []StatsDistributionItem `json:"audioFormatDistribution"`
+	AudioLanguageDistribution []StatsDistributionItem `json:"audioLanguageDistribution"`
 	Error           string  `json:"error,omitempty"`
 }

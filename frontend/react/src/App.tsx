@@ -4,6 +4,7 @@ import { Topbar } from './components/Topbar';
 import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
 import { Recents } from './pages/Recents';
+import { Statistics } from './pages/Statistics';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
@@ -59,6 +60,11 @@ const AppContent = () => {
                 onSelectMovie={(id) => goToPage('detail-movie', id)}
                 onSelectSeries={(id) => goToPage('detail-series', id)}
               />
+            </div>
+          )}
+          {currentPage === 'statistics' && (
+            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+              <Statistics />
             </div>
           )}
           {currentPage === 'detail-movie' && selectedId && (
