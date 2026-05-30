@@ -24,7 +24,7 @@ docker run -d \
   indexarr:latest
 
 # Pull from GitHub Container Registry
-docker pull ghcr.io/pschmucker/indexarr:latest
+docker pull ghcr.io/techn0phil/indexarr:latest
 ```
 
 ### Management
@@ -156,7 +156,7 @@ docker inspect --format='{{.State.Health.Status}}' indexarr
 Push to `main` branch triggers automatic build and push to GitHub Container Registry:
 
 1. Multi-architecture build (linux/amd64, linux/arm64)
-2. Push to `ghcr.io/pschmucker/indexarr:latest`
+2. Push to `ghcr.io/techn0phil/indexarr:latest`
 3. Also tagged with commit SHA
 
 ## Troubleshooting

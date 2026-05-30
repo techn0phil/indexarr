@@ -1,6 +1,6 @@
 services:
   indexarr:
-    image: ghcr.io/pschmucker/indexarr:latest
+    image: ghcr.io/techn0phil/indexarr:latest
     container_name: indexarr
     restart: unless-stopped
     ports:
