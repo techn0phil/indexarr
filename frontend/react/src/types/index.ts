@@ -164,3 +164,35 @@ export interface ScanResponse {
   success: boolean;
   message: string;
 }
+
+export type IssueLevel = 'error' | 'warning' | 'info' | 'notice';
+
+export type IssueType =
+  | 'missing_file'
+  | 'corrupted_file'
+  | 'invalid_metadata'
+  | 'duplicate_movies'
+  | 'low_bitrate'
+  | 'missing_episodes'
+  | 'missing_subtitles'
+  | 'missing_poster'
+  | 'unusual_codec'
+  | 'incorrect_encoding'
+  | 'duration_mismatch'
+  | 'missing_minor_metadata';
+
+export interface MediaIssue {
+  id: string;
+  type: IssueType;
+  level: IssueLevel;
+  title: string;
+  description: string;
+  path?: string;
+  tags: string[];
+  mediaType: 'movie' | 'series';
+  mediaId?: number;
+  actions: {
+    primary: string;
+    secondary: string;
+  };
+}

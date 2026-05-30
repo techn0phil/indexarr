@@ -5,6 +5,7 @@ import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
 import { Recents } from './pages/Recents';
 import { Statistics } from './pages/Statistics';
+import { Problems } from './pages/Problems';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
@@ -65,6 +66,11 @@ const AppContent = () => {
           {currentPage === 'statistics' && (
             <div className={layoutStyles.page + ' ' + layoutStyles.active}>
               <Statistics />
+            </div>
+          )}
+          {currentPage === 'problems' && (
+            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+              <Problems />
             </div>
           )}
           {currentPage === 'detail-movie' && selectedId && (

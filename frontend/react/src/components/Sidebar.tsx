@@ -93,17 +93,20 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           Statistiques
         </div>
 
-        {/* Menu to be implemented in the future: */}
-        {/* <div className={styles['nav-item']}>
+        <div
+          className={`${styles['nav-item']} ${activeNav === 'problems' ? styles.active : ''}`}
+          onClick={() => onNavClick('problems')}
+        >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="6" />
             <path d="M8 5v4M8 11h.01" />
           </svg>
           Problèmes
-          <span className={styles['nav-badge']} style={{ background: 'var(--color-badge-problem)', color: 'var(--color-badge-problem-text)', borderColor: 'var(--color-border-secondary)' }}>
-            {context?.stats?.problemsCount ?? 0}
+          <span className={styles['nav-badge']} style={{ background: 'var(--color-badge-rating)', color: 'var(--color-badge-rating-text)', borderColor: 'var(--color-border-secondary)', border: '0' }}>
+            {/* {context?.stats?.problemsCount ?? 0} */}
+            Beta
           </span>
-        </div> */}
+        </div>
       </nav>
 
       <div style={{ padding: '6px 18px', marginTop: 'auto' }}>
