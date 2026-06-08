@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -15,15 +16,16 @@ type Config struct {
 	SonarrURL          string
 	RadarrAPIKey       string
 	SonarrAPIKey       string
-	RadarrPathMapping  string   // path mapping for Radarr (format: "from:to")
-	SonarrPathMapping  string   // path mapping for Sonarr (format: "from:to")
-	ScanInterval       int      // hours between scans (0 = disabled)
-	MediaLibraryPaths  []string // directories to scan for media files
-	MoviesLibraryPaths []string // directories to scan for movies (optional)
-	SeriesLibraryPaths []string // directories to scan for series (optional)
-	SkipFolders        []string // folder names to skip during scanning
-	MediainfoPath      string   // path to mediainfo binary
-	ScanTimeout        int      // timeout in seconds per file
+	RadarrPathMapping  string         // path mapping for Radarr (format: "from:to")
+	SonarrPathMapping  string         // path mapping for Sonarr (format: "from:to")
+	ScanInterval       int            // hours between scans (0 = disabled)
+	MediaLibraryPaths  []string       // directories to scan for media files
+	MoviesLibraryPaths []string       // directories to scan for movies (optional)
+	SeriesLibraryPaths []string       // directories to scan for series (optional)
+	SkipFolders        []string       // folder names to skip during scanning
+	IgnoreFilePattern  *regexp.Regexp // regex pattern to ignore files
+	MediainfoPath      string         // path to mediainfo binary
+	ScanTimeout        int            // timeout in seconds per file
 }
 
 func Load() *Config {
@@ -43,6 +45,7 @@ func Load() *Config {
 		MoviesLibraryPaths: getEnvList("MOVIES_LIBRARY_PATHS", []string{}),
 		SeriesLibraryPaths: getEnvList("SERIES_LIBRARY_PATHS", []string{}),
 		SkipFolders:        getEnvList("SKIP_FOLDERS", []string{}),
+		IgnoreFilePattern:  getEnvRegex("IGNORE_FILE_PATTERN", ""),
 		MediainfoPath:      getEnv("MEDIAINFO_PATH", "mediainfo"),
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
 	}
@@ -77,6 +80,15 @@ func getEnvList(key string, defaultValue []string) []string {
 		return result
 	}
 	return defaultValue
+}
+
+func getEnvRegex(key string, defaultValue string) *regexp.Regexp {
+	if value := os.Getenv(key); value != "" {
+		if regex, err := regexp.Compile(value); err == nil {
+			return regex
+		}
+	}
+	return nil
 }
 
 // HasRadarrConfig returns true if Radarr API is configured
