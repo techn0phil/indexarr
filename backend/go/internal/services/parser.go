@@ -113,21 +113,42 @@ func ParseFilename(filename string) *ParsedFilename {
 	}
 
 	// Extract title
-	result.Title = extractTitle(filename, result.Year)
+	result.Title = extractTitle(filename, result.IsSeries)
 
 	return result
 }
 
 // extractTitle cleans up the filename to extract just the title
-func extractTitle(filename string, year int) string {
+func extractTitle(filename string, isSeries bool) string {
 	title := filename
 
-	// Remove year and everything after if we found a year
-	if year > 0 {
-		yearStr := strconv.Itoa(year)
-		idx := strings.Index(title, yearStr)
-		if idx > 0 {
-			title = title[:idx-1]
+	yearCleanupPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\((\d{4})\).*`),       // (2024)
+		regexp.MustCompile(`[._-](\d{4})[._-].*`), // .2024., -2024-, _2024_
+		regexp.MustCompile(`\b(\d{4})\b.*`),       // 2024
+	}
+
+	// Clear year and anything after it to avoid confusion with title
+	for _, pattern := range yearCleanupPatterns {
+		if pattern.MatchString(title) {
+			title = pattern.ReplaceAllString(title, "")
+			break
+		}
+	}
+
+	if isSeries {
+		// Remove season and episode information for series
+		seriesPatterns := []*regexp.Regexp{
+			regexp.MustCompile(`(?i)[.\s_-]?S(\d{1,2})([E.](\d{1,3}))?[.\s_-]?.*`),                 // S01E05, S01.05
+			regexp.MustCompile(`(?i)[.\s_-]?(\d{1,2})(x(\d{1,3}))?[.\s_-]?.*`),                     // 1x05
+			regexp.MustCompile(`(?i)Season[.\s_-]?(\d{1,2})([.\s_-]?Episode[.\s_-]?(\d{1,3}))?.*`), // Season 1 Episode 5
+		}
+
+		for _, pattern := range seriesPatterns {
+			if pattern.MatchString(title) {
+				title = pattern.ReplaceAllString(title, "")
+				break
+			}
 		}
 	}
 
