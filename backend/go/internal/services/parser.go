@@ -58,7 +58,7 @@ var (
 		regexp.MustCompile(`(?i)\b(BluRay|Blu-Ray|BDRip|BRRip|WEB-DL|WEBDL|WEBRip|HDTV|DVDRip|Remux)\b`), // sources
 		regexp.MustCompile(`(?i)\b(x264|x265|H\.?264|H\.?265|HEVC|AVC|AAC|AC3|DTS|TrueHD|Atmos)\b`),      // codecs
 		regexp.MustCompile(`(?i)\b(HDR10\+?|Dolby\.?Vision|DV|DoVi)\b`),                                  // HDR formats
-		regexp.MustCompile(`(?i)\b(PROPER|REPACK|EXTENDED|UNRATED|DIRECTORS\.?CUT)\b`),                   // release tags
+		regexp.MustCompile(`(?i)\b(PROPER|REPACK|CUSTOM|EXTENDED|UNRATED|DIRECTORS\.?CUT)\b`),            // release tags
 		regexp.MustCompile(`-[A-Za-z0-9]+$`),                                                             // release group
 		// regexp.MustCompile(`(?i)(\[.*?\]|\(.*?\))`),                                                      // bracketed content
 	}
