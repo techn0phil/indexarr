@@ -171,6 +171,11 @@ func IsVideoFile(filename string) bool {
 	return videoExtensions[ext]
 }
 
+// IsBlurayFolder checks if path is BDMV
+func IsBlurayFolder(path string) bool {
+	return strings.EqualFold(filepath.Base(path), "BDMV")
+}
+
 // GetContainer returns the container format from filename
 func GetContainer(filename string) string {
 	ext := strings.ToLower(filepath.Ext(filename))

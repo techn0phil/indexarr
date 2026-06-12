@@ -249,6 +249,12 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 					}
 				}
 
+				// Handle Bluray format (skip BDMV/STREAM content, but include the BDMV folder itself for metadata extraction)
+				if strings.EqualFold(name, "STREAM") && strings.EqualFold(filepath.Base(filepath.Dir(path)), "BDMV") {
+					files = append(files, filepath.Dir(path))
+					return fs.SkipDir
+				}
+
 				return nil
 			}
 
@@ -890,25 +896,62 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 
 // processMovie handles a movie file
 func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
-	// Check if movie already exists by file path
-	exists, err := repository.MovieExistsByFilePath(s.db, filePath)
-	if err != nil {
-		return fmt.Errorf("failed to check for existing movie: %w", err)
-	}
-	if exists {
-		log.Printf("Movie already exists for file: %s", filePath)
-		return nil
+	isBluray := IsBlurayFolder(filePath)
+	mediaFilePath := filePath
+
+	var mediaInfo *models.MediaInfo
+	var fileSize int64
+	var duration int
+	var err error
+
+	if !isBluray {
+		// Check if movie already exists by file path
+		exists, err := repository.MovieExistsByFilePath(s.db, filePath)
+		if err != nil {
+			return fmt.Errorf("failed to check for existing movie: %w", err)
+		}
+		if exists {
+			log.Printf("Movie already exists for file: %s", filePath)
+			return nil
+		}
+	} else {
+		mediaFilePath, err = s.FindMoviePlaylistInBlurayFolder(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to find media playlist in Bluray folder: %w", err)
+		}
+		log.Printf("Detected Bluray folder, using media playlist: %s", mediaFilePath)
 	}
 
 	// Extract media info
-	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
+	mediaInfo, fileSize, duration, err = s.extractor.Extract(mediaFilePath)
 	if err != nil {
-		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		log.Printf("Mediainfo extraction failed for %s: %v", mediaFilePath, err)
 		// Continue with minimal info
 		mediaInfo = &models.MediaInfo{
 			VideoTracks:    []models.VideoTrack{},
 			AudioTracks:    []models.AudioTrack{},
 			SubtitleTracks: []models.SubtitleTrack{},
+		}
+	}
+
+	// If it's a Bluray folder, extracts file path and size from the source
+	if isBluray {
+		mediaFilePath = filepath.Join(filePath, "STREAM", mediaInfo.VideoTracks[0].Source)
+
+		// Check if movie already exists by file path
+		exists, err := repository.MovieExistsByFilePath(s.db, mediaFilePath)
+		if err != nil {
+			return fmt.Errorf("failed to check for existing movie: %w", err)
+		}
+		if exists {
+			log.Printf("Movie already exists for file: %s", mediaFilePath)
+			return nil
+		}
+
+		_, fileSize, _, err = s.extractor.Extract(mediaFilePath)
+		if err != nil {
+			log.Printf("Mediainfo extraction failed for media file in Bluray folder %s: %v", mediaFilePath, err)
+			fileSize = 0
 		}
 	}
 
@@ -918,8 +961,8 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 		Duration:  duration / 60, // Convert seconds to minutes
 		Status:    "available",
 		FileSize:  fileSize,
-		FilePath:  filePath,
-		Container: GetContainer(filePath),
+		FilePath:  mediaFilePath,
+		Container: GetContainer(mediaFilePath),
 		DateAdded: time.Now().Format(time.RFC3339),
 		MediaInfo: mediaInfo,
 	}
@@ -939,6 +982,44 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 	result.MoviesAdded++
 	log.Printf("Added movie: %s (%d)", movie.Title, movie.Year)
 	return nil
+}
+
+func (s *Scanner) FindMoviePlaylistInBlurayFolder(blurayFolderPath string) (string, error) {
+	playlistFolder := filepath.Join(blurayFolderPath, "PLAYLIST")
+	files, err := os.ReadDir(playlistFolder)
+	if err != nil {
+		return "", fmt.Errorf("failed to read PLAYLIST folder: %w", err)
+	}
+
+	// Look for the .mpls having the longest duration (heuristic for main movie playlist)
+	var longestPlaylist string
+	var longestDuration int
+
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".mpls") {
+			continue
+		}
+
+		playlistPath := filepath.Join(playlistFolder, file.Name())
+
+		_, _, duration, err := s.extractor.Extract(playlistPath)
+
+		if err != nil {
+			log.Printf("Failed to get duration for playlist %s: %v", playlistPath, err)
+			continue
+		}
+
+		if duration > longestDuration {
+			longestDuration = duration
+			longestPlaylist = playlistPath
+		}
+	}
+
+	if longestPlaylist == "" {
+		return "", fmt.Errorf("no valid playlist found in Bluray folder")
+	}
+
+	return longestPlaylist, nil
 }
 
 func slugify(title string) string {
