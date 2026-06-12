@@ -167,6 +167,7 @@ func IsVideoFile(filename string) bool {
 		".wmv":  true,
 		".ts":   true,
 		".m2ts": true,
+		".iso":  true,
 	}
 	return videoExtensions[ext]
 }
