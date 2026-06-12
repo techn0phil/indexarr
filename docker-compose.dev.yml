@@ -23,6 +23,7 @@ services:
 
       # Comma-separated list of folder names to skip during scanning (optional)
       SKIP_FOLDERS: ${SKIP_FOLDERS:-}
+      IGNORE_FILE_PATTERN: ${IGNORE_FILE_PATTERN:-}
 
       # User/Group configuration (optional: match your media library owner)
       UID: ${UID:-1000}

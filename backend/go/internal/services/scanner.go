@@ -113,6 +113,13 @@ func (s *Scanner) CountMediaFiles(paths []string) (int, error) {
 				return nil
 			}
 
+			// Skip files matching ignore pattern
+			if s.config.IgnoreFilePattern != nil {
+				if s.config.IgnoreFilePattern.MatchString(filepath.Base(path)) {
+					return nil
+				}
+			}
+
 			// Count video files
 			if IsVideoFile(path) {
 				count++
@@ -243,6 +250,13 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 				}
 
 				return nil
+			}
+
+			// Skip files matching ignore pattern
+			if s.config.IgnoreFilePattern != nil {
+				if s.config.IgnoreFilePattern.MatchString(filepath.Base(path)) {
+					return nil
+				}
 			}
 
 			// Check if it's a video file
