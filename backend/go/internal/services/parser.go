@@ -120,7 +120,7 @@ func ParseFilename(filename string) *ParsedFilename {
 
 // extractTitle cleans up the filename to extract just the title
 func extractTitle(filename string, year int) string {
-	title := filename
+	title := strings.TrimSuffix(filename, filepath.Ext(filename))
 
 	// Remove year and everything after if we found a year
 	if year > 0 {
