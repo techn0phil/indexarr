@@ -45,7 +45,7 @@ func Load() *Config {
 		MoviesLibraryPaths: getEnvList("MOVIES_LIBRARY_PATHS", []string{}),
 		SeriesLibraryPaths: getEnvList("SERIES_LIBRARY_PATHS", []string{}),
 		SkipFolders:        getEnvList("SKIP_FOLDERS", []string{}),
-		IgnoreFilePattern:  getEnvRegex("IGNORE_FILE_PATTERN", ""),
+		IgnoreFilePattern:  getEnvRegex("IGNORE_FILE_PATTERN", nil),
 		MediainfoPath:      getEnv("MEDIAINFO_PATH", "mediainfo"),
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
 	}
@@ -82,13 +82,13 @@ func getEnvList(key string, defaultValue []string) []string {
 	return defaultValue
 }
 
-func getEnvRegex(key string, defaultValue string) *regexp.Regexp {
+func getEnvRegex(key string, defaultValue *regexp.Regexp) *regexp.Regexp {
 	if value := os.Getenv(key); value != "" {
 		if regex, err := regexp.Compile(value); err == nil {
 			return regex
 		}
 	}
-	return nil
+	return defaultValue
 }
 
 // HasRadarrConfig returns true if Radarr API is configured
