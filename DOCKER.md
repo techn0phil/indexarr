@@ -108,6 +108,7 @@ indexarr/
 | `MOVIES_LIBRARY_PATHS` | - | Comma-separated movies folder paths |
 | `SERIES_LIBRARY_PATHS` | - | Comma-separated series folder paths |
 | `SKIP_FOLDERS` | - | Comma-separated list of folder names to skip during scanning |
+| `IGNORE_FILE_PATTERN` | - | Regular expression pattern to ignore certain files during scanning |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |
 | `TZ` | `UTC` | Container timezone |

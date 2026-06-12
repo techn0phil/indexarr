@@ -96,6 +96,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `MOVIES_LIBRARY_PATHS` | - | No | Comma-separated paths to movies on the guest |
 | `SERIES_LIBRARY_PATHS` | - | No | Comma-separated paths to series on the guest |
 | `SKIP_FOLDERS` | - | No | Comma-separated list of folder names to skip during scanning |
+| `IGNORE_FILE_PATTERN` | - | No | Regular expression pattern to ignore certain files during scanning |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
 | `RADARR_API_KEY` | - | No | Radarr API key for importing movies from Radarr |
 | `RADARR_PATH_MAPPING` | - | No | Used to map Radarr paths to local paths (e.g. `/movies:/data/movies`) |
@@ -336,6 +337,15 @@ environment:
   # Skip the folders based on Plex extras list:
   # https://support.plex.tv/articles/local-files-for-trailers-and-extras/
   SKIP_FOLDERS: Behind The Scenes, Deleted Scenes, Featurettes, Interviews, Scenes, Shorts, Trailers, Other
+```
+
+If you need a more advanced way to exclude only some files, you can set the `IGNORE_FILE_PATTERN` environment variable instead and define
+the regular expression you want:
+
+```yaml
+environment:
+  # Ignore all AVI files
+  IGNORE_FILE_PATTERN: "\.avi$"
 ```
 
 
