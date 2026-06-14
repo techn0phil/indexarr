@@ -9,12 +9,12 @@ services:
       - data:/app/data
       # Optional: Mount as many media library paths as needed (read-only recommended)
       - ${MOVIES_HOST_PATH:-/host/path/to/movies}:/data/movies:ro
-      - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/tv-shows:ro
+      - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/series:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
-      MEDIA_LIBRARY_PATHS: /data/movies,/data/tv-shows
-      MOVIES_LIBRARY_PATH: /data/movies
-      SERIES_LIBRARY_PATH: /data/tv-shows
+      MEDIA_LIBRARY_PATHS: /data/movies,/data/series
+      MOVIES_LIBRARY_PATHS: /data/movies
+      SERIES_LIBRARY_PATHS: /data/series
 
       # Comma-separated list of folder names to skip during scanning (optional)
       SKIP_FOLDERS: ${SKIP_FOLDERS:-}
