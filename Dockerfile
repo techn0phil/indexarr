@@ -85,7 +85,9 @@ ENV SERVER_PORT=8080 \
     DB_PATH=/app/data/indexarr.db \
     MEDIAINFO_PATH=/usr/bin/mediainfo \
     GIN_MODE=release \
-    MEDIA_LIBRARY_PATHS=/data/movies,/data/tv-shows
+    MEDIA_LIBRARY_PATHS=/data/movies,/data/series \
+    MOVIES_LIBRARY_PATHS=/data/movies \
+    SERIES_LIBRARY_PATHS=/data/series
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
