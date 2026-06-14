@@ -436,6 +436,16 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 		series.DateAdded = time.Now().Format(time.RFC3339)
 	}
 
+	if ss.LastAired != "" {
+		lastAired, err := time.Parse(time.RFC3339, ss.LastAired)
+		if err != nil {
+			log.Printf("Failed to parse last aired date for '%s': %v", ss.Title, err)
+		} else {
+			yearEnd := lastAired.Year()
+			series.YearEnd = yearEnd
+		}
+	}
+
 	return series
 }
 
