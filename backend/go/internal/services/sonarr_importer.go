@@ -319,6 +319,11 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		default:
 		}
 
+		// Skip season 0 (specials)
+		if se.SeasonNumber == 0 {
+			continue
+		}
+
 		if err := si.processSonarrEpisode(seriesID, &se, result); err != nil {
 			log.Printf("Error processing episode S%02dE%02d of '%s': %v", se.SeasonNumber, se.EpisodeNumber, ss.Title, err)
 			result.Errors = append(result.Errors, fmt.Sprintf("%s S%02dE%02d: %v", ss.Title, se.SeasonNumber, se.EpisodeNumber, err))
