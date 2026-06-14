@@ -227,12 +227,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
             {series.seasons?.[0]?.episodes && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840x') && (
                   <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     4K
                   </span>
                 )}
-                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920x') && (
                   <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     1080p
                   </span>
@@ -378,12 +378,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
                     {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flexShrink: 0 }}>
-                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840x') && (
                         <span className={comStyles['badge-4k']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           4K
                         </span>
                       )}
-                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920x') && (
                         <span className={comStyles['badge-1080p']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           1080p
                         </span>
