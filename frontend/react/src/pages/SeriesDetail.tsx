@@ -204,10 +204,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               </div>
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <span>
-                {series.yearStart} – {series.yearEnd}
-              </span>
-              <span>·</span>
+              {(series.yearStart > 0) ? (<>
+                <span>
+                  {series.yearStart}{series.yearEnd ? ` – ${series.yearEnd}` : ''}
+                </span>
+                <span>·</span>
+              </>) : null}
               <span>
                 {series.seasonCount} saisons
               </span>
