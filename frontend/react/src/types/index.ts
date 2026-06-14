@@ -27,6 +27,7 @@ export interface Series {
   yearEnd: number;
   seasonCount: number;
   episodeCount: number;
+  missingEpisodeCount: number;
   synopsis: string;
   genres: string;
   rating: number;
