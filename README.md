@@ -1,6 +1,6 @@
-# Indexarr (Mediarr)
+# Indexarr
 
-**Indexarr** is a media library application inspired by Sonarr and Radarr. It provides a centralized catalog for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
+**Indexarr** is a media library application inspired by Sonarr and Radarr. It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
 
 ![Main movie page screenshot](ux-ui/movies.png)
 
@@ -30,8 +30,9 @@
 
 ## Features
 - Centralized movie and TV series catalog
-- Advanced multi-criteria filtering (title, status, resolution, codec, audio, HDR)
-- Real-time statistics (total count, disk space, 4K %, problems)
+- Blu-ray formats support (uncompressed folder and ISO files)
+- Advanced multi-criteria filtering (title, year, status, resolution, codec, audio, HDR)
+- Real-time statistics (total count, disk space, 4K %, issues)
 - Detailed media info (video, audio, and subtitle tracks)
 - Responsive UI with grid/list views
 - RESTful API backend
@@ -92,7 +93,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `TVDB_API_KEY` | - | No | TVDB API key for series metadata ([get here](https://www.thetvdb.com/api-information)) |
 | `MOVIES_HOST_PATH` | - | No | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
 | `SERIES_HOST_PATH` | - | No | Comma-separated paths to series folder on the host (e.g., `/series` or `/mnt/nas/tv,/external/tv`) |
-| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest [**Deprecated**: prefer `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS`] |
 | `MOVIES_LIBRARY_PATHS` | /data/movies | No | Comma-separated paths to movies on the guest |
 | `SERIES_LIBRARY_PATHS` | /data/series | No | Comma-separated paths to series on the guest |
 | `SKIP_FOLDERS` | - | No | Comma-separated list of folder names to skip during scanning |
