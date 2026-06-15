@@ -120,7 +120,7 @@ func ParseFilename(filename string) *ParsedFilename {
 
 // extractTitle cleans up the filename to extract just the title
 func extractTitle(filename string, isSeries bool) string {
-	title := filename
+	title := strings.TrimSuffix(filename, filepath.Ext(filename))
 
 	yearCleanupPatterns := []*regexp.Regexp{
 		regexp.MustCompile(`\((\d{4})\).*`),       // (2024)
@@ -190,6 +190,11 @@ func IsVideoFile(filename string) bool {
 		".m2ts": true,
 	}
 	return videoExtensions[ext]
+}
+
+// IsBlurayFolder checks if path is BDMV
+func IsBlurayFolder(path string) bool {
+	return strings.EqualFold(filepath.Base(path), "BDMV")
 }
 
 // GetContainer returns the container format from filename

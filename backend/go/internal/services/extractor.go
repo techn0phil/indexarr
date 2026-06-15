@@ -29,14 +29,15 @@ type MediainfoTrack struct {
 	FileSize string `json:"FileSize"`
 
 	// Common fields for all track types
-	Type      string `json:"@type"`
-	Format    string `json:"Format"`
-	CodecID   string `json:"CodecID"`
-	Duration  string `json:"Duration"`
-	FrameRate string `json:"FrameRate"`
-	BitRate   string `json:"BitRate"`
-	Default   string `json:"Default"`
-	Forced    string `json:"Forced"`
+	Type      string              `json:"@type"`
+	Format    string              `json:"Format"`
+	CodecID   string              `json:"CodecID"`
+	Duration  string              `json:"Duration"`
+	FrameRate string              `json:"FrameRate"`
+	BitRate   string              `json:"BitRate"`
+	Default   string              `json:"Default"`
+	Forced    string              `json:"Forced"`
+	Extra     MediaInfoTrackExtra `json:"extra"`
 
 	// Video-specific fields
 	FormatProfile     string `json:"Format_profile"`
@@ -62,6 +63,10 @@ type MediainfoTrack struct {
 	// Audio and Subtitle-specific fields
 	Language string `json:"Language"`
 	Title    string `json:"Title"`
+}
+
+type MediaInfoTrackExtra struct {
+	Source string `json:"Source"`
 }
 
 // Extractor handles mediainfo extraction from files
@@ -142,6 +147,7 @@ func (e *Extractor) parseMediaInfo(mi *MediainfoOutput) (*models.MediaInfo, int6
 				Bitrate:    e.formatBitrate(track.BitRate),
 				HDR:        e.parseHDR(track),
 				ColorSpace: e.parseColorSpace(track),
+				Source:     track.Extra.Source,
 			})
 
 		case "Audio":
