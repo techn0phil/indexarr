@@ -16,7 +16,7 @@ docker run -d \
   -p 8787:8787 \
   -v indexarr_data:/app/data \
   -v /mnt/movies:/data/movies \
-  -v /mnt/tv-shows:/data/tv-shows \
+  -v /mnt/series:/data/series \
   -e TMDB_API_KEY=your_key \
   -e TVDB_API_KEY=your_key \
   -e RADARR_URL=http://radarr:7878 \
@@ -104,10 +104,11 @@ indexarr/
 | `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
 | `SONARR_API_KEY` | - | Sonarr API key (optional) |
 | `SONARR_PATH_MAPPING` | - | Path mapping between Sonarr and Indexarr |
-| `MEDIA_LIBRARY_PATHS` | - | Comma-separated media folder paths |
-| `MOVIES_LIBRARY_PATHS` | - | Comma-separated movies folder paths |
-| `SERIES_LIBRARY_PATHS` | - | Comma-separated series folder paths |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | Comma-separated media folder paths |
+| `MOVIES_LIBRARY_PATHS` | /data/movies | Comma-separated movies folder paths |
+| `SERIES_LIBRARY_PATHS` | /data/series | Comma-separated series folder paths |
 | `SKIP_FOLDERS` | - | Comma-separated list of folder names to skip during scanning |
+| `IGNORE_FILE_PATTERN` | - | Regular expression pattern to ignore certain files during scanning |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |
 | `TZ` | `UTC` | Container timezone |
@@ -127,7 +128,7 @@ volumes:
 ```yaml
 volumes:
   - /host/path/to/movies:/data/movies:ro
-  - /host/path/to/tv-shows:/data/tv-shows:ro
+  - /host/path/to/series:/data/series:ro
 ```
 
 ## Ports

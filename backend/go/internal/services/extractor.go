@@ -296,17 +296,17 @@ func (e *Extractor) parseAudioCodec(track MediainfoTrack) string {
 	if strings.Contains(strings.ToUpper(format), "DTS") ||
 		strings.Contains(strings.ToUpper(codec), "DTS") {
 
+		if strings.Contains(strings.ToUpper(commercialName), "X") ||
+			strings.Contains(strings.ToUpper(additionalFeatures), "XLL X") {
+
+			return "DTS:X"
+		}
 		if strings.Contains(strings.ToLower(commercialName), "master audio") ||
 			strings.Contains(strings.ToLower(commercialName), "ma") ||
 			strings.Contains(strings.ToLower(title), "master audio") ||
 			strings.Contains(strings.ToLower(title), "ma") {
 
 			return "DTS-HD MA"
-		}
-		if strings.Contains(strings.ToUpper(commercialName), "X") ||
-			strings.Contains(strings.ToLower(title), "X") {
-
-			return "DTS:X"
 		}
 
 		return "DTS"

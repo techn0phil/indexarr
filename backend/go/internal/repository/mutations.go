@@ -398,9 +398,9 @@ func GetSeriesByTitleAndYear(db *sql.DB, title string, year int) (*models.Series
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
 		FROM series WHERE LOWER(title) = LOWER(?) AND year_start = ?
-	`, title, year).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, title, year).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
 	if poster.Valid {
@@ -424,9 +424,9 @@ func GetSeriesByTMDBId(db *sql.DB, tmdbID int64) (*models.Series, error) {
 	var sonarrID sql.NullInt64
 	var titleSlug sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
 		FROM series WHERE tmdb_id = ?
-	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrID, &titleSlug)
 	if poster.Valid {
@@ -456,9 +456,9 @@ func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
 	var sonarrIDVal sql.NullInt64
 	var titleSlug sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
 		FROM series WHERE sonarr_id = ?
-	`, sonarrID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, sonarrID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrIDVal, &titleSlug)
 	if poster.Valid {
@@ -481,15 +481,17 @@ func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
 	return &series, nil
 }
 
-// UpdateSeriesCounts updates season_count and episode_count for a series
+// UpdateSeriesCounts updates season_count, episode_count, and file_size for a series
 func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`
 			UPDATE series SET
 				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?)
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?),
+				missing_episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'missing'),
+				file_size = (SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE series_id = ?)
 			WHERE id = ?
-		`, seriesID, seriesID, seriesID)
+		`, seriesID, seriesID, seriesID, seriesID, seriesID)
 		return err
 	})
 }

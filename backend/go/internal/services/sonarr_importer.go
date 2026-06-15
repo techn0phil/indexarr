@@ -319,6 +319,11 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		default:
 		}
 
+		// Skip season 0 (specials)
+		if se.SeasonNumber == 0 {
+			continue
+		}
+
 		if err := si.processSonarrEpisode(seriesID, &se, result); err != nil {
 			log.Printf("Error processing episode S%02dE%02d of '%s': %v", se.SeasonNumber, se.EpisodeNumber, ss.Title, err)
 			result.Errors = append(result.Errors, fmt.Sprintf("%s S%02dE%02d: %v", ss.Title, se.SeasonNumber, se.EpisodeNumber, err))
@@ -410,6 +415,10 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 		DateAdded:    ss.Added,
 	}
 
+	if series.TMDBId == 0 {
+		series.TMDBId = -1 * int64(ss.TvdbId) // Fallback to negative TVDB ID to avoid potential conflicts with real TMDB IDs
+	}
+
 	// Genres (join array)
 	if len(ss.Genres) > 0 {
 		series.Genres = strings.Join(ss.Genres, ", ")
@@ -429,6 +438,16 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 	// Use Sonarr's added date, fallback to now
 	if series.DateAdded == "" {
 		series.DateAdded = time.Now().Format(time.RFC3339)
+	}
+
+	if ss.LastAired != "" {
+		lastAired, err := time.Parse(time.RFC3339, ss.LastAired)
+		if err != nil {
+			log.Printf("Failed to parse last aired date for '%s': %v", ss.Title, err)
+		} else {
+			yearEnd := lastAired.Year()
+			series.YearEnd = yearEnd
+		}
 	}
 
 	return series

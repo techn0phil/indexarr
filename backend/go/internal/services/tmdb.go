@@ -174,8 +174,17 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 		return nil, err
 	}
 
+	// Retry without year filter
+	if year > 0 && result.TotalResults == 0 {
+		return c.SearchMovie(title, 0)
+	}
+
 	// Log number of results found
-	log.Printf("Found %d results for movie '%s' (%d)", result.TotalResults, title, year)
+	if year > 0 {
+		log.Printf("Found %d results for movie '%s' (%d)", result.TotalResults, title, year)
+	} else {
+		log.Printf("Found %d results for movie '%s'", result.TotalResults, title)
+	}
 
 	return &result, nil
 }
@@ -220,6 +229,11 @@ func (c *TMDBClient) SearchTV(title string, year int) (*TMDBTVSearchResult, erro
 	var result TMDBTVSearchResult
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
+	}
+
+	// Retry without year filter
+	if year > 0 && result.TotalResults == 0 {
+		return c.SearchTV(title, 0)
 	}
 
 	// Log number of results found

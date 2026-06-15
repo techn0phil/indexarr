@@ -49,6 +49,8 @@ type SonarrSeries struct {
 	Runtime     int            `json:"runtime"` // minutes per episode
 	Statistics  SonarrStats    `json:"statistics"`
 	Seasons     []SonarrSeason `json:"seasons"`
+	FirstAired  string         `json:"firstAired"` // YYYY-MM-DDTHH:MM:SSZ
+	LastAired   string         `json:"lastAired"`  // YYYY-MM-DDTHH:MM:SSZ
 }
 
 // SonarrSeason represents a season within a series
