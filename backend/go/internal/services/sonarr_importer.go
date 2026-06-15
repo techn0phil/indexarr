@@ -415,6 +415,10 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 		DateAdded:    ss.Added,
 	}
 
+	if series.TMDBId == 0 {
+		series.TMDBId = -1 * int64(ss.TvdbId) // Fallback to negative TVDB ID to avoid potential conflicts with real TMDB IDs
+	}
+
 	// Genres (join array)
 	if len(ss.Genres) > 0 {
 		series.Genres = strings.Join(ss.Genres, ", ")
