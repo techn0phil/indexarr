@@ -212,12 +212,12 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 HDR10
               </span>
             )}
-            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('TrueHD')) && (
               <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 TrueHD
               </span>
             )}
-            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('E-AC-3')) && (
               <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Dolby Digital Plus
               </span>
@@ -225,6 +225,16 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
               <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Atmos
+              </span>
+            )}
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS:X') && (
+              <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                DTS:X
+              </span>
+            )}
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS-HD MA') && (
+              <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                DTS-HD Master Audio
               </span>
             )}
             {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
