@@ -14,6 +14,7 @@ interface WSMessage {
   filesFound?: number;
   filesProcessed?: number;
   startedAt?: string;
+  completedAt?: string;
   error?: string;
   moviesAdded?: number;
   episodesAdded?: number;
@@ -77,7 +78,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         filesFound: msg.filesFound || prevStatus?.filesFound || 0,
         filesProcessed: msg.filesProcessed || prevStatus?.filesProcessed || 0,
         startedAt: msg.startedAt || prevStatus?.startedAt,
-        completedAt: prevStatus?.completedAt,
+        completedAt: msg.completedAt || prevStatus?.completedAt,
         errorMessage: msg.error || prevStatus?.errorMessage,
       };
 
@@ -95,16 +96,18 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
           break;
         case 'scan_complete':
           newStatus.status = 'completed';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_error':
           newStatus.status = 'error';
           newStatus.errorMessage = msg.error;
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_stopped':
           newStatus.status = 'stopped';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_idle':
           newStatus.status = msg.filesProcessed ? 'completed' : 'idle';
