@@ -63,6 +63,7 @@ func HandleWebSocket(db *sql.DB, broadcaster *services.Broadcaster) http.Handler
 					FilesFound:     status.FilesFound,
 					FilesProcessed: status.FilesProcessed,
 					StartedAt:      status.StartedAt,
+					CompletedAt:    status.CompletedAt,
 					ErrorMessage:   status.ErrorMessage,
 				}
 
