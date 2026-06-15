@@ -252,12 +252,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     HDR10
                   </span>
                 )}
-                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('TrueHD')) && (
                   <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     TrueHD
                   </span>
                 )}
-                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('E-AC-3')) && (
                   <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     Dolby Digital Plus
                   </span>
@@ -265,6 +265,16 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
                   <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     Atmos
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS:X') && (
+                  <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    DTS:X
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS-HD MA') && (
+                  <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    DTS-HD Master Audio
                   </span>
                 )}
                 {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
@@ -403,12 +413,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                           HDR10
                         </span>
                       )}
-                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('TrueHD')) && (
                         <span className={comStyles['badge-truehd']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           TrueHD
                         </span>
                       )}
-                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('E-AC-3')) && (
                         <span className={comStyles['badge-ddplus']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           DD+
                         </span>
@@ -416,6 +426,16 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
                         <span className={comStyles['badge-atmos']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           Atmos
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS:X') && (
+                        <span className={comStyles['badge-dts']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DTS:X
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS-HD MA') && (
+                        <span className={comStyles['badge-dts']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DTS-HD MA
                         </span>
                       )}
                       {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
