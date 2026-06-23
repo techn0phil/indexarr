@@ -46,7 +46,7 @@ ARG UID=1000
 ARG GID=1000
 
 # Install runtime dependencies
-RUN apk add --no-cache \
+RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     ca-certificates \
     nginx \
     mediainfo \
