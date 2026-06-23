@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Build Frontend (React + Vite)
 # =============================================================================
-FROM node:24-alpine AS frontend-builder
+FROM node:26.3.1-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
@@ -18,7 +18,7 @@ RUN npm run build
 # =============================================================================
 # Stage 2: Build Backend (Go)
 # =============================================================================
-FROM golang:1.26-alpine AS backend-builder
+FROM golang:1.26.4-alpine AS backend-builder
 
 WORKDIR /build/backend
 
@@ -39,7 +39,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -tags musl -ldflags="-s -w -extldflags 
 # =============================================================================
 # Stage 3: Runtime (Alpine with Nginx + mediainfo + Go backend)
 # =============================================================================
-FROM alpine:latest
+FROM alpine:3.24.1
 
 # Build arguments for dynamic user/group configuration
 ARG UID=1000
