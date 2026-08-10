@@ -32,12 +32,17 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
 
   return (
     <div className={styles.sidebar}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 14px' }}>
-        <div className={styles['logo-mark']}>
-          <svg viewBox="0 0 14 14" style={{ width: '13px', height: '13px', fill: 'white' }}>
-            <path d="M2 11L7 3L12 11Z" />
-          </svg>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '0 14px' }}>
+        <div className={styles.logo}>
+          <div className={styles.glass}></div>
+          <div className={styles.handle}></div>
+          <div className={styles.index}>
+            <div className={styles.item}></div>
+            <div className={styles.item}></div>
+            <div className={styles.item}></div>
+          </div>
         </div>
+
         <span className={styles['logo-name']}>Index<span style={{ color: "#1d9e75" }}>arr</span></span>
       </div>
 
