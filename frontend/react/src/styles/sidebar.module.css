@@ -41,14 +41,14 @@
     calc(75% - var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
     calc(25% + var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
     var(--b) 50%);
-  background: #fff;
+  background: var(--color-primary-logo);
 }
 
 .handle {
   position: absolute;
   width: 1.2em;
   height: .3em;
-  background: white;
+  background: var(--color-primary-logo);
   border-radius: .05em;
   transform: rotate(30deg) translateX(1.9em);
 }
@@ -56,7 +56,7 @@
 .handle::after {
   content: "";
   position: absolute;
-  background: white;
+  background: var(--color-primary-logo);
   top: -0.1em;
   left: 0.35em;
   bottom: -0.1em;
