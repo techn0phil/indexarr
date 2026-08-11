@@ -2,8 +2,6 @@ import { createContext, useState, useEffect, useContext, ReactNode, useRef, useC
 import { apiClient } from '../api/client';
 import { StatsResponse, ScanStatus } from '../types';
 
-export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series';
-
 interface AppConfig {
   radarrUrl?: string;
   sonarrUrl?: string;
@@ -21,11 +19,6 @@ interface WSMessage {
 }
 
 interface AppContextType {
-  currentPage: Page;
-  selectedId: number | null;
-  goToPage: (page: Page, id?: number) => void;
-  goBack: () => void;
-  history: Page[];
   isDark: boolean;
   toggleTheme: () => void;
   config: AppConfig | null;
@@ -45,9 +38,6 @@ interface AppContextProviderProps {
 }
 
 export const AppContextProvider = ({ children }: AppContextProviderProps) => {
-  const [currentPage, setCurrentPage] = useState<Page>('list-films');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [history, setHistory] = useState<Page[]>(['list-films']);
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -271,20 +261,6 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const goToPage = (page: Page, id?: number) => {
-    setCurrentPage(page);
-    if (id) setSelectedId(id);
-    setHistory([...history, page]);
-  };
-
-  const goBack = () => {
-    if (history.length > 1) {
-      const newHistory = history.slice(0, -1);
-      setHistory(newHistory);
-      setCurrentPage(newHistory[newHistory.length - 1]);
-    }
-  };
-
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
@@ -292,7 +268,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme, config, configLoading, stats, statsLoading, refreshStats, scanStatus, wsConnected, wsReconnecting }}>
+    <AppContext.Provider value={{ isDark, toggleTheme, config, configLoading, stats, statsLoading, refreshStats, scanStatus, wsConnected, wsReconnecting }}>
       {children}
     </AppContext.Provider>
   );
