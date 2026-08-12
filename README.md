@@ -106,6 +106,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
+| `LOG_LEVEL` | `INFO` | No | Logging level |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
 | `UID` | 1000 | No | User ID inside container (match your media library owner) |
 | `GID` | 1000 | No | Group ID inside container (match your media library owner) |

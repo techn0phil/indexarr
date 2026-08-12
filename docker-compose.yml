@@ -39,6 +39,9 @@ services:
       # Scan configuration
       SCAN_INTERVAL: ${SCAN_INTERVAL:-24}
       SCAN_TIMEOUT: ${SCAN_TIMEOUT:-30}
+
+      # Logging configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       
       # Timezone (optional, adjust to your location)
       TZ: ${TZ:-UTC}

@@ -111,6 +111,7 @@ indexarr/
 | `IGNORE_FILE_PATTERN` | - | Regular expression pattern to ignore certain files during scanning |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |
+| `LOG_LEVEL` | `INFO` | Logging level |
 | `TZ` | `UTC` | Container timezone |
 | `GIN_MODE` | `release` | Go server mode |
 
