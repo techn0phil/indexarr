@@ -20,6 +20,9 @@ func main() {
 	// Load .env file
 	godotenv.Load()
 
+	// Initialize logger
+	logger := config.InitLogger()
+
 	// Load configuration
 	cfg := config.Load()
 
