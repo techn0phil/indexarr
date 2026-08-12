@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"indexarr/internal/config"
 
 	"golang.org/x/sys/unix"
 
@@ -117,7 +118,7 @@ func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, err
 	info, fileSize, duration, _ := e.parseMediaInfo(&mi)
 
 	mediainfoDuration := time.Since(mediainfoStart)
-	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
+	config.GlobalLogger.Trace().Int64("duration_ms", mediainfoDuration.Milliseconds()).Str("file", filePath).Msg("Mediainfo extraction completed")
 
 	return info, fileSize, duration, nil
 }

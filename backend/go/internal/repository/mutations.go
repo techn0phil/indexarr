@@ -2,10 +2,11 @@ package repository
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"strings"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 )
 
@@ -24,7 +25,7 @@ func retryOnLock(fn func() error) error {
 		if strings.Contains(err.Error(), "database is locked") {
 			lastErr = err
 			if attempt < len(backoffs) {
-				log.Printf("Database locked, retrying in %v (attempt %d/3)", backoffs[attempt], attempt+1)
+				config.GlobalLogger.Warn().Dur("retry_delay", backoffs[attempt]).Str("attempt", fmt.Sprintf("%d/3", attempt+1)).Msg("Database locked, retrying")
 				time.Sleep(backoffs[attempt])
 				continue
 			}
