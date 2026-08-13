@@ -464,15 +464,28 @@ func (c *TVClient) GetAllEpisodes(tvdbID int, language string) (*TVDBAllEpisodes
 		return nil, fmt.Errorf("TVDB API key not configured")
 	}
 
-	// Default to French if no language specified
-	if language == "" {
-		language = "fra"
+	lang := strings.ToLower(language)
+
+	switch lang {
+	case "en":
+		lang = "eng"
+	case "fr":
+		lang = "fra"
+	case "de":
+		lang = "deu"
+	case "it":
+		lang = "ita"
+	case "es":
+		lang = "spa"
+	default:
+		log.Printf("Warning: Unsupported language code '%s', defaulting to 'en'", lang)
+		lang = "eng"
 	}
 
 	params := url.Values{}
 	params.Set("page", "0")
 
-	resp, err := c.makeAuthenticatedRequest("GET", fmt.Sprintf("/series/%d/episodes/default/%s", tvdbID, language), params)
+	resp, err := c.makeAuthenticatedRequest("GET", fmt.Sprintf("/series/%d/episodes/default/%s", tvdbID, lang), params)
 	if err != nil {
 		return nil, err
 	}

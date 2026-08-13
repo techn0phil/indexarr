@@ -48,7 +48,7 @@ func NewScanner(db *sql.DB, cfg *config.Config, broadcaster *Broadcaster) *Scann
 		db:          db,
 		config:      cfg,
 		extractor:   NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
-		tmdb:        NewTMDBClient(cfg.TMDBAPIKey),
+		tmdb:        NewTMDBClient(cfg.TMDBAPIKey, cfg.DetectionLanguage, cfg.MetadataLanguage),
 		tv:          NewTVClient(cfg.TVDBAPIKey, db), // Uses TVDB API v4 for TV shows
 		broadcaster: broadcaster,
 		stopChan:    make(chan struct{}),
@@ -840,7 +840,7 @@ func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 	// log.Printf("[Cache] Successfully cached series metadata: %d seasons", len(seriesExtended.Data.Seasons))
 
 	// Fetch all episodes in bulk
-	allEpisodes, err := s.tv.GetAllEpisodes(tvdbID, "fra")
+	allEpisodes, err := s.tv.GetAllEpisodes(tvdbID, s.config.MetadataLanguage)
 	if err != nil {
 		return fmt.Errorf("failed to fetch bulk episodes: %w", err)
 	}

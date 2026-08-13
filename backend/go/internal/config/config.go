@@ -35,6 +35,8 @@ type Config struct {
 	IgnoreFilePattern  *regexp.Regexp // regex pattern to ignore files
 	MediainfoPath      string         // path to mediainfo binary
 	ScanTimeout        int            // timeout in seconds per file
+	DetectionLanguage  string         // language code for media detection (e.g., "en", "fr")
+	MetadataLanguage   string         // language code for metadata fetching (e.g., "en", "fr")
 }
 
 func Load() *Config {
@@ -57,6 +59,8 @@ func Load() *Config {
 		IgnoreFilePattern:  getEnvRegex("IGNORE_FILE_PATTERN", nil),
 		MediainfoPath:      getEnv("MEDIAINFO_PATH", "mediainfo"),
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
+		DetectionLanguage:  getEnv("DETECTION_LANGUAGE", "en"),
+		MetadataLanguage:   getEnv("METADATA_LANGUAGE", "en"),
 	}
 }
 

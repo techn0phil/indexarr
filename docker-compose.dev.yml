@@ -48,6 +48,10 @@ services:
       # Logging configuration
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       
+      # Language configuration
+      DETECTION_LANGUAGE: ${DETECTION_LANGUAGE:-en}
+      METADATA_LANGUAGE: ${METADATA_LANGUAGE:-en}
+
       # Timezone (optional, adjust to your location)
       TZ: ${TZ:-UTC}
 
