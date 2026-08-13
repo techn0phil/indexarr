@@ -39,7 +39,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'contain',
+              objectFit: 'cover',
               background: 'var(--color-background-secondary)',
               borderRadius: 0,
               display: 'block',

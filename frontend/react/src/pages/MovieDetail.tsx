@@ -102,19 +102,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             {/* Popup contextual menu */}
             <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
               <button
-                style={{
-                  background: 'var(--color-background-primary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  padding: 0,
-                  position: 'relative',
-                }}
+                className={comStyles['menu-button']}
                 aria-label="Menu"
                 onClick={(e) => {
                   e.stopPropagation();
