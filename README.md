@@ -108,6 +108,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `DETECTION_LANGUAGE` | `en` | No | Language code for media detection (e.g., "en", "fr") |
 | `METADATA_LANGUAGE` | `en` | No | Language code for metadata fetching (e.g., "en", "fr") |
+| `LOG_LEVEL` | `INFO` | No | Logging level |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
 | `UID` | 1000 | No | User ID inside container (match your media library owner) |
 | `GID` | 1000 | No | Group ID inside container (match your media library owner) |

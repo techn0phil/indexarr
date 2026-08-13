@@ -39,10 +39,13 @@ services:
       # Scan configuration
       SCAN_INTERVAL: ${SCAN_INTERVAL:-24}
       SCAN_TIMEOUT: ${SCAN_TIMEOUT:-30}
-
+      
       # Language configuration
       DETECTION_LANGUAGE: ${DETECTION_LANGUAGE:-en}
       METADATA_LANGUAGE: ${METADATA_LANGUAGE:-en}
+
+      # Logging configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
 
       # Timezone (optional, adjust to your location)
       TZ: ${TZ:-UTC}

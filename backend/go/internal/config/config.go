@@ -1,11 +1,20 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+// GlobalLogger is the package-level logger instance accessible by all services
+var GlobalLogger *zerolog.Logger
 
 type Config struct {
 	ServerPort         string
@@ -176,4 +185,70 @@ func ParsePathMapping(mapping string) (string, string) {
 		return "", ""
 	}
 	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+}
+
+// InitLogger initializes a zerolog logger with level from LOG_LEVEL environment variable
+// Valid levels: TRACE, DEBUG, INFO, WARN, ERROR (case-insensitive, default: INFO)
+// Sets the global GlobalLogger variable for use by services
+func InitLogger() *zerolog.Logger {
+	logLevel := strings.ToUpper(getEnv("LOG_LEVEL", "INFO"))
+
+	// Parse and set zerolog level
+	var zeroLevel zerolog.Level
+	switch logLevel {
+	case "TRACE":
+		zeroLevel = zerolog.TraceLevel
+	case "DEBUG":
+		zeroLevel = zerolog.DebugLevel
+	case "INFO":
+		zeroLevel = zerolog.InfoLevel
+	case "WARN":
+		zeroLevel = zerolog.WarnLevel
+	case "ERROR":
+		zeroLevel = zerolog.ErrorLevel
+	default:
+		// Invalid level, warn and use INFO
+		log.Warn().Str("invalid_level", logLevel).Msg("LOG_LEVEL not recognized, using INFO")
+		zeroLevel = zerolog.InfoLevel
+	}
+
+	zerolog.SetGlobalLevel(zeroLevel)
+	zerolog.DurationFieldFormat = zerolog.DurationFormatString
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		return filepath.Base(file) + ":" + strconv.Itoa(line)
+	}
+
+	// Configure zerolog with pretty console output
+	logger := log.With().Caller().Logger()
+	logger = logger.Output(zerolog.ConsoleWriter{
+		Out: os.Stderr,
+		FormatLevel: func(i interface{}) string {
+			// Colorize log level for better visibility
+			levelStr := strings.ToUpper(fmt.Sprintf("%s", i))
+			switch levelStr {
+			case "TRACE":
+				return fmt.Sprintf("\033[34m%s\033[0m", levelStr) // Blue
+			case "DEBUG":
+				return fmt.Sprintf("\033[36m%s\033[0m", levelStr) // Cyan
+			case "INFO":
+				return fmt.Sprintf("\033[32m%s\033[0m", levelStr) // Green
+			case "WARN":
+				return fmt.Sprintf("\033[33m%s\033[0m", levelStr) // Yellow
+			case "ERROR":
+				return fmt.Sprintf("\033[31m%s\033[0m", levelStr) // Red
+			case "FATAL":
+				return fmt.Sprintf("\033[35m%s\033[0m", levelStr) // Magenta
+			case "PANIC":
+				return fmt.Sprintf("\033[35m%s\033[0m", levelStr) // Magenta
+			default:
+				return levelStr
+			}
+		},
+		TimeFormat: time.RFC3339,
+	})
+
+	// Set the global logger for service access
+	GlobalLogger = &logger
+
+	return &logger
 }

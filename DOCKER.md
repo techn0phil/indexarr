@@ -113,6 +113,7 @@ indexarr/
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |
 | `DETECTION_LANGUAGE` | `en` | Language code for media detection (e.g., "en", "fr") |
 | `METADATA_LANGUAGE` | `en` | Language code for metadata fetching (e.g., "en", "fr") |
+| `LOG_LEVEL` | `INFO` | Logging level |
 | `TZ` | `UTC` | Container timezone |
 | `GIN_MODE` | `release` | Go server mode |
 
