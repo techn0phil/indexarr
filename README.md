@@ -106,9 +106,14 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
-| `DETECTION_LANGUAGE` | `en` | No | Language code for media detection (e.g., "en", "fr") |
-| `METADATA_LANGUAGE` | `en` | No | Language code for metadata fetching (e.g., "en", "fr") |
+| `DETECTION_LANGUAGE` | en | No | Language code for media detection (e.g., "en", "fr") |
+| `METADATA_LANGUAGE` | en | No | Language code for metadata fetching (e.g., "en", "fr") |
 | `LOG_LEVEL` | `INFO` | No | Logging level |
+| `AUTH_MODE` | `none` | No | Authentication mode (none, simple, or oidc) |
+| `AUTH_ADMIN_USERNAME` | - | Yes if `AUTH_MODE` is `simple` | Username of administrator account |
+| `AUTH_ADMIN_PASSWORD` | - | Yes if `AUTH_MODE` is `simple` | Password of administrator account |
+| `AUTH_SESSION_SECRET` | - | No | A random secret (auto-generated if not provided) |
+| `AUTH_SESSION_MAX_AGE` | 168 | No | Maximum session validity (default to 168 hours, ie. 7 days) |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
 | `UID` | 1000 | No | User ID inside container (match your media library owner) |
 | `GID` | 1000 | No | Group ID inside container (match your media library owner) |
