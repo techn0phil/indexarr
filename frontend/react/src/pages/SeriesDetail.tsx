@@ -132,19 +132,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               {/* Popup contextual menu */}
               <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
                 <button
-                  style={{
-                    background: 'var(--color-background-primary)',
-                    border: '0.5px solid var(--color-border-tertiary)',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    padding: 0,
-                    position: 'relative',
-                  }}
+                  className={comStyles['menu-button']}
                   aria-label="Menu"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -356,7 +344,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 <div
                   key={ep.id}
                   style={{
-                    border: `0.5px solid ${isExpanded ? '#5DCAA5' : 'var(--color-border-tertiary)'}`,
+                    border: `0.5px solid ${isExpanded ? 'var(--color-border-secondary)' : 'var(--color-border-tertiary)'}`,
                     borderRadius: '8px',
                     overflow: 'hidden',
                     background: 'var(--color-background-primary)',
@@ -470,7 +458,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       style={{
                         width: '22px',
                         height: '22px',
-                        border: `0.5px solid ${isExpanded ? 'var(--color-primary-accent)' : 'var(--color-border-tertiary)'}`,
+                        border: `0.5px solid ${isExpanded ? 'var(--color-border-secondary)' : 'var(--color-border-tertiary)'}`,
                         borderRadius: '4px',
                         background: isExpanded ? 'var(--color-background-secondary)' : 'var(--color-background-secondary)',
                         display: 'flex',
@@ -486,7 +474,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         height="9"
                         viewBox="0 0 9 9"
                         fill="none"
-                        stroke={isExpanded ? '#1D9E75' : 'var(--color-text-tertiary)'}
+                        stroke={isExpanded ? 'var(--color-text-secondary)' : 'var(--color-text-tertiary)'}
                         strokeWidth="1.5"
                         style={{
                           transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',

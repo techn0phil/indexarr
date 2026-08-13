@@ -23,15 +23,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           <img
             src={series.poster}
             alt={series.title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              background: 'var(--color-background-secondary)',
-              borderRadius: 0,
-              display: 'block',
-              objectPosition: 'center',
-            }}
+            className={comStyles['card-list-poster-img']}
           />
         ) : (
           <>
@@ -43,7 +35,6 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
             </div>
           </>
         )}
-        <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
       </div>
 
       <div className={comStyles['card-list-content']}>
