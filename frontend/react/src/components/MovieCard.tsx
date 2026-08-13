@@ -21,7 +21,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
       <div
         style={{
           width: '100%',
-          aspectRatio: '2/3', // Typical poster ratio
+          aspectRatio: '2 / 3', // Typical poster ratio
           background: 'var(--color-background-secondary)',
           display: 'flex',
           flexDirection: 'column',
@@ -38,7 +38,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'contain',
+              objectFit: 'cover',
               background: 'var(--color-background-secondary)',
               borderRadius: 0,
               display: 'block',

@@ -55,7 +55,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
           ref={searchInputRef}
           type="text"
           className={styles['search-input']}
-          placeholder="Rechercher un titre ou une année…"
+          placeholder="Filtrer par titre ou par année…"
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
