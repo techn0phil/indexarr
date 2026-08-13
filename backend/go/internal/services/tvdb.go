@@ -478,7 +478,7 @@ func (c *TVClient) GetAllEpisodes(tvdbID int, language string) (*TVDBAllEpisodes
 	case "es":
 		lang = "spa"
 	default:
-		log.Printf("Warning: Unsupported language code '%s', defaulting to 'en'", lang)
+		config.GlobalLogger.Warn().Str("language", lang).Msg("Unsupported language code, defaulting to 'en'")
 		lang = "eng"
 	}
 
