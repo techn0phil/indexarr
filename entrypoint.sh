@@ -32,7 +32,9 @@ echo "Environment:"
 echo "  - Server Port: ${SERVER_PORT}"
 echo "  - Database: ${DB_PATH}"
 echo "  - Mediainfo: ${MEDIAINFO_PATH}"
-echo "  - Media Libraries: ${MEDIA_LIBRARY_PATHS}"
+echo "  - Media libraries: ${MEDIA_LIBRARY_PATHS}"
+echo "  - Movies libraries: ${MOVIES_LIBRARY_PATHS}"
+echo "  - Series libraries: ${SERIES_LIBRARY_PATHS}"
 
 # Verify mediainfo is available
 if ! command -v "${MEDIAINFO_PATH}" >/dev/null 2>&1; then

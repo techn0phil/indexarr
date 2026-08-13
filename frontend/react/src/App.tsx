@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ListFilms } from './pages/ListFilms';
@@ -38,56 +39,88 @@ const AuthLoadingSpinner = () => (
 const AppContent = () => {
   const context = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
   
   if (!context) return null;
 
-  const { currentPage, selectedId, goToPage, goBack } = context;
-  // const showBack = currentPage.startsWith('detail-');
-  // const breadcrumb =
-  //   currentPage === 'detail-movie'
-  //     ? 'Films / Interstellar'
-  //     : currentPage === 'detail-series'
-  //       ? 'Séries / Breaking Bad'
-  //       : '';
+  const activeNav = useMemo<'movies' | 'series'>(() => {
+    return location.pathname.startsWith('/series') ? 'series' : 'movies';
+  }, [location.pathname]);
+
+  const handleSidebarNav = (page: 'movies' | 'series') => {
+    navigate(page === 'movies' ? '/movies' : '/series');
+  };
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(activeNav === 'series' ? '/series' : '/movies');
+  };
 
   return (
     <div className={layoutStyles.layout}>
-      <Sidebar activeNav={currentPage} onNavClick={goToPage} />
+      <Sidebar activeNav={activeNav} onNavClick={handleSidebarNav} />
       <div className={layoutStyles.main}>
         <Topbar 
           showBack={false} 
           breadcrumb="" 
-          onBack={goBack}
+          onBack={handleBack}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
         <div className={layoutStyles.content}>
-          {currentPage === 'list-films' && (
-            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <ListFilms 
-                onSelectMovie={(id) => goToPage('detail-movie', id)}
-                searchQuery={searchQuery}
-              />
-            </div>
-          )}
-          {currentPage === 'list-series' && (
-            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <ListSeries 
-                onSelectSeries={(id) => goToPage('detail-series', id)}
-                searchQuery={searchQuery}
-              />
-            </div>
-          )}
-          {currentPage === 'detail-movie' && selectedId && (
-            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <MovieDetail movieId={selectedId} />
-            </div>
-          )}
-          {currentPage === 'detail-series' && selectedId && (
-            <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <SeriesDetail seriesId={selectedId} />
-            </div>
-          )}
+          <Routes>
+            <Route
+              path="/"
+              element={<Navigate to="/movies" replace />}
+            />
+            <Route
+              path="/movies"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <ListFilms
+                    onSelectMovie={(id) => navigate(`/movies/${id}`)}
+                    searchQuery={searchQuery}
+                  />
+                </div>
+              )}
+            />
+            <Route
+              path="/movies/:movieId"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <MovieDetailFromRoute />
+                </div>
+              )}
+            />
+            <Route
+              path="/series"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <ListSeries
+                    onSelectSeries={(id) => navigate(`/series/${id}`)}
+                    searchQuery={searchQuery}
+                  />
+                </div>
+              )}
+            />
+            <Route
+              path="/series/:seriesId"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <SeriesDetailFromRoute />
+                </div>
+              )}
+            />
+            <Route
+              path="*"
+              element={<Navigate to="/movies" replace />}
+            />
+          </Routes>
         </div>
       </div>
     </div>
@@ -116,11 +149,35 @@ const AppRouter = () => {
   return <AppContent />;
 };
 
+const MovieDetailFromRoute = () => {
+  const { movieId } = useParams();
+  const parsedId = Number(movieId);
+
+  if (!movieId || Number.isNaN(parsedId)) {
+    return <div style={{ padding: '20px' }}>Film non trouvé</div>;
+  }
+
+  return <MovieDetail movieId={parsedId} />;
+};
+
+const SeriesDetailFromRoute = () => {
+  const { seriesId } = useParams();
+  const parsedId = Number(seriesId);
+
+  if (!seriesId || Number.isNaN(parsedId)) {
+    return <div style={{ padding: '20px' }}>Série non trouvée</div>;
+  }
+
+  return <SeriesDetail seriesId={parsedId} />;
+};
+
 function App() {
   return (
-    <AppContextProvider>
-      <AppRouter />
-    </AppContextProvider>
+    <BrowserRouter>
+      <AppContextProvider>
+        <AppRouter />
+      </AppContextProvider>
+    </BrowserRouter>
   );
 }
 

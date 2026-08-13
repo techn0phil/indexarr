@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,7 +48,7 @@ func NewScanner(db *sql.DB, cfg *config.Config, broadcaster *Broadcaster) *Scann
 		db:          db,
 		config:      cfg,
 		extractor:   NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
-		tmdb:        NewTMDBClient(cfg.TMDBAPIKey),
+		tmdb:        NewTMDBClient(cfg.TMDBAPIKey, cfg.DetectionLanguage, cfg.MetadataLanguage),
 		tv:          NewTVClient(cfg.TVDBAPIKey, db), // Uses TVDB API v4 for TV shows
 		broadcaster: broadcaster,
 		stopChan:    make(chan struct{}),
@@ -113,6 +112,13 @@ func (s *Scanner) CountMediaFiles(paths []string) (int, error) {
 				return nil
 			}
 
+			// Skip files matching ignore pattern
+			if s.config.IgnoreFilePattern != nil {
+				if s.config.IgnoreFilePattern.MatchString(filepath.Base(path)) {
+					return nil
+				}
+			}
+
 			// Count video files
 			if IsVideoFile(path) {
 				count++
@@ -122,7 +128,7 @@ func (s *Scanner) CountMediaFiles(paths []string) (int, error) {
 		})
 
 		if err != nil {
-			log.Printf("Error counting files in %s: %v", libPath, err)
+			config.GlobalLogger.Error().Err(err).Str("path", libPath).Msg("Error counting files")
 		}
 	}
 
@@ -151,7 +157,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 
 	s.mu.Unlock()
 
-	log.Println("Starting scan")
+	config.GlobalLogger.Info().Msg("Scan starting")
 	start := time.Now()
 
 	defer func() {
@@ -191,7 +197,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	}
 	if !suppressBroadcasts {
 		if err := repository.UpdateScanStatus(s.db, status); err != nil {
-			log.Printf("Failed to update scan status: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to update scan status")
 		}
 
 		// Broadcast scan start to WebSocket clients
@@ -207,7 +213,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 			continue
 		}
 
-		log.Printf("Scanning library path: %s", libPath)
+		config.GlobalLogger.Info().Str("path", libPath).Msg("Scanning library path")
 
 		if _, err := os.Stat(libPath); os.IsNotExist(err) {
 			result.Errors = append(result.Errors, fmt.Sprintf("Path does not exist: %s", libPath))
@@ -223,7 +229,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 			}
 
 			if err != nil {
-				log.Printf("Error accessing path %s: %v", path, err)
+				config.GlobalLogger.Error().Err(err).Str("path", path).Msg("Error accessing path")
 				return nil // Continue walking
 			}
 
@@ -242,7 +248,20 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 					}
 				}
 
+				// Handle Bluray format (skip BDMV/STREAM content, but include the BDMV folder itself for metadata extraction)
+				if strings.EqualFold(name, "STREAM") && strings.EqualFold(filepath.Base(filepath.Dir(path)), "BDMV") {
+					files = append(files, filepath.Dir(path))
+					return fs.SkipDir
+				}
+
 				return nil
+			}
+
+			// Skip files matching ignore pattern
+			if s.config.IgnoreFilePattern != nil {
+				if s.config.IgnoreFilePattern.MatchString(filepath.Base(path)) {
+					return nil
+				}
 			}
 
 			// Check if it's a video file
@@ -259,7 +278,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	}
 
 	result.FilesFound = len(files)
-	log.Printf("Found %d media files", result.FilesFound)
+	config.GlobalLogger.Info().Int("count", result.FilesFound).Msg("Found media files")
 
 	// Update status with files found
 	status.FilesFound = result.FilesFound
@@ -294,7 +313,7 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 		}
 
 		if err := s.processFile(filePath, result); err != nil {
-			log.Printf("Error processing %s: %v", filePath, err)
+			config.GlobalLogger.Error().Err(err).Str("file", filePath).Msg("Error processing file")
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: %v", filepath.Base(filePath), err))
 		} else {
 			seenFiles = append(seenFiles, filePath)
@@ -333,19 +352,19 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	if s.pathsMatchAnyLibrary(paths) {
 		// Handle deletions: find movies/episodes in database that were not seen during scan and check if their files are missing from disk.
 		// If so, mark them as deleted. This ensures that if a file was deleted from disk, it will be reflected in the database after the scan.
-		log.Default().Printf("Removing stale media files not seen during scan...")
+		config.GlobalLogger.Info().Msg("Removing stale media files not seen during scan")
 		var err error
 		deletedMoviesCount, deletedEpisodesCount, err = s.removeStaleMediaFiles(paths, seenFiles)
 		if err != nil {
-			log.Printf("Warning: Failed to remove stale media files: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to remove stale media files")
 			result.Errors = append(result.Errors, fmt.Sprintf("Failed to remove stale media files: %v", err))
 		} else if deletedMoviesCount > 0 || deletedEpisodesCount > 0 {
-			log.Printf("Removed %d movies and %d episodes no longer on disk", deletedMoviesCount, deletedEpisodesCount)
+			config.GlobalLogger.Info().Int("movies", deletedMoviesCount).Int("episodes", deletedEpisodesCount).Msg("Removed stale media files")
 		}
 
 		// Remove series that have no episodes left after episode deletions
 		if err := repository.DeleteEmptySeries(s.db); err != nil {
-			log.Printf("Warning: Failed to delete empty series: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to delete empty series")
 			result.Errors = append(result.Errors, fmt.Sprintf("Failed to delete empty series: %v", err))
 		}
 	}
@@ -367,17 +386,24 @@ func (s *Scanner) ScanPaths(paths []string, ctx *models.ProgressContext) (*model
 	}
 
 	duration := time.Since(start)
-	log.Printf("Scan completed in %v - %d files processed, %d movies added, %d episodes added, %d movies removed, %d episodes removed, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, deletedMoviesCount, deletedEpisodesCount, len(result.Errors))
+	config.GlobalLogger.Info().
+		Dur("duration", duration).
+		Int("files_processed", result.FilesProcessed).
+		Int("movies_added", result.MoviesAdded).
+		Int("episodes_added", result.EpisodesAdded).
+		Int("movies_removed", deletedMoviesCount).
+		Int("episodes_removed", deletedEpisodesCount).
+		Int("errors", len(result.Errors)).
+		Msg("Scan completed")
 
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
 		for i, err := range result.Errors {
 			if i >= 100 {
-				log.Printf("  - ... %d more lines", len(result.Errors)-100)
+				config.GlobalLogger.Warn().Int("count", len(result.Errors)-100).Msg("... and more")
 				break
 			}
-			log.Printf("  - %s", err)
+			config.GlobalLogger.Warn().Str("error", err).Msg("Scan error")
 		}
 	}
 
@@ -479,7 +505,7 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 	}
 
 	// Print seen files count for debugging
-	log.Printf("Seen %d files during scan, checking for stale entries in database...", len(seenFiles))
+	config.GlobalLogger.Debug().Int("seen_count", len(seenFiles)).Msg("Checking for stale entries in database")
 
 	deletedMoviesCount := 0
 	deletedEpisodesCount := 0
@@ -492,14 +518,14 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 		}
 
 		// Print movie paths count for debugging
-		log.Printf("Fetched %d movie file paths from database for deletion check", len(moviePaths))
+		config.GlobalLogger.Debug().Int("count", len(moviePaths)).Msg("Fetched movie file paths from database")
 
 		for _, moviePath := range moviePaths {
 			if !seenFilesMap[moviePath] {
 				if _, err := os.Stat(moviePath); os.IsNotExist(err) {
-					log.Printf("Movie file missing from disk, deleting movie: %s", moviePath)
+					config.GlobalLogger.Info().Str("path", moviePath).Msg("Movie file missing from disk, deleting")
 					if err := repository.DeleteMovieByPath(s.db, moviePath); err != nil {
-						log.Printf("Failed to delete movie: %v", err)
+						config.GlobalLogger.Error().Err(err).Msg("Failed to delete movie")
 					} else {
 						deletedMoviesCount++
 					}
@@ -507,7 +533,7 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 			}
 		}
 
-		log.Printf("Removed %d movies no longer on disk", deletedMoviesCount)
+		config.GlobalLogger.Info().Int("count", deletedMoviesCount).Msg("Removed movies no longer on disk")
 	}
 
 	if s.pathsMatchSeriesOrMediaLibrary(paths) {
@@ -518,14 +544,14 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 		}
 
 		// Print episode paths count for debugging
-		log.Printf("Fetched %d episode file paths from database for deletion check", len(episodePaths))
+		config.GlobalLogger.Debug().Int("count", len(episodePaths)).Msg("Fetched episode file paths from database")
 
 		for _, episodePath := range episodePaths {
 			if !seenFilesMap[episodePath] {
 				if _, err := os.Stat(episodePath); os.IsNotExist(err) {
-					log.Printf("Episode file missing from disk, deleting episode: %s", episodePath)
+					config.GlobalLogger.Info().Str("path", episodePath).Msg("Episode file missing from disk, deleting")
 					if err := repository.DeleteEpisodeByPath(s.db, episodePath); err != nil {
-						log.Printf("Failed to delete episode: %v", err)
+						config.GlobalLogger.Error().Err(err).Msg("Failed to delete episode")
 					} else {
 						deletedEpisodesCount++
 					}
@@ -533,7 +559,7 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 			}
 		}
 
-		log.Printf("Removed %d episodes no longer on disk", deletedEpisodesCount)
+		config.GlobalLogger.Info().Int("count", deletedEpisodesCount).Msg("Removed episodes no longer on disk")
 	}
 
 	return deletedMoviesCount, deletedEpisodesCount, nil
@@ -541,7 +567,7 @@ func (s *Scanner) removeStaleMediaFiles(paths []string, seenFiles []string) (int
 
 // ScanMovie scans a single movie (used for manual refresh via API)
 func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
-	log.Printf("Starting movie refresh for ID: %d", movieID)
+	config.GlobalLogger.Info().Int64("id", movieID).Msg("Starting movie refresh")
 	start := time.Now()
 
 	movie, err := repository.GetMovieByID(s.db, movieID)
@@ -552,7 +578,7 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 		return nil, fmt.Errorf("movie not found with ID: %d", movieID)
 	}
 
-	log.Printf("Found movie: %s (%d)", movie.Title, movie.Year)
+	config.GlobalLogger.Info().Str("title", movie.Title).Int("year", movie.Year).Msg("Found movie")
 
 	result, err := s.ScanPaths([]string{movie.FilePath}, nil)
 	if err != nil {
@@ -561,15 +587,15 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 
 	// Remove movie if it was deleted from disk
 	if result.FilesProcessed == 0 {
-		log.Printf("Movie file not found during refresh, deleting movie: %s", movie.FilePath)
+		config.GlobalLogger.Info().Str("path", movie.FilePath).Msg("Movie file not found during refresh, deleting")
 		if err := repository.DeleteMovie(s.db, movieID); err != nil {
-			log.Printf("Failed to delete movie: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to delete movie")
 		}
 	} else {
 		// Extract media info again to update any changes (e.g. new audio tracks)
 		mediaInfo, fileSize, duration, err := s.extractor.Extract(movie.FilePath)
 		if err != nil {
-			log.Printf("Mediainfo extraction failed during refresh for %s: %v", movie.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", movie.Title).Msg("Mediainfo extraction failed during refresh")
 		} else {
 			movie.MediaInfo = mediaInfo
 			movie.FileSize = fileSize
@@ -585,13 +611,13 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 
 		// Try to enrich with TMDB metadata
 		if err := s.tmdb.EnrichMovie(movie); err != nil {
-			log.Printf("TMDB enrichment failed during refresh for %s: %v", movie.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", movie.Title).Msg("TMDB enrichment failed during refresh")
 		} else {
 			// Update movie with new metadata
 			if err := repository.UpdateMovie(s.db, movie); err != nil {
-				log.Printf("Failed to update movie during refresh: %v", err)
+				config.GlobalLogger.Warn().Err(err).Msg("Failed to update movie during refresh")
 			}
-			log.Printf("Movie refreshed: %s (%d)", movie.Title, movie.Year)
+			config.GlobalLogger.Info().Str("title", movie.Title).Int("year", movie.Year).Msg("Movie refreshed")
 			result.MoviesAdded = 1 // Count as "added" for refresh purposes
 			result.FilesProcessed = 1
 			result.FilesFound = 1
@@ -601,14 +627,14 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 	}
 
 	duration := time.Since(start)
-	log.Printf("Movie refresh completed in %d ms", duration.Milliseconds())
+	config.GlobalLogger.Info().Dur("duration", duration).Msg("Movie refresh completed")
 
 	return result, nil
 }
 
 // ScanSeries scans a single series (used for manual refresh via API)
 func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
-	log.Printf("Starting series refresh for ID: %d", seriesID)
+	config.GlobalLogger.Info().Int64("id", seriesID).Msg("Starting series refresh")
 	start := time.Now()
 
 	result := &models.ScanResult{
@@ -624,7 +650,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 		return nil, fmt.Errorf("series not found with ID: %d", seriesID)
 	}
 
-	log.Printf("Found series: %s (%d)", series.Title, series.YearStart)
+	config.GlobalLogger.Info().Str("title", series.Title).Int("year", series.YearStart).Msg("Found series")
 
 	// Step 2: Fetch all episodes to determine folders to scan
 	episodes, err := repository.GetAllEpisodesForSeries(s.db, seriesID)
@@ -634,7 +660,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 
 	// Extract unique folder paths from existing episodes
 	folderPaths := s.findSeriesFolderPaths(episodes)
-	log.Printf("Will scan %d folder(s) for series: %v", len(folderPaths), folderPaths)
+	config.GlobalLogger.Info().Int("count", len(folderPaths)).Strs("paths", folderPaths).Msg("Found folders for series")
 
 	// Step 3: Scan folder paths to detect new episodes
 	scanResult, err := s.ScanPaths(folderPaths, nil)
@@ -649,7 +675,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	for _, episode := range episodes {
 		// Check if file still exists
 		if _, err := os.Stat(episode.FilePath); os.IsNotExist(err) {
-			log.Printf("Episode file missing: %s (S%02dE%02d), marking for removal", episode.FilePath, episode.SeasonNum, episode.EpisodeNum)
+			config.GlobalLogger.Info().Str("path", episode.FilePath).Int("season", episode.SeasonNum).Int("episode", episode.EpisodeNum).Msg("Episode file missing, marking for removal")
 			episodesToDelete = append(episodesToDelete, episode.ID)
 		}
 	}
@@ -658,22 +684,22 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	for _, episodeID := range episodesToDelete {
 		if err := repository.DeleteEpisode(s.db, episodeID); err != nil {
 			errMsg := fmt.Sprintf("Failed to remove missing episode %d: %v", episodeID, err)
-			log.Printf("%s", errMsg)
+			config.GlobalLogger.Error().Err(err).Int64("id", episodeID).Msg("Failed to remove missing episode")
 			result.Errors = append(result.Errors, errMsg)
 		}
 	}
 
 	// Delete seasons that have no episodes left
 	if err := repository.DeleteEmptySeasons(s.db, seriesID); err != nil {
-		log.Printf("Failed to delete empty seasons: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to delete empty seasons")
 	}
 
 	// Step 6: Check if series folder is completely missing
 	if scanResult.FilesFound == 0 && len(episodesToDelete) == len(episodes) {
-		log.Printf("All episodes missing from disk, deleting series: %s", series.Title)
+		config.GlobalLogger.Info().Str("title", series.Title).Msg("All episodes missing from disk, deleting series")
 		if err := repository.DeleteSeries(s.db, seriesID); err != nil {
 			errMsg := fmt.Sprintf("Failed to delete series: %v", err)
-			log.Printf("%s", errMsg)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to delete series")
 			result.Errors = append(result.Errors, errMsg)
 		}
 		return result, nil
@@ -683,7 +709,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	for _, episode := range episodes {
 		mediaInfo, fileSize, duration, err := s.extractor.Extract(episode.FilePath)
 		if err != nil {
-			log.Printf("Mediainfo extraction failed for %s: %v", episode.FilePath, err)
+			config.GlobalLogger.Warn().Err(err).Str("path", episode.FilePath).Msg("Mediainfo extraction failed for episode")
 			// Continue with minimal info
 			mediaInfo = &models.MediaInfo{
 				VideoTracks:    []models.VideoTrack{},
@@ -698,25 +724,25 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 
 		// Update episode in database
 		if err := repository.UpdateEpisode(s.db, &episode); err != nil {
-			log.Printf("Failed to update episode during refresh: %v", err)
+			config.GlobalLogger.Warn().Err(err).Int("season", episode.SeasonNum).Int("episode", episode.EpisodeNum).Msg("Failed to update episode during refresh")
 			result.Errors = append(result.Errors, fmt.Sprintf("Failed to update episode S%02dE%02d: %v", episode.SeasonNum, episode.EpisodeNum, err))
 		}
 	}
 
 	// Re-enrich series metadata from TMDB
 	if err := s.tmdb.EnrichSeries(series); err != nil {
-		log.Printf("TMDB enrichment failed during refresh for %s: %v", series.Title, err)
+		config.GlobalLogger.Warn().Err(err).Str("title", series.Title).Msg("TMDB enrichment failed during refresh")
 	}
 
 	// Update series in database
 	if err := repository.UpdateSeries(s.db, series); err != nil {
-		log.Printf("Failed to update series during refresh: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("Failed to update series during refresh")
 		result.Errors = append(result.Errors, fmt.Sprintf("Failed to update series: %v", err))
 	}
 
 	// Recalculate series counts
 	if err := repository.UpdateSeriesCounts(s.db, seriesID); err != nil {
-		log.Printf("Failed to update series counts: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to update series counts")
 		result.Errors = append(result.Errors, fmt.Sprintf("Failed to update series counts: %v", err))
 	}
 
@@ -728,8 +754,13 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	result.Errors = append(result.Errors, scanResult.Errors...)
 
 	duration := time.Since(start)
-	log.Printf("Series refresh completed in %d ms - %d files processed, %d episodes added, %d episodes deleted, %d errors",
-		duration.Milliseconds(), result.FilesProcessed, result.EpisodesAdded, len(episodesToDelete), len(result.Errors))
+	config.GlobalLogger.Info().
+		Dur("duration", duration).
+		Int("files_processed", result.FilesProcessed).
+		Int("episodes_added", result.EpisodesAdded).
+		Int("episodes_deleted", len(episodesToDelete)).
+		Int("errors", len(result.Errors)).
+		Msg("Series refresh completed")
 
 	return result, nil
 }
@@ -752,7 +783,7 @@ func (s *Scanner) findSeriesFolderPaths(episodes []models.Episode) []string {
 	// Find common parent folder which does not belong to any media library path to avoid scanning the entire library if series episodes are stored in different folders. This is a common edge case for users who have their TV shows organized in multiple folders (e.g. by genre, by quality, etc.) but still want to be able to refresh the entire series metadata with one click.
 	commonParent := findCommonParentFolder(folders)
 	if commonParent != "" && !s.isLibraryPath(commonParent) {
-		log.Printf("Series episodes are in multiple folders, using common parent folder for scan: %s", commonParent)
+		config.GlobalLogger.Debug().Str("path", commonParent).Msg("Series episodes in multiple folders, using common parent")
 		return []string{commonParent}
 	}
 
@@ -797,7 +828,7 @@ func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 	// 	return nil
 	// }
 
-	log.Printf("Pre-fetching all metadata for series TVDB ID %d...", tvdbID)
+	config.GlobalLogger.Debug().Int("tvdbID", tvdbID).Msg("Pre-fetching all metadata for series")
 
 	// // Fetch extended series metadata (includes seasons array)
 	// seriesExtended, err := s.tv.GetTVDetails(tvdbID)
@@ -809,17 +840,14 @@ func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 	// log.Printf("[Cache] Successfully cached series metadata: %d seasons", len(seriesExtended.Data.Seasons))
 
 	// Fetch all episodes in bulk
-	allEpisodes, err := s.tv.GetAllEpisodes(tvdbID, "fra")
+	allEpisodes, err := s.tv.GetAllEpisodes(tvdbID, s.config.MetadataLanguage)
 	if err != nil {
 		return fmt.Errorf("failed to fetch bulk episodes: %w", err)
 	}
 	// s.cache.episodesByTVDBId[tvdbID] = allEpisodes.Data.Episodes
 	s.cache.episodesByTVDBId[tvdbID] = allEpisodes
 
-	// log.Printf("[Cache] Successfully cached episodes data: %d episodes, %d seasons",
-	// 	len(allEpisodes.Data.Episodes), len(seriesExtended.Data.Seasons))
-	log.Printf("[Cache] Successfully cached episodes data: %d episodes",
-		len(allEpisodes.Data.Episodes))
+	config.GlobalLogger.Debug().Int("count", len(allEpisodes.Data.Episodes)).Msg("Successfully cached episodes data")
 
 	return nil
 }
@@ -829,7 +857,7 @@ func (s *Scanner) enrichEpisodeFromCache(episode *models.Episode, seriesTVDBID i
 	// Get cached episodes for this series
 	cachedEpisodes, exists := s.cache.episodesByTVDBId[seriesTVDBID]
 	if !exists {
-		log.Printf("Warning: No cached episodes found for series TVDB ID %d", seriesTVDBID)
+		config.GlobalLogger.Debug().Int("tvdbID", seriesTVDBID).Msg("No cached episodes found for series")
 		return
 	}
 
@@ -840,14 +868,13 @@ func (s *Scanner) enrichEpisodeFromCache(episode *models.Episode, seriesTVDBID i
 			if episode.Duration == 0 && ep.Runtime > 0 {
 				episode.Duration = ep.Runtime * 60 // Convert minutes to seconds
 			}
-			log.Printf("[Cache] Enriched episode S%02dE%02d: %s (runtime: %dm)",
-				seasonNum, episodeNum, ep.Name, ep.Runtime)
+			config.GlobalLogger.Debug().Int("season", seasonNum).Int("episode", episodeNum).Str("title", ep.Name).Int("runtime", ep.Runtime).Msg("Enriched episode from cache")
 			return
 		}
 	}
 
 	// Episode not found in cache, use default title
-	log.Printf("Warning: Episode S%02dE%02d not found in cached data for series %d", seasonNum, episodeNum, seriesTVDBID)
+	config.GlobalLogger.Debug().Int("season", seasonNum).Int("episode", episodeNum).Int("tvdbID", seriesTVDBID).Msg("Episode not found in cached data")
 	episode.Title = fmt.Sprintf("Episode %d", episodeNum)
 }
 
@@ -869,32 +896,69 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 
 	// Total processing time for the file
 	processDuration := time.Since(processStart)
-	log.Printf("Total processing time for file %s: %d ms", filePath, processDuration.Milliseconds())
+	config.GlobalLogger.Trace().Int64("duration_ms", processDuration.Milliseconds()).Str("file", filePath).Msg("Total processing time for file")
 
 	return processError
 }
 
 // processMovie handles a movie file
 func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
-	// Check if movie already exists by file path
-	exists, err := repository.MovieExistsByFilePath(s.db, filePath)
-	if err != nil {
-		return fmt.Errorf("failed to check for existing movie: %w", err)
-	}
-	if exists {
-		log.Printf("Movie already exists for file: %s", filePath)
-		return nil
+	isBluray := IsBlurayFolder(filePath)
+	mediaFilePath := filePath
+
+	var mediaInfo *models.MediaInfo
+	var fileSize int64
+	var duration int
+	var err error
+
+	if !isBluray {
+		// Check if movie already exists by file path
+		exists, err := repository.MovieExistsByFilePath(s.db, filePath)
+		if err != nil {
+			return fmt.Errorf("failed to check for existing movie: %w", err)
+		}
+		if exists {
+			config.GlobalLogger.Trace().Str("path", filePath).Msg("Movie already exists for file")
+			return nil
+		}
+	} else {
+		mediaFilePath, err = s.FindMoviePlaylistInBlurayFolder(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to find media playlist in Bluray folder: %w", err)
+		}
+		config.GlobalLogger.Debug().Str("path", mediaFilePath).Msg("Detected Bluray folder, using media playlist")
 	}
 
 	// Extract media info
-	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
+	mediaInfo, fileSize, duration, err = s.extractor.Extract(mediaFilePath)
 	if err != nil {
-		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		config.GlobalLogger.Warn().Err(err).Str("path", mediaFilePath).Msg("Mediainfo extraction failed")
 		// Continue with minimal info
 		mediaInfo = &models.MediaInfo{
 			VideoTracks:    []models.VideoTrack{},
 			AudioTracks:    []models.AudioTrack{},
 			SubtitleTracks: []models.SubtitleTrack{},
+		}
+	}
+
+	// If it's a Bluray folder, extracts file path and size from the source
+	if isBluray {
+		mediaFilePath = filepath.Join(filePath, "STREAM", mediaInfo.VideoTracks[0].Source)
+
+		// Check if movie already exists by file path
+		exists, err := repository.MovieExistsByFilePath(s.db, mediaFilePath)
+		if err != nil {
+			return fmt.Errorf("failed to check for existing movie: %w", err)
+		}
+		if exists {
+			config.GlobalLogger.Trace().Str("path", mediaFilePath).Msg("Movie already exists for file")
+			return nil
+		}
+
+		_, fileSize, _, err = s.extractor.Extract(mediaFilePath)
+		if err != nil {
+			config.GlobalLogger.Warn().Err(err).Str("path", mediaFilePath).Msg("Mediainfo extraction failed for media file in Bluray folder")
+			fileSize = 0
 		}
 	}
 
@@ -904,15 +968,15 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 		Duration:  duration / 60, // Convert seconds to minutes
 		Status:    "available",
 		FileSize:  fileSize,
-		FilePath:  filePath,
-		Container: GetContainer(filePath),
+		FilePath:  mediaFilePath,
+		Container: GetContainer(mediaFilePath),
 		DateAdded: time.Now().Format(time.RFC3339),
 		MediaInfo: mediaInfo,
 	}
 
 	// Try to enrich with TMDB metadata
 	if err := s.tmdb.EnrichMovie(movie); err != nil {
-		log.Printf("TMDB enrichment failed for %s: %v", parsed.Title, err)
+		config.GlobalLogger.Warn().Err(err).Str("title", parsed.Title).Msg("TMDB enrichment failed")
 		// Continue without TMDB data
 	}
 
@@ -923,8 +987,46 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 	}
 
 	result.MoviesAdded++
-	log.Printf("Added movie: %s (%d)", movie.Title, movie.Year)
+	config.GlobalLogger.Info().Str("title", movie.Title).Int("year", movie.Year).Msg("Added movie")
 	return nil
+}
+
+func (s *Scanner) FindMoviePlaylistInBlurayFolder(blurayFolderPath string) (string, error) {
+	playlistFolder := filepath.Join(blurayFolderPath, "PLAYLIST")
+	files, err := os.ReadDir(playlistFolder)
+	if err != nil {
+		return "", fmt.Errorf("failed to read PLAYLIST folder: %w", err)
+	}
+
+	// Look for the .mpls having the longest duration (heuristic for main movie playlist)
+	var longestPlaylist string
+	var longestDuration int
+
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".mpls") {
+			continue
+		}
+
+		playlistPath := filepath.Join(playlistFolder, file.Name())
+
+		_, _, duration, err := s.extractor.Extract(playlistPath)
+
+		if err != nil {
+			config.GlobalLogger.Warn().Err(err).Str("path", playlistPath).Msg("Failed to get duration for playlist")
+			continue
+		}
+
+		if duration > longestDuration {
+			longestDuration = duration
+			longestPlaylist = playlistPath
+		}
+	}
+
+	if longestPlaylist == "" {
+		return "", fmt.Errorf("no valid playlist found in Bluray folder")
+	}
+
+	return longestPlaylist, nil
 }
 
 func slugify(title string) string {
@@ -969,7 +1071,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 		return fmt.Errorf("failed to check for existing episode: %w", err)
 	}
 	if exists {
-		log.Printf("Episode already exists for file: %s", filePath)
+		config.GlobalLogger.Trace().Str("path", filePath).Msg("Episode already exists for file")
 		return nil
 	}
 
@@ -985,31 +1087,31 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	if s.cache.seriesByTitle != nil {
 		if cached, ok := s.cache.seriesByTitle[normalizedTitle]; ok {
 			series = cached
-			log.Printf("[Cache] Series found in cache: %s (%d)", parsed.Title, parsed.Year)
+			config.GlobalLogger.Debug().Str("title", parsed.Title).Int("year", parsed.Year).Msg("Series found in cache")
 		} else if ferr, failed := s.cache.failedSeriesByTitle[normalizedTitle]; failed {
-			log.Printf("[Cache] Skipping enrichment for series '%s' (%d) due to previous failure: %v", parsed.Title, parsed.Year, ferr)
+			config.GlobalLogger.Debug().Str("title", parsed.Title).Int("year", parsed.Year).Err(err).Msg("Skipping enrichment due to previous failure")
 			return ferr
 		}
 	}
 
 	// If not in cache, lookup in database
 	if series == nil {
-		log.Printf("Looking up series in database: %s (%d)", parsed.Title, parsed.Year)
+		config.GlobalLogger.Debug().Str("title", parsed.Title).Int("year", parsed.Year).Msg("Looking up series in database")
 		series, err = repository.GetSeriesByTitleAndYear(s.db, parsed.Title, parsed.Year)
 		if err != nil {
 			s.cache.failedSeriesByTitle[normalizedTitle] = err
 			return fmt.Errorf("failed to lookup series: %w", err)
 		} else if series != nil {
-			log.Printf("Series found in database: %s (TMDB ID: %d, TVDB ID: %d)", series.Title, series.TMDBId, series.TVDBId)
+			config.GlobalLogger.Debug().Str("title", series.Title).Int64("tmdbID", series.TMDBId).Int64("tvdbID", series.TVDBId).Msg("Series found in database")
 
 			// Try to enrich with TMDB metadata
 			if err := s.tmdb.EnrichSeries(series); err != nil {
-				log.Printf("TMDB enrichment failed for %s: %v", parsed.Title, err)
+				config.GlobalLogger.Warn().Err(err).Str("title", parsed.Title).Msg("TMDB enrichment failed")
 				s.cache.failedSeriesByTitle[normalizedTitle] = err
 			}
 
 			s.cache.seriesByTitle[normalizedTitle] = series
-			log.Printf("[Cache] Added series to cache: %s (%d)", series.Title, series.YearStart)
+			config.GlobalLogger.Debug().Str("title", series.Title).Int("year", series.YearStart).Msg("Added series to cache")
 		}
 	}
 
@@ -1018,7 +1120,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	var seriesTVDBID int
 
 	if series == nil {
-		log.Printf("Series not found in database, creating new series: %s (%d)", parsed.Title, parsed.Year)
+		config.GlobalLogger.Info().Str("title", parsed.Title).Int("year", parsed.Year).Msg("Series not found in database, creating new series")
 
 		// Create new series
 		newSeries := &models.Series{
@@ -1031,13 +1133,13 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 
 		// Try to enrich with TMDB metadata
 		if err := s.tmdb.EnrichSeries(newSeries); err != nil {
-			log.Printf("TMDB enrichment failed for %s: %v", parsed.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", parsed.Title).Msg("TMDB enrichment failed")
 			s.cache.failedSeriesByTitle[normalizedTitle] = err
 		}
 
 		// Check if series with same TMDB ID already exists (prevents duplicates)
 		if newSeries.TMDBId > 0 {
-			log.Printf("Checking for existing series with TMDB ID %d", newSeries.TMDBId)
+			config.GlobalLogger.Debug().Int64("tmdbID", newSeries.TMDBId).Msg("Checking for existing series with TMDB ID")
 			existingSeries, err := repository.GetSeriesByTMDBId(s.db, newSeries.TMDBId)
 			if err != nil {
 				s.cache.failedSeriesByTitle[normalizedTitle] = err
@@ -1055,9 +1157,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 					seriesTVDBID = int(newSeries.TVDBId)
 				}
 
-				log.Printf("Found existing series: %s (TMDB ID: %d, TVDB ID: %d)", existingSeries.Title, seriesTMDBID, seriesTVDBID)
+				config.GlobalLogger.Info().Str("title", existingSeries.Title).Int("tmdbID", seriesTMDBID).Int("tvdbID", seriesTVDBID).Msg("Found existing series")
 				s.cache.seriesByTitle[normalizedTitle] = existingSeries
-				log.Printf("[Cache] Added series to cache: %s", existingSeries.Title)
+				config.GlobalLogger.Debug().Str("title", existingSeries.Title).Msg("Added series to cache")
 				series = existingSeries
 				// Skip the InsertSeries step below
 			} else {
@@ -1070,13 +1172,13 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 				newSeries.ID = seriesID // Update the series object with the DB-generated ID
 				seriesTMDBID = int(newSeries.TMDBId)
 				seriesTVDBID = int(newSeries.TVDBId)
-				log.Printf("Added series: %s (TMDB ID: %d, TVDB ID: %d)", newSeries.Title, seriesTMDBID, seriesTVDBID)
+				config.GlobalLogger.Info().Str("title", newSeries.Title).Int("tmdbID", seriesTMDBID).Int("tvdbID", seriesTVDBID).Msg("Added series")
 				s.cache.seriesByTitle[normalizedTitle] = newSeries
-				log.Printf("[Cache] Added series to cache: %s", newSeries.Title)
+				config.GlobalLogger.Debug().Str("title", newSeries.Title).Msg("Added series to cache")
 				series = newSeries
 			}
 		} else {
-			log.Printf("No TMDB ID found for series '%s', inserting without TMDB enrichment", parsed.Title)
+			config.GlobalLogger.Warn().Str("title", parsed.Title).Msg("No TMDB ID found, inserting without TMDB enrichment")
 			// No TMDB ID, insert new series anyway
 			seriesID, err = repository.InsertSeries(s.db, newSeries)
 			if err != nil {
@@ -1086,17 +1188,17 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 			newSeries.ID = seriesID // Update the series object with the DB-generated ID
 			seriesTMDBID = int(newSeries.TMDBId)
 			seriesTVDBID = int(newSeries.TVDBId)
-			log.Printf("Added series: %s (TMDB ID: %d, TVDB ID: %d)", newSeries.Title, seriesTMDBID, seriesTVDBID)
+			config.GlobalLogger.Info().Str("title", newSeries.Title).Int("tmdbID", seriesTMDBID).Int("tvdbID", seriesTVDBID).Msg("Added series")
 			s.cache.seriesByTitle[normalizedTitle] = newSeries
-			log.Printf("[Cache] Added series to cache: %s", newSeries.Title)
+			config.GlobalLogger.Debug().Str("title", newSeries.Title).Msg("Added series to cache")
 			series = newSeries
 		}
 
 		// Pre-fetch all series data if TVDB ID is available (bulk optimization)
 		if seriesTVDBID > 0 {
-			log.Printf("Pre-fetching series data for TVDB ID %d after creating new series...", seriesTVDBID)
+			config.GlobalLogger.Debug().Int("tvdbID", seriesTVDBID).Msg("Pre-fetching series data after creating new series")
 			if err := s.preFetchSeriesData(seriesTVDBID); err != nil {
-				log.Printf("Warning: Failed to pre-fetch series data for TVDB ID %d: %v", seriesTVDBID, err)
+				config.GlobalLogger.Warn().Err(err).Int("tvdbID", seriesTVDBID).Msg("Failed to pre-fetch series data")
 				// Continue anyway - we can still process episodes without bulk data
 			} else {
 				// Update series with artwork from cached extended data if available
@@ -1106,14 +1208,14 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 					if seriesExtended.Data.Image != "" {
 						series.Poster = &seriesExtended.Data.Image
 						if err := repository.UpdateSeries(s.db, series); err != nil {
-							log.Printf("Warning: Failed to update series artwork from cached data: %v", err)
+							config.GlobalLogger.Warn().Err(err).Msg("Failed to update series artwork from cached data")
 						} else {
-							log.Printf("Updated series artwork from cached data for '%s'", series.Title)
+							config.GlobalLogger.Info().Str("title", series.Title).Msg("Updated series artwork from cached data")
 						}
 					}
 				}
 
-				log.Printf("Successfully pre-fetched series data for TVDB ID %d", seriesTVDBID)
+				config.GlobalLogger.Info().Int("tvdbID", seriesTVDBID).Msg("Successfully pre-fetched series data")
 				// Create seasons from cached extended series data
 				if seriesExtended, exists := s.cache.episodesByTVDBId[seriesTVDBID]; exists {
 					// for _, season := range seriesExtended.Data.Seasons {
@@ -1136,10 +1238,10 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 					}
 
 					for seasonNum := range seasons {
-						log.Printf("Creating season %d for series '%s' from cached data", seasonNum, series.Title)
+						config.GlobalLogger.Info().Int("season", seasonNum).Str("series", series.Title).Msg("Creating season from cached data")
 						_, err := repository.GetOrCreateSeason(s.db, seriesID, seasonNum)
 						if err != nil {
-							log.Printf("Warning: Failed to create season %d: %v", seasonNum, err)
+							config.GlobalLogger.Error().Err(err).Int("season", seasonNum).Msg("Failed to create season")
 							// Continue creating other seasons even if one fails
 						}
 					}
@@ -1147,7 +1249,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 			}
 		}
 	} else {
-		log.Printf("Using existing series: %s (ID: %d)", series.Title, series.ID)
+		config.GlobalLogger.Debug().Str("title", series.Title).Int64("id", series.ID).Msg("Using existing series")
 		seriesID = series.ID
 		seriesTMDBID = int(series.TMDBId)
 		seriesTVDBID = int(series.TVDBId)
@@ -1155,9 +1257,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 		// Pre-fetch series data if not already cached and TVDB ID is available
 		if seriesTVDBID > 0 {
 			if _, exists := s.cache.episodesByTVDBId[seriesTVDBID]; !exists {
-				log.Printf("Pre-fetching series data for TVDB ID %d...", seriesTVDBID)
+				config.GlobalLogger.Info().Int("tvdbID", seriesTVDBID).Msg("Pre-fetching series data")
 				if err := s.preFetchSeriesData(seriesTVDBID); err != nil {
-					log.Printf("Warning: Failed to pre-fetch series data for TVDB ID %d: %v", seriesTVDBID, err)
+					config.GlobalLogger.Warn().Err(err).Int("tvdbID", seriesTVDBID).Msg("Failed to pre-fetch series data")
 				} else {
 					// Update series with artwork from cached extended data if available
 					if seriesExtended, exists := s.cache.episodesByTVDBId[seriesTVDBID]; exists {
@@ -1166,9 +1268,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 						if seriesExtended.Data.Image != "" {
 							series.Poster = &seriesExtended.Data.Image
 							if err := repository.UpdateSeries(s.db, series); err != nil {
-								log.Printf("Warning: Failed to update series artwork from cached data: %v", err)
+								config.GlobalLogger.Warn().Err(err).Msg("Failed to update series artwork from cached data")
 							} else {
-								log.Printf("Updated series artwork from cached data for '%s'", series.Title)
+								config.GlobalLogger.Info().Str("title", series.Title).Msg("Updated series artwork from cached data")
 							}
 						}
 					}
@@ -1180,7 +1282,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	// Extract media info
 	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
 	if err != nil {
-		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		config.GlobalLogger.Warn().Err(err).Str("filePath", filePath).Msg("Mediainfo extraction failed")
 		// Continue with minimal info
 		mediaInfo = &models.MediaInfo{
 			VideoTracks:    []models.VideoTrack{},
@@ -1210,7 +1312,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	// If no title from cache, try TMDB as fallback
 	if episode.Title == "" && seriesTMDBID > 0 {
 		if err := s.tmdb.EnrichEpisode(episode, seriesTMDBID); err != nil {
-			log.Printf("TMDB episode enrichment failed: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("TMDB episode enrichment failed")
 		}
 	}
 
@@ -1222,7 +1324,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	// Ensure season exists
 	_, err = repository.GetOrCreateSeason(s.db, seriesID, parsed.Season)
 	if err != nil {
-		log.Printf("Failed to create season: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to create season")
 	}
 
 	// Check if episode already exists
@@ -1242,14 +1344,14 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 		if err := repository.UpdateEpisode(s.db, existingEpisode); err != nil {
 			return fmt.Errorf("failed to update episode: %w", err)
 		}
-		log.Printf("Updated episode: %s S%02dE%02d - %s", parsed.Title, parsed.Season, parsed.Episode, existingEpisode.Title)
+		config.GlobalLogger.Info().Str("series", parsed.Title).Int("season", parsed.Season).Int("episode", parsed.Episode).Str("title", existingEpisode.Title).Msg("Updated episode")
 	} else {
 		// New episode - insert it
 		_, err = repository.InsertEpisode(s.db, episode)
 		if err != nil {
 			return fmt.Errorf("failed to insert episode: %w", err)
 		}
-		log.Printf("Added episode: %s S%02dE%02d - %s", parsed.Title, parsed.Season, parsed.Episode, episode.Title)
+		config.GlobalLogger.Info().Str("series", parsed.Title).Int("season", parsed.Season).Int("episode", parsed.Episode).Str("title", episode.Title).Msg("Added episode")
 		result.EpisodesAdded++
 	}
 
@@ -1257,7 +1359,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 	repository.UpdateSeriesCounts(s.db, seriesID)
 
 	processDuration := time.Since(processStart)
-	log.Printf("Processed episode in %d ms: %s S%02dE%02d - %s", processDuration.Milliseconds(), parsed.Title, parsed.Season, parsed.Episode, episode.Title)
+	config.GlobalLogger.Debug().Int64("duration_ms", processDuration.Milliseconds()).Str("series", parsed.Title).Int("season", parsed.Season).Int("episode", parsed.Episode).Str("title", episode.Title).Msg("Processed episode")
 
 	return nil
 }

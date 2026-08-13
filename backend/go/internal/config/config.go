@@ -3,10 +3,20 @@ package config
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+// GlobalLogger is the package-level logger instance accessible by all services
+var GlobalLogger *zerolog.Logger
 
 type Config struct {
 	ServerPort         string
@@ -17,22 +27,25 @@ type Config struct {
 	SonarrURL          string
 	RadarrAPIKey       string
 	SonarrAPIKey       string
-	RadarrPathMapping  string   // path mapping for Radarr (format: "from:to")
-	SonarrPathMapping  string   // path mapping for Sonarr (format: "from:to")
-	ScanInterval       int      // hours between scans (0 = disabled)
-	MediaLibraryPaths  []string // directories to scan for media files
-	MoviesLibraryPaths []string // directories to scan for movies (optional)
-	SeriesLibraryPaths []string // directories to scan for series (optional)
-	SkipFolders        []string // folder names to skip during scanning
-	MediainfoPath      string   // path to mediainfo binary
-	ScanTimeout        int      // timeout in seconds per file
+	RadarrPathMapping  string         // path mapping for Radarr (format: "from:to")
+	SonarrPathMapping  string         // path mapping for Sonarr (format: "from:to")
+	ScanInterval       int            // hours between scans (0 = disabled)
+	MediaLibraryPaths  []string       // directories to scan for media files
+	MoviesLibraryPaths []string       // directories to scan for movies (optional)
+	SeriesLibraryPaths []string       // directories to scan for series (optional)
+	SkipFolders        []string       // folder names to skip during scanning
+	IgnoreFilePattern  *regexp.Regexp // regex pattern to ignore files
+	MediainfoPath      string         // path to mediainfo binary
+	ScanTimeout        int            // timeout in seconds per file
+	DetectionLanguage  string         // language code for media detection (e.g., "en", "fr")
+	MetadataLanguage   string         // language code for metadata fetching (e.g., "en", "fr")
 
 	// Authentication settings
-	AuthMode           string // none, simple, oidc
-	AuthAdminUsername  string // admin username (for simple auth)
-	AuthAdminPassword  string // admin password (for simple auth)
-	AuthSessionSecret  string // secret for signing session tokens
-	AuthSessionMaxAge  int    // session duration in hours (default: 168 = 7 days)
+	AuthMode          string // none, simple, oidc
+	AuthAdminUsername string // admin username (for simple auth)
+	AuthAdminPassword string // admin password (for simple auth)
+	AuthSessionSecret string // secret for signing session tokens
+	AuthSessionMaxAge int    // session duration in hours (default: 168 = 7 days)
 }
 
 func Load() *Config {
@@ -58,8 +71,11 @@ func Load() *Config {
 		MoviesLibraryPaths: getEnvList("MOVIES_LIBRARY_PATHS", []string{}),
 		SeriesLibraryPaths: getEnvList("SERIES_LIBRARY_PATHS", []string{}),
 		SkipFolders:        getEnvList("SKIP_FOLDERS", []string{}),
+		IgnoreFilePattern:  getEnvRegex("IGNORE_FILE_PATTERN", nil),
 		MediainfoPath:      getEnv("MEDIAINFO_PATH", "mediainfo"),
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
+		DetectionLanguage:  getEnv("DETECTION_LANGUAGE", "en"),
+		MetadataLanguage:   getEnv("METADATA_LANGUAGE", "en"),
 
 		// Authentication
 		AuthMode:          getEnv("AUTH_MODE", "none"),
@@ -97,6 +113,15 @@ func getEnvList(key string, defaultValue []string) []string {
 			}
 		}
 		return result
+	}
+	return defaultValue
+}
+
+func getEnvRegex(key string, defaultValue *regexp.Regexp) *regexp.Regexp {
+	if value := os.Getenv(key); value != "" {
+		if regex, err := regexp.Compile(value); err == nil {
+			return regex
+		}
 	}
 	return defaultValue
 }
@@ -182,6 +207,72 @@ func ParsePathMapping(mapping string) (string, string) {
 		return "", ""
 	}
 	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+}
+
+// InitLogger initializes a zerolog logger with level from LOG_LEVEL environment variable
+// Valid levels: TRACE, DEBUG, INFO, WARN, ERROR (case-insensitive, default: INFO)
+// Sets the global GlobalLogger variable for use by services
+func InitLogger() *zerolog.Logger {
+	logLevel := strings.ToUpper(getEnv("LOG_LEVEL", "INFO"))
+
+	// Parse and set zerolog level
+	var zeroLevel zerolog.Level
+	switch logLevel {
+	case "TRACE":
+		zeroLevel = zerolog.TraceLevel
+	case "DEBUG":
+		zeroLevel = zerolog.DebugLevel
+	case "INFO":
+		zeroLevel = zerolog.InfoLevel
+	case "WARN":
+		zeroLevel = zerolog.WarnLevel
+	case "ERROR":
+		zeroLevel = zerolog.ErrorLevel
+	default:
+		// Invalid level, warn and use INFO
+		log.Warn().Str("invalid_level", logLevel).Msg("LOG_LEVEL not recognized, using INFO")
+		zeroLevel = zerolog.InfoLevel
+	}
+
+	zerolog.SetGlobalLevel(zeroLevel)
+	zerolog.DurationFieldFormat = zerolog.DurationFormatString
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		return filepath.Base(file) + ":" + strconv.Itoa(line)
+	}
+
+	// Configure zerolog with pretty console output
+	logger := log.With().Caller().Logger()
+	logger = logger.Output(zerolog.ConsoleWriter{
+		Out: os.Stderr,
+		FormatLevel: func(i interface{}) string {
+			// Colorize log level for better visibility
+			levelStr := strings.ToUpper(fmt.Sprintf("%s", i))
+			switch levelStr {
+			case "TRACE":
+				return fmt.Sprintf("\033[34m%s\033[0m", levelStr) // Blue
+			case "DEBUG":
+				return fmt.Sprintf("\033[36m%s\033[0m", levelStr) // Cyan
+			case "INFO":
+				return fmt.Sprintf("\033[32m%s\033[0m", levelStr) // Green
+			case "WARN":
+				return fmt.Sprintf("\033[33m%s\033[0m", levelStr) // Yellow
+			case "ERROR":
+				return fmt.Sprintf("\033[31m%s\033[0m", levelStr) // Red
+			case "FATAL":
+				return fmt.Sprintf("\033[35m%s\033[0m", levelStr) // Magenta
+			case "PANIC":
+				return fmt.Sprintf("\033[35m%s\033[0m", levelStr) // Magenta
+			default:
+				return levelStr
+			}
+		},
+		TimeFormat: time.RFC3339,
+	})
+
+	// Set the global logger for service access
+	GlobalLogger = &logger
+
+	return &logger
 }
 
 // generateRandomSecret generates a random 32-byte hex string for session signing

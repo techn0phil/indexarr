@@ -3,10 +3,10 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/repository"
 	"indexarr/internal/services"
 
@@ -28,7 +28,7 @@ func HandleWebSocket(db *sql.DB, broadcaster *services.Broadcaster) http.Handler
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Printf("Failed to upgrade to WebSocket: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to upgrade to WebSocket")
 			return
 		}
 
@@ -41,7 +41,7 @@ func HandleWebSocket(db *sql.DB, broadcaster *services.Broadcaster) http.Handler
 		go func() {
 			status, err := repository.GetScanStatus(db)
 			if err != nil {
-				log.Printf("Failed to get initial scan status: %v", err)
+				config.GlobalLogger.Warn().Err(err).Msg("Failed to get initial scan status")
 			} else {
 				// Send current status as initial message
 				var msgType string
@@ -63,6 +63,7 @@ func HandleWebSocket(db *sql.DB, broadcaster *services.Broadcaster) http.Handler
 					FilesFound:     status.FilesFound,
 					FilesProcessed: status.FilesProcessed,
 					StartedAt:      status.StartedAt,
+					CompletedAt:    status.CompletedAt,
 					ErrorMessage:   status.ErrorMessage,
 				}
 
@@ -71,7 +72,7 @@ func HandleWebSocket(db *sql.DB, broadcaster *services.Broadcaster) http.Handler
 					select {
 					case client.GetSendChannel() <- data:
 					case <-time.After(time.Second):
-						log.Printf("Timeout sending initial status to client")
+						config.GlobalLogger.Warn().Msg("Timeout sending initial status to client")
 					}
 				}
 			}
@@ -101,7 +102,7 @@ func readPump(client *services.Client, broadcaster *services.Broadcaster) {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket error: %v", err)
+				config.GlobalLogger.Warn().Err(err).Msg("WebSocket error")
 			}
 			break
 		}

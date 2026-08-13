@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"indexarr/internal/config"
 
 	"golang.org/x/sys/unix"
 
@@ -29,14 +30,15 @@ type MediainfoTrack struct {
 	FileSize string `json:"FileSize"`
 
 	// Common fields for all track types
-	Type      string `json:"@type"`
-	Format    string `json:"Format"`
-	CodecID   string `json:"CodecID"`
-	Duration  string `json:"Duration"`
-	FrameRate string `json:"FrameRate"`
-	BitRate   string `json:"BitRate"`
-	Default   string `json:"Default"`
-	Forced    string `json:"Forced"`
+	Type      string              `json:"@type"`
+	Format    string              `json:"Format"`
+	CodecID   string              `json:"CodecID"`
+	Duration  string              `json:"Duration"`
+	FrameRate string              `json:"FrameRate"`
+	BitRate   string              `json:"BitRate"`
+	Default   string              `json:"Default"`
+	Forced    string              `json:"Forced"`
+	Extra     MediaInfoTrackExtra `json:"extra"`
 
 	// Video-specific fields
 	FormatProfile     string `json:"Format_profile"`
@@ -62,6 +64,10 @@ type MediainfoTrack struct {
 	// Audio and Subtitle-specific fields
 	Language string `json:"Language"`
 	Title    string `json:"Title"`
+}
+
+type MediaInfoTrackExtra struct {
+	Source string `json:"Source"`
 }
 
 // Extractor handles mediainfo extraction from files
@@ -112,7 +118,7 @@ func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, err
 	info, fileSize, duration, _ := e.parseMediaInfo(&mi)
 
 	mediainfoDuration := time.Since(mediainfoStart)
-	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
+	config.GlobalLogger.Trace().Int64("duration_ms", mediainfoDuration.Milliseconds()).Str("file", filePath).Msg("Mediainfo extraction completed")
 
 	return info, fileSize, duration, nil
 }
@@ -142,6 +148,7 @@ func (e *Extractor) parseMediaInfo(mi *MediainfoOutput) (*models.MediaInfo, int6
 				Bitrate:    e.formatBitrate(track.BitRate),
 				HDR:        e.parseHDR(track),
 				ColorSpace: e.parseColorSpace(track),
+				Source:     track.Extra.Source,
 			})
 
 		case "Audio":
@@ -290,17 +297,17 @@ func (e *Extractor) parseAudioCodec(track MediainfoTrack) string {
 	if strings.Contains(strings.ToUpper(format), "DTS") ||
 		strings.Contains(strings.ToUpper(codec), "DTS") {
 
+		if strings.Contains(strings.ToUpper(commercialName), "X") ||
+			strings.Contains(strings.ToUpper(additionalFeatures), "XLL X") {
+
+			return "DTS:X"
+		}
 		if strings.Contains(strings.ToLower(commercialName), "master audio") ||
 			strings.Contains(strings.ToLower(commercialName), "ma") ||
 			strings.Contains(strings.ToLower(title), "master audio") ||
 			strings.Contains(strings.ToLower(title), "ma") {
 
 			return "DTS-HD MA"
-		}
-		if strings.Contains(strings.ToUpper(commercialName), "X") ||
-			strings.Contains(strings.ToLower(title), "X") {
-
-			return "DTS:X"
 		}
 
 		return "DTS"

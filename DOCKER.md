@@ -16,7 +16,7 @@ docker run -d \
   -p 8787:8787 \
   -v indexarr_data:/app/data \
   -v /mnt/movies:/data/movies \
-  -v /mnt/tv-shows:/data/tv-shows \
+  -v /mnt/series:/data/series \
   -e TMDB_API_KEY=your_key \
   -e TVDB_API_KEY=your_key \
   -e RADARR_URL=http://radarr:7878 \
@@ -24,7 +24,7 @@ docker run -d \
   indexarr:latest
 
 # Pull from GitHub Container Registry
-docker pull ghcr.io/pschmucker/indexarr:latest
+docker pull ghcr.io/techn0phil/indexarr:latest
 ```
 
 ### Management
@@ -104,12 +104,16 @@ indexarr/
 | `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
 | `SONARR_API_KEY` | - | Sonarr API key (optional) |
 | `SONARR_PATH_MAPPING` | - | Path mapping between Sonarr and Indexarr |
-| `MEDIA_LIBRARY_PATHS` | - | Comma-separated media folder paths |
-| `MOVIES_LIBRARY_PATHS` | - | Comma-separated movies folder paths |
-| `SERIES_LIBRARY_PATHS` | - | Comma-separated series folder paths |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | Comma-separated media folder paths |
+| `MOVIES_LIBRARY_PATHS` | /data/movies | Comma-separated movies folder paths |
+| `SERIES_LIBRARY_PATHS` | /data/series | Comma-separated series folder paths |
 | `SKIP_FOLDERS` | - | Comma-separated list of folder names to skip during scanning |
+| `IGNORE_FILE_PATTERN` | - | Regular expression pattern to ignore certain files during scanning |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |
+| `DETECTION_LANGUAGE` | `en` | Language code for media detection (e.g., "en", "fr") |
+| `METADATA_LANGUAGE` | `en` | Language code for metadata fetching (e.g., "en", "fr") |
+| `LOG_LEVEL` | `INFO` | Logging level |
 | `TZ` | `UTC` | Container timezone |
 | `GIN_MODE` | `release` | Go server mode |
 
@@ -127,7 +131,7 @@ volumes:
 ```yaml
 volumes:
   - /host/path/to/movies:/data/movies:ro
-  - /host/path/to/tv-shows:/data/tv-shows:ro
+  - /host/path/to/series:/data/series:ro
 ```
 
 ## Ports
@@ -156,7 +160,7 @@ docker inspect --format='{{.State.Health.Status}}' indexarr
 Push to `main` branch triggers automatic build and push to GitHub Container Registry:
 
 1. Multi-architecture build (linux/amd64, linux/arm64)
-2. Push to `ghcr.io/pschmucker/indexarr:latest`
+2. Push to `ghcr.io/techn0phil/indexarr:latest`
 3. Also tagged with commit SHA
 
 ## Troubleshooting

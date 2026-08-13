@@ -3,10 +3,10 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
 )
@@ -76,7 +76,7 @@ func (s *Scheduler) Stop() {
 
 	close(s.stopChan)
 	s.running = false
-	log.Println("Scheduler stopped")
+	config.GlobalLogger.Info().Msg("Scheduler stopped")
 }
 
 // IsRunning returns whether the scheduler is active
@@ -89,7 +89,7 @@ func (s *Scheduler) IsRunning() bool {
 func (s *Scheduler) run() {
 	// Run initial scan/import after a short delay
 	initialDelay := 30 * time.Second
-	log.Printf("Scheduler: First import in %v (mode: %s)", initialDelay, s.GetMode())
+	config.GlobalLogger.Info().Dur("delay", initialDelay).Str("mode", s.GetMode()).Msg("Starting first import")
 
 	select {
 	case <-time.After(initialDelay):
@@ -113,7 +113,7 @@ func (s *Scheduler) run() {
 }
 
 func (s *Scheduler) runImport() {
-	log.Println("Scheduler: Running scheduled import")
+	config.GlobalLogger.Info().Msg("Running scheduled import")
 	start := time.Now()
 
 	// Reset stop flag
@@ -132,7 +132,7 @@ func (s *Scheduler) runImport() {
 	if s.movieImporter != nil {
 		movieCount, err = s.movieImporter.GetPendingFileCount()
 		if err != nil {
-			log.Printf("Scheduler: Failed to get movie count: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to get movie count")
 			movieCount = 0
 		}
 	}
@@ -140,13 +140,13 @@ func (s *Scheduler) runImport() {
 	if s.seriesImporter != nil {
 		seriesCount, err = s.seriesImporter.GetPendingFileCount()
 		if err != nil {
-			log.Printf("Scheduler: Failed to get series count: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Failed to get series count")
 			seriesCount = 0
 		}
 	}
 
 	totalCount := movieCount + seriesCount
-	log.Printf("Scheduler: Combined total: %d files (%d movies + %d episodes)", totalCount, movieCount, seriesCount)
+	config.GlobalLogger.Info().Int("total", totalCount).Int("movies", movieCount).Int("episodes", seriesCount).Msg("Combined total")
 
 	// Phase 2: Broadcast combined scan_start
 	startedAt := time.Now().Format(time.RFC3339)
@@ -156,7 +156,7 @@ func (s *Scheduler) runImport() {
 		FilesFound: totalCount,
 	}
 	if err := repository.UpdateScanStatus(s.db, status); err != nil {
-		log.Printf("Scheduler: Failed to update scan status: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("Failed to update scan status")
 	}
 	if s.broadcaster != nil {
 		s.broadcaster.BroadcastScanStart(totalCount, startedAt)
@@ -168,7 +168,7 @@ func (s *Scheduler) runImport() {
 
 	// Phase 3: Run movie import with progress coordination
 	if s.movieImporter != nil {
-		log.Println("Scheduler: Starting movie import...")
+		config.GlobalLogger.Info().Msg("Starting movie import")
 		moviectx := &models.ProgressContext{
 			Offset:                0,
 			TotalOverride:         totalCount,
@@ -177,10 +177,10 @@ func (s *Scheduler) runImport() {
 
 		movieResult, err := s.movieImporter.Import(moviectx)
 		if err != nil {
-			log.Printf("Scheduler: Movie import failed: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Movie import failed")
 			errors = append(errors, "Movie import: "+err.Error())
 		} else {
-			log.Println("Scheduler: Movie import completed")
+			config.GlobalLogger.Info().Msg("Movie import completed")
 		}
 		if movieResult != nil {
 			movieProcessed = movieResult.FilesProcessed
@@ -196,7 +196,7 @@ func (s *Scheduler) runImport() {
 	s.mu.Unlock()
 
 	if stopped {
-		log.Println("Scheduler: Stopped by user after movie import")
+		config.GlobalLogger.Info().Msg("Stopped by user after movie import")
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = totalProcessed
@@ -207,18 +207,17 @@ func (s *Scheduler) runImport() {
 		}
 
 		duration := time.Since(start)
-		log.Printf("TriggerScan: Interrupted after %v - %d files, %d movies, %d episodes, %d errors",
-			duration.Round(time.Second), totalProcessed, moviesAdded, episodesAdded, len(errors))
+		config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", totalProcessed).Int("movies", moviesAdded).Int("episodes", episodesAdded).Int("errors", len(errors)).Msg("TriggerScan: Interrupted")
 
 		// Print the top 100 errors if there are any
 		if len(errors) > 0 {
 			// Log the first 100 errors for visibility
 			for i, err := range errors {
 				if i >= 100 {
-					log.Printf("  - ... %d more lines", len(errors)-100)
+					config.GlobalLogger.Warn().Int("count", len(errors)-100).Msg("... and more errors")
 					break
 				}
-				log.Printf("  - %s", err)
+				config.GlobalLogger.Warn().Msg("  - " + err)
 			}
 		}
 
@@ -227,7 +226,7 @@ func (s *Scheduler) runImport() {
 
 	// Phase 4: Run series import with progress coordination (offset by movie count)
 	if s.seriesImporter != nil {
-		log.Println("Scheduler: Starting series import...")
+		config.GlobalLogger.Info().Msg("Starting series import")
 		seriesctx := &models.ProgressContext{
 			Offset:                movieProcessed,
 			TotalOverride:         totalCount,
@@ -236,10 +235,10 @@ func (s *Scheduler) runImport() {
 
 		seriesResult, err := s.seriesImporter.Import(seriesctx)
 		if err != nil {
-			log.Printf("Scheduler: Series import failed: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("Series import failed")
 			errors = append(errors, "Series import: "+err.Error())
 		} else {
-			log.Println("Scheduler: Series import completed")
+			config.GlobalLogger.Info().Msg("Series import completed")
 		}
 		if seriesResult != nil {
 			totalProcessed += seriesResult.FilesProcessed
@@ -254,7 +253,7 @@ func (s *Scheduler) runImport() {
 	s.mu.Unlock()
 
 	if stopped {
-		log.Println("Scheduler: Stopped by user during series import")
+		config.GlobalLogger.Info().Msg("Stopped by user during series import")
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = totalProcessed
@@ -265,18 +264,16 @@ func (s *Scheduler) runImport() {
 		}
 
 		duration := time.Since(start)
-		log.Printf("TriggerScan: Interrupted after %v - %d files, %d movies, %d episodes, %d errors",
-			duration.Round(time.Second), totalProcessed, moviesAdded, episodesAdded, len(errors))
+		config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", totalProcessed).Int("movies", moviesAdded).Int("episodes", episodesAdded).Int("errors", len(errors)).Msg("TriggerScan: Interrupted")
 
-		// Print the top 100 errors if there are any
 		if len(errors) > 0 {
 			// Log the first 100 errors for visibility
 			for i, err := range errors {
 				if i >= 100 {
-					log.Printf("  - ... %d more lines", len(errors)-100)
+					config.GlobalLogger.Warn().Int("count", len(errors)-100).Msg("... and more errors")
 					break
 				}
-				log.Printf("  - %s", err)
+				config.GlobalLogger.Warn().Msg("  - " + err)
 			}
 		}
 
@@ -297,18 +294,16 @@ func (s *Scheduler) runImport() {
 	}
 
 	duration := time.Since(start)
-	log.Printf("Scheduler: Scheduled import completed in %v - %d files, %d movies, %d episodes, %d errors",
-		duration.Round(time.Second), totalProcessed, moviesAdded, episodesAdded, len(errors))
+	config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", totalProcessed).Int("movies", moviesAdded).Int("episodes", episodesAdded).Int("errors", len(errors)).Msg("Scheduled import completed")
 
-	// Print the top 100 errors if there are any
 	if len(errors) > 0 {
 		// Log the first 100 errors for visibility
 		for i, err := range errors {
 			if i >= 100 {
-				log.Printf("  - ... %d more lines", len(errors)-100)
+				config.GlobalLogger.Warn().Int("count", len(errors)-100).Msg("... and more errors")
 				break
 			}
-			log.Printf("  - %s", err)
+			config.GlobalLogger.Warn().Msg("  - " + err)
 		}
 	}
 }
@@ -316,7 +311,7 @@ func (s *Scheduler) runImport() {
 // TriggerScan manually triggers an import for both movies and series (used by API)
 // Uses coordinated progress reporting for a single 0-100% progress bar across both
 func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
-	log.Println("TriggerScan: Starting coordinated import")
+	config.GlobalLogger.Info().Msg("TriggerScan: Starting coordinated import")
 	start := time.Now()
 
 	// Reset stop flag
@@ -339,7 +334,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	if s.movieImporter != nil {
 		movieCount, err = s.movieImporter.GetPendingFileCount()
 		if err != nil {
-			log.Printf("TriggerScan: Failed to get movie count: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("TriggerScan: Failed to get movie count")
 			result.Errors = append(result.Errors, "Movie count: "+err.Error())
 			movieCount = 0
 		}
@@ -348,7 +343,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	if s.seriesImporter != nil {
 		seriesCount, err = s.seriesImporter.GetPendingFileCount()
 		if err != nil {
-			log.Printf("TriggerScan: Failed to get series count: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("TriggerScan: Failed to get series count")
 			result.Errors = append(result.Errors, "Series count: "+err.Error())
 			seriesCount = 0
 		}
@@ -356,7 +351,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 
 	totalCount := movieCount + seriesCount
 	result.FilesFound = totalCount
-	log.Printf("TriggerScan: Combined total: %d files (%d movies + %d episodes)", totalCount, movieCount, seriesCount)
+	config.GlobalLogger.Info().Int("total", totalCount).Int("movies", movieCount).Int("episodes", seriesCount).Msg("TriggerScan: Combined total")
 
 	// Phase 2: Broadcast combined scan_start
 	startedAt := time.Now().Format(time.RFC3339)
@@ -366,7 +361,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 		FilesFound: totalCount,
 	}
 	if err := repository.UpdateScanStatus(s.db, status); err != nil {
-		log.Printf("TriggerScan: Failed to update scan status: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("TriggerScan: Failed to update scan status")
 	}
 	if s.broadcaster != nil {
 		s.broadcaster.BroadcastScanStart(totalCount, startedAt)
@@ -383,7 +378,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 
 		movieResult, err := s.movieImporter.Import(moviectx)
 		if err != nil {
-			log.Printf("TriggerScan: Movie import error: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("TriggerScan: Movie import error")
 			result.Errors = append(result.Errors, "Movie import: "+err.Error())
 		}
 		if movieResult != nil {
@@ -400,7 +395,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	s.mu.Unlock()
 
 	if stopped {
-		log.Println("TriggerScan: Stopped by user after movie import")
+		config.GlobalLogger.Info().Msg("TriggerScan: Stopped by user after movie import")
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = result.FilesProcessed
@@ -411,18 +406,16 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 		}
 
 		duration := time.Since(start)
-		log.Printf("TriggerScan: Interrupted after %v - %d files, %d movies, %d episodes, %d errors",
-			duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+		config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", result.FilesProcessed).Int("movies", result.MoviesAdded).Int("episodes", result.EpisodesAdded).Int("errors", len(result.Errors)).Msg("TriggerScan: Interrupted")
 
-		// Print the top 100 errors if there are any
 		if len(result.Errors) > 0 {
 			// Log the first 100 errors for visibility
 			for i, err := range result.Errors {
 				if i >= 100 {
-					log.Printf("  - ... %d more lines", len(result.Errors)-100)
+					config.GlobalLogger.Warn().Int("count", len(result.Errors)-100).Msg("... and more errors")
 					break
 				}
-				log.Printf("  - %s", err)
+				config.GlobalLogger.Warn().Msg("  - " + err)
 			}
 		}
 
@@ -439,7 +432,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 
 		seriesResult, err := s.seriesImporter.Import(seriesctx)
 		if err != nil {
-			log.Printf("TriggerScan: Series import error: %v", err)
+			config.GlobalLogger.Error().Err(err).Msg("TriggerScan: Series import error")
 			result.Errors = append(result.Errors, "Series import: "+err.Error())
 		}
 		if seriesResult != nil {
@@ -455,7 +448,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	s.mu.Unlock()
 
 	if stopped {
-		log.Println("TriggerScan: Stopped by user during series import")
+		config.GlobalLogger.Info().Msg("TriggerScan: Stopped by user during series import")
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = result.FilesProcessed
@@ -466,18 +459,16 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 		}
 
 		duration := time.Since(start)
-		log.Printf("TriggerScan: Interrupted after %v - %d files, %d movies, %d episodes, %d errors",
-			duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+		config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", result.FilesProcessed).Int("movies", result.MoviesAdded).Int("episodes", result.EpisodesAdded).Int("errors", len(result.Errors)).Msg("TriggerScan: Interrupted")
 
-		// Print the top 100 errors if there are any
 		if len(result.Errors) > 0 {
 			// Log the first 100 errors for visibility
 			for i, err := range result.Errors {
 				if i >= 100 {
-					log.Printf("  - ... %d more lines", len(result.Errors)-100)
+					config.GlobalLogger.Warn().Int("count", len(result.Errors)-100).Msg("... and more errors")
 					break
 				}
-				log.Printf("  - %s", err)
+				config.GlobalLogger.Warn().Msg("  - " + err)
 			}
 		}
 
@@ -498,18 +489,16 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 	}
 
 	duration := time.Since(start)
-	log.Printf("TriggerScan: Completed in %v - %d files, %d movies, %d episodes, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+	config.GlobalLogger.Info().Dur("duration", duration.Round(time.Second)).Int("files", result.FilesProcessed).Int("movies", result.MoviesAdded).Int("episodes", result.EpisodesAdded).Int("errors", len(result.Errors)).Msg("TriggerScan: Completed")
 
-	// Print the top 100 errors if there are any
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
 		for i, err := range result.Errors {
 			if i >= 100 {
-				log.Printf("  - ... %d more lines", len(result.Errors)-100)
+				config.GlobalLogger.Warn().Int("count", len(result.Errors)-100).Msg("... and more errors")
 				break
 			}
-			log.Printf("  - %s", err)
+			config.GlobalLogger.Warn().Msg("  - " + err)
 		}
 	}
 

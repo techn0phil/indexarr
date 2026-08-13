@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import styles from '../styles/sidebar.module.css';
-import { Page } from '../hooks/useAppContext';
 import { useAppContext } from '../hooks/useAppContext';
 import { apiClient } from '../api/client';
 
 interface SidebarProps {
-  activeNav: string;
-  onNavClick: (page: Page, id?: number) => void;
+  activeNav: 'movies' | 'series';
+  onNavClick: (page: 'movies' | 'series') => void;
 }
 
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
@@ -32,12 +31,17 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
 
   return (
     <div className={styles.sidebar}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 14px' }}>
-        <div className={styles['logo-mark']}>
-          <svg viewBox="0 0 14 14" style={{ width: '13px', height: '13px', fill: 'white' }}>
-            <path d="M2 11L7 3L12 11Z" />
-          </svg>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '0 14px' }}>
+        <div className={styles.logo}>
+          <div className={styles.glass}></div>
+          <div className={styles.handle}></div>
+          <div className={styles.index}>
+            <div className={styles.item}></div>
+            <div className={styles.item}></div>
+            <div className={styles.item}></div>
+          </div>
         </div>
+
         <span className={styles['logo-name']}>Index<span style={{ color: "#1d9e75" }}>arr</span></span>
       </div>
 
@@ -45,8 +49,8 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         <div className={styles['nav-group']}>Librairie</div>
 
         <div
-          className={`${styles['nav-item']} ${activeNav === 'list-films' ? styles.active : ''}`}
-          onClick={() => onNavClick('list-films')}
+          className={`${styles['nav-item']} ${activeNav === 'movies' ? styles.active : ''}`}
+          onClick={() => onNavClick('movies')}
         >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="2" y="3" width="12" height="10" rx="1.5" />
@@ -57,8 +61,8 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         </div>
 
         <div
-          className={`${styles['nav-item']} ${activeNav === 'list-series' ? styles.active : ''}`}
-          onClick={() => onNavClick('list-series')}
+          className={`${styles['nav-item']} ${activeNav === 'series' ? styles.active : ''}`}
+          onClick={() => onNavClick('series')}
         >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="2" y="2" width="12" height="12" rx="1.5" />

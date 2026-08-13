@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -72,7 +71,7 @@ func (ri *RadarrImporter) Stop() {
 
 // GetPendingFileCount returns the number of movies with files, caching the API response
 func (ri *RadarrImporter) GetPendingFileCount() (int, error) {
-	log.Println("Fetching movie count from Radarr...")
+	config.GlobalLogger.Info().Msg("Fetching movie count from Radarr")
 	radarrMovies, err := ri.client.GetMovies()
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch movies from Radarr: %w", err)
@@ -89,7 +88,7 @@ func (ri *RadarrImporter) GetPendingFileCount() (int, error) {
 	count := len(ri.cachedMovies)
 	ri.mu.Unlock()
 
-	log.Printf("Found %d movies with files in Radarr (out of %d total)", count, len(radarrMovies))
+	config.GlobalLogger.Info().Int("with_files", count).Int("total", len(radarrMovies)).Msg("Found movies in Radarr")
 	return count, nil
 }
 
@@ -105,7 +104,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	ri.stopChan = make(chan struct{})
 	ri.mu.Unlock()
 
-	log.Println("Starting Radarr import")
+	config.GlobalLogger.Info().Msg("Starting Radarr import")
 	start := time.Now()
 
 	defer func() {
@@ -141,7 +140,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	}
 	if !suppressBroadcasts {
 		if err := repository.UpdateScanStatus(ri.db, status); err != nil {
-			log.Printf("Failed to update scan status: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to update scan status")
 		}
 	}
 
@@ -153,7 +152,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 
 	if moviesWithFiles == nil {
 		// Fetch all movies from Radarr
-		log.Println("Fetching movies from Radarr...")
+		config.GlobalLogger.Debug().Msg("Fetching movies from Radarr...")
 		radarrMovies, err := ri.client.GetMovies()
 		if err != nil {
 			if !suppressBroadcasts {
@@ -170,9 +169,9 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 				moviesWithFiles = append(moviesWithFiles, m)
 			}
 		}
-		log.Printf("Found %d movies with files in Radarr (out of %d total)", len(moviesWithFiles), len(radarrMovies))
+		config.GlobalLogger.Info().Int("with_files", len(moviesWithFiles)).Int("total", len(radarrMovies)).Msg("Found movies in Radarr")
 	} else {
-		log.Printf("Using cached movies: %d movies with files", len(moviesWithFiles))
+		config.GlobalLogger.Debug().Int("count", len(moviesWithFiles)).Msg("Using cached movies")
 	}
 
 	result.FilesFound = len(moviesWithFiles)
@@ -209,7 +208,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 		}
 
 		if err := ri.processRadarrMovie(&rm, result); err != nil {
-			log.Printf("Error processing movie '%s': %v", rm.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", rm.Title).Msg("Error processing movie")
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: %v", rm.Title, err))
 		} else {
 			seenTMDBIds[int64(rm.TmdbID)] = true
@@ -238,10 +237,10 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	// Full sync: Remove movies that are no longer in Radarr
 	deletedCount, err := ri.removeStaleMovies(seenTMDBIds)
 	if err != nil {
-		log.Printf("Warning: Failed to remove stale movies: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to remove stale movies")
 		result.Errors = append(result.Errors, fmt.Sprintf("Failed to remove stale movies: %v", err))
 	} else if deletedCount > 0 {
-		log.Printf("Removed %d movies no longer in Radarr", deletedCount)
+		config.GlobalLogger.Info().Int("count", deletedCount).Msg("Removed movies no longer in Radarr")
 	}
 
 	// Update status to completed (only if not suppressed)
@@ -261,8 +260,13 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	}
 
 	duration := time.Since(start)
-	log.Printf("Radarr import completed in %v - %d movies processed, %d added/updated, %d removed, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, deletedCount, len(result.Errors))
+	config.GlobalLogger.Info().
+		Dur("duration", duration).
+		Int("count", result.FilesProcessed).
+		Int("added", result.MoviesAdded).
+		Int("removed", deletedCount).
+		Int("errors", len(result.Errors)).
+		Msg("Radarr import completed")
 
 	return result, nil
 }
@@ -277,7 +281,7 @@ func (ri *RadarrImporter) processRadarrMovie(rm *RadarrMovie, result *models.Sca
 		localPath := ri.mapPath(rm.MovieFile.Path)
 		mediaInfo, fileSize, duration, err := ri.extractor.Extract(localPath)
 		if err != nil {
-			log.Printf("Mediainfo extraction failed for %s: %v", rm.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", rm.Title).Msg("Mediainfo extraction failed")
 			// Continue with Radarr's file size
 			movie.FileSize = rm.MovieFile.Size
 		} else {
@@ -302,7 +306,7 @@ func (ri *RadarrImporter) processRadarrMovie(rm *RadarrMovie, result *models.Sca
 		if err := repository.UpdateMovie(ri.db, movie); err != nil {
 			return fmt.Errorf("failed to update movie: %w", err)
 		}
-		log.Printf("Updated movie: %s (%d)", movie.Title, movie.Year)
+		config.GlobalLogger.Info().Str("title", movie.Title).Int("year", movie.Year).Msg("Updated movie")
 	} else {
 		// Insert new movie
 		_, err := repository.InsertMovie(ri.db, movie)
@@ -310,7 +314,7 @@ func (ri *RadarrImporter) processRadarrMovie(rm *RadarrMovie, result *models.Sca
 			return fmt.Errorf("failed to insert movie: %w", err)
 		}
 		result.MoviesAdded++
-		log.Printf("Added movie: %s (%d)", movie.Title, movie.Year)
+		config.GlobalLogger.Info().Str("title", movie.Title).Int("year", movie.Year).Msg("Added movie")
 	}
 
 	return nil
@@ -404,7 +408,7 @@ func (ri *RadarrImporter) removeStaleMovies(seenTMDBIds map[int64]bool) (int, er
 		if !seenTMDBIds[tmdbId] {
 			// Movie is in our DB but not in Radarr - delete it
 			if err := repository.DeleteMovieByTMDBId(ri.db, tmdbId); err != nil {
-				log.Printf("Failed to delete movie with TMDB ID %d: %v", tmdbId, err)
+				config.GlobalLogger.Error().Err(err).Int64("tmdbID", tmdbId).Msg("Failed to delete movie")
 			} else {
 				deletedCount++
 			}
@@ -416,7 +420,7 @@ func (ri *RadarrImporter) removeStaleMovies(seenTMDBIds map[int64]bool) (int, er
 
 // ImportMovie imports/refreshes a single movie by its database ID
 func (ri *RadarrImporter) ImportMovie(movieID int64) (*models.ScanResult, error) {
-	log.Printf("Starting single movie refresh for ID: %d", movieID)
+	config.GlobalLogger.Info().Int64("id", movieID).Msg("Starting single movie refresh")
 	start := time.Now()
 
 	result := &models.ScanResult{
@@ -439,7 +443,7 @@ func (ri *RadarrImporter) ImportMovie(movieID int64) (*models.ScanResult, error)
 	}
 	if radarrMovie == nil {
 		// Movie no longer in Radarr - delete it
-		log.Printf("Movie no longer in Radarr, deleting: %s", movie.Title)
+		config.GlobalLogger.Info().Str("title", movie.Title).Msg("Movie no longer in Radarr, deleting")
 		if err := repository.DeleteMovie(ri.db, movieID); err != nil {
 			return nil, fmt.Errorf("failed to delete movie: %w", err)
 		}
@@ -455,7 +459,7 @@ func (ri *RadarrImporter) ImportMovie(movieID int64) (*models.ScanResult, error)
 	result.FilesProcessed = 1
 
 	duration := time.Since(start)
-	log.Printf("Movie refresh completed in %d ms", duration.Milliseconds())
+	config.GlobalLogger.Info().Dur("duration", duration).Msg("Movie refresh completed")
 
 	return result, nil
 }

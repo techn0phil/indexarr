@@ -180,7 +180,7 @@ SONARR_PATH_MAPPING=/downloads:/mnt/media
 
 # Filesystem scanning
 MOVIES_LIBRARY_PATHS=/data/movies,/data/movies2
-SERIES_LIBRARY_PATHS=/data/tv-shows
+SERIES_LIBRARY_PATHS=/data/series
 
 # Metadata APIs (required)
 TMDB_API_KEY=your_key
