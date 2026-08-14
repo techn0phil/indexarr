@@ -28,13 +28,18 @@ export const LoginPage = () => {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <div className={styles.logo}>
-            <div className={styles.logoMark}>
-              <svg viewBox="0 0 14 14" style={{ width: '13px', height: '13px', fill: 'white' }}>
-                <path d="M2 11L7 3L12 11Z" />
-              </svg>
+          <div className={styles['logo-container']}>
+            <div className={styles.logo}>
+              <div className={styles.glass}></div>
+              <div className={styles.handle}></div>
+              <div className={styles.index}>
+                <div className={styles.item}></div>
+                <div className={styles.item}></div>
+                <div className={styles.item}></div>
+              </div>
             </div>
-            <span className={styles.logoText}>Index<span style={{ color: "#1d9e75" }}>arr</span></span>
+
+            <span className={styles['logo-name']}>Index<span style={{ color: "#1d9e75" }}>arr</span></span>
           </div>
           <div className={styles.themeToggle}>
             <ThemeToggle />

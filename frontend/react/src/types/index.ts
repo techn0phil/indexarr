@@ -27,6 +27,7 @@ export interface Series {
   yearEnd: number;
   seasonCount: number;
   episodeCount: number;
+  missingEpisodeCount: number;
   synopsis: string;
   genres: string;
   rating: number;
@@ -130,6 +131,8 @@ export interface StatsResponse {
   totalSeries: number;
   totalEpisodes: number;
   diskSpaceGB: number;
+  moviesDiskSpaceGB: number;
+  seriesDiskSpaceGB: number;
   fourKCount: number;
   fourKPercent: number;
   problemsCount: number;

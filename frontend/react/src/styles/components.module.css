@@ -8,7 +8,10 @@
 }
 
 .movie-card:hover {
-  border: 0.5px solid #5DCAA5;
+  border: 0.5px solid var(--color-border-secondary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  transition: 0.2s;
 }
 
 .tv-show-card {
@@ -21,7 +24,10 @@
 }
 
 .tv-show-card:hover {
-  border: 0.5px solid #5DCAA5;
+  border: 0.5px solid var(--color-border-secondary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  transition: 0.2s;
 }
 
 .card {
@@ -279,6 +285,26 @@
   color: white;
 }
 
+.menu-button {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.menu-button:hover {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-tertiary);
+  color: var(--color-text-primary);
+}
+
 /* List View Cards */
 .card-list {
   display: flex;
@@ -312,6 +338,14 @@
   position: relative;
 }
 
+.card-list-poster-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--border-radius-md);
+  object-fit: cover;
+}
+
 .card-list-poster-initial {
   font-size: 18px;
   font-weight: 500;
@@ -328,14 +362,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.card-list-poster-status {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
 }
 
 .card-list-content {

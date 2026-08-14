@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Build Frontend (React + Vite)
 # =============================================================================
-FROM node:24-alpine AS frontend-builder
+FROM node:26.7.0-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
@@ -18,7 +18,7 @@ RUN npm run build
 # =============================================================================
 # Stage 2: Build Backend (Go)
 # =============================================================================
-FROM golang:1.26-alpine AS backend-builder
+FROM golang:1.26.6-alpine AS backend-builder
 
 WORKDIR /build/backend
 
@@ -39,20 +39,19 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -tags musl -ldflags="-s -w -extldflags 
 # =============================================================================
 # Stage 3: Runtime (Alpine with Nginx + mediainfo + Go backend)
 # =============================================================================
-FROM alpine:latest
+FROM alpine:3.24.1
 
 # Build arguments for dynamic user/group configuration
 ARG UID=1000
 ARG GID=1000
 
 # Install runtime dependencies
-RUN apk add --no-cache \
+RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     ca-certificates \
     nginx \
     mediainfo \
     sqlite-libs \
     tzdata \
-    wget \
     su-exec
 
 # Create necessary directories (user will be created at runtime via entrypoint.sh)
@@ -85,11 +84,13 @@ ENV SERVER_PORT=8080 \
     DB_PATH=/app/data/indexarr.db \
     MEDIAINFO_PATH=/usr/bin/mediainfo \
     GIN_MODE=release \
-    MEDIA_LIBRARY_PATHS=/data/movies,/data/tv-shows
+    MEDIA_LIBRARY_PATHS=/data/movies,/data/series \
+    MOVIES_LIBRARY_PATHS=/data/movies \
+    SERIES_LIBRARY_PATHS=/data/series
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 -O /dev/null http://localhost:8787/health || exit 1
+    CMD busybox wget --no-verbose --tries=1 -O /dev/null http://localhost:8787/health || exit 1
 
 # Start services
 ENTRYPOINT ["/app/entrypoint.sh"]

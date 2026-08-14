@@ -2,8 +2,6 @@ import { createContext, useState, useEffect, useContext, ReactNode, useRef, useC
 import { apiClient } from '../api/client';
 import { StatsResponse, ScanStatus, AuthMode, User } from '../types';
 
-export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series' | 'admin-users';
-
 interface AppConfig {
   radarrUrl?: string;
   sonarrUrl?: string;
@@ -14,6 +12,7 @@ interface WSMessage {
   filesFound?: number;
   filesProcessed?: number;
   startedAt?: string;
+  completedAt?: string;
   error?: string;
   moviesAdded?: number;
   episodesAdded?: number;
@@ -27,13 +26,6 @@ interface AppContextType {
   authLoading: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  
-  // Navigation state
-  currentPage: Page;
-  selectedId: number | null;
-  goToPage: (page: Page, id?: number) => void;
-  goBack: () => void;
-  history: Page[];
   
   // Theme state
   isDark: boolean;
@@ -62,11 +54,6 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
-  
-  // Navigation state
-  const [currentPage, setCurrentPage] = useState<Page>('list-films');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [history, setHistory] = useState<Page[]>(['list-films']);
   
   // App data state
   const [config, setConfig] = useState<AppConfig | null>(null);
@@ -99,7 +86,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         filesFound: msg.filesFound || prevStatus?.filesFound || 0,
         filesProcessed: msg.filesProcessed || prevStatus?.filesProcessed || 0,
         startedAt: msg.startedAt || prevStatus?.startedAt,
-        completedAt: prevStatus?.completedAt,
+        completedAt: msg.completedAt || prevStatus?.completedAt,
         errorMessage: msg.error || prevStatus?.errorMessage,
       };
 
@@ -117,16 +104,18 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
           break;
         case 'scan_complete':
           newStatus.status = 'completed';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_error':
           newStatus.status = 'error';
           newStatus.errorMessage = msg.error;
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_stopped':
           newStatus.status = 'stopped';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_idle':
           newStatus.status = msg.filesProcessed ? 'completed' : 'idle';
@@ -325,20 +314,6 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const goToPage = (page: Page, id?: number) => {
-    setCurrentPage(page);
-    if (id) setSelectedId(id);
-    setHistory([...history, page]);
-  };
-
-  const goBack = () => {
-    if (history.length > 1) {
-      const newHistory = history.slice(0, -1);
-      setHistory(newHistory);
-      setCurrentPage(newHistory[newHistory.length - 1]);
-    }
-  };
-
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
@@ -388,8 +363,6 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     <AppContext.Provider value={{ 
       // Auth
       authMode, user, isAuthenticated, authLoading, login, logout,
-      // Navigation
-      currentPage, selectedId, goToPage, goBack, history, 
       // Theme
       isDark, toggleTheme, 
       // App data

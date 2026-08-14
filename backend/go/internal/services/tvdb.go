@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
 )
@@ -48,7 +48,7 @@ func NewTVClient(apiKey string, db *sql.DB) *TVClient {
 		if err == nil && token != "" && time.Now().Before(expiry) {
 			client.token = token
 			client.tokenExpiry = expiry
-			// log.Printf("Loaded TVDB token from database (expires: %s)", expiry.Format(time.RFC3339))
+			config.GlobalLogger.Trace().Time("expires", expiry).Msg("Loaded TVDB token from database")
 		}
 	}
 
@@ -270,13 +270,13 @@ func (c *TVClient) login() error {
 	// Persist token to database
 	if c.db != nil {
 		if err := repository.SaveTVDBToken(c.db, c.token, expiry); err != nil {
-			log.Printf("Warning: Failed to save TVDB token to database: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to save TVDB token to database")
 		} else {
-			log.Printf("TVDB token saved to database (expires: %s)", expiry.Format(time.RFC3339))
+			config.GlobalLogger.Info().Time("expires", expiry).Msg("TVDB token saved to database")
 		}
 	}
 
-	log.Println("TVDB authentication successful")
+	config.GlobalLogger.Info().Msg("TVDB authentication successful")
 	return nil
 }
 
@@ -315,12 +315,12 @@ func (c *TVClient) makeAuthenticatedRequest(method, path string, params url.Valu
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("[TVDB] API Response: %s %s - %d (%d ms)", method, reqURL, resp.StatusCode, duration.Milliseconds())
+	config.GlobalLogger.Trace().Str("method", method).Str("url", reqURL).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TVDB API Response")
 
 	// Handle 401 (token expired) - reactive refresh
 	if resp.StatusCode == http.StatusUnauthorized {
 		resp.Body.Close()
-		log.Println("TVDB token expired (401), refreshing...")
+		config.GlobalLogger.Info().Msg("TVDB token expired (401), refreshing...")
 
 		// Force token refresh
 		c.mu.Lock()
@@ -464,15 +464,28 @@ func (c *TVClient) GetAllEpisodes(tvdbID int, language string) (*TVDBAllEpisodes
 		return nil, fmt.Errorf("TVDB API key not configured")
 	}
 
-	// Default to French if no language specified
-	if language == "" {
-		language = "fra"
+	lang := strings.ToLower(language)
+
+	switch lang {
+	case "en":
+		lang = "eng"
+	case "fr":
+		lang = "fra"
+	case "de":
+		lang = "deu"
+	case "it":
+		lang = "ita"
+	case "es":
+		lang = "spa"
+	default:
+		config.GlobalLogger.Warn().Str("language", lang).Msg("Unsupported language code, defaulting to 'en'")
+		lang = "eng"
 	}
 
 	params := url.Values{}
 	params.Set("page", "0")
 
-	resp, err := c.makeAuthenticatedRequest("GET", fmt.Sprintf("/series/%d/episodes/default/%s", tvdbID, language), params)
+	resp, err := c.makeAuthenticatedRequest("GET", fmt.Sprintf("/series/%d/episodes/default/%s", tvdbID, lang), params)
 	if err != nil {
 		return nil, err
 	}
@@ -488,13 +501,11 @@ func (c *TVClient) GetAllEpisodes(tvdbID int, language string) (*TVDBAllEpisodes
 		return nil, fmt.Errorf("failed to decode bulk episodes: %w", err)
 	}
 
-	log.Printf("Fetched %d episodes for series %d (page size: %d, total: %d)",
-		len(result.Data.Episodes), tvdbID, result.Links.PageSize, result.Links.TotalItems)
+	config.GlobalLogger.Debug().Int("count", len(result.Data.Episodes)).Int("tvdb_id", tvdbID).Int("page_size", result.Links.PageSize).Int("total", result.Links.TotalItems).Msg("Fetched episodes for series")
 
 	// TODO: Handle pagination if total_items > page_size (rare for most series)
 	if result.Links.TotalItems > result.Links.PageSize {
-		log.Printf("Warning: Series %d has %d total episodes but only fetched %d (pagination not yet implemented)",
-			tvdbID, result.Links.TotalItems, len(result.Data.Episodes))
+		config.GlobalLogger.Warn().Int("tvdb_id", tvdbID).Int("total", result.Links.TotalItems).Int("fetched", len(result.Data.Episodes)).Msg("Series has more episodes than fetched")
 	}
 
 	return &result, nil
@@ -513,7 +524,7 @@ func (c *TVClient) EnrichSeries(series *models.Series) error {
 	}
 
 	if len(results.Data) == 0 {
-		log.Printf("No TVDB results found for: %s", series.Title)
+		config.GlobalLogger.Warn().Str("title", series.Title).Msg("No TVDB results found")
 		return nil // No matches found
 	}
 
@@ -631,7 +642,7 @@ func (c *TVClient) EnrichEpisode(episode *models.Episode, seriesTVDBID int) erro
 	// Get series details to find season ID
 	seriesDetails, err := c.GetTVDetails(seriesTVDBID)
 	if err != nil {
-		log.Printf("Failed to get series details for episode enrichment: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("Failed to get series details for episode enrichment")
 		return nil // Don't fail the scan
 	}
 
@@ -645,14 +656,14 @@ func (c *TVClient) EnrichEpisode(episode *models.Episode, seriesTVDBID int) erro
 	}
 
 	if seasonID == 0 {
-		log.Printf("Season %d not found in TVDB for series ID %d", episode.SeasonNum, seriesTVDBID)
+		config.GlobalLogger.Warn().Int("season", episode.SeasonNum).Int("tvdb_id", seriesTVDBID).Msg("Season not found in TVDB for series")
 		return nil
 	}
 
 	// Get season details with episodes
 	seasonDetails, err := c.GetSeasonDetails(seasonID)
 	if err != nil {
-		log.Printf("Failed to get season details: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("Failed to get season details")
 		return nil
 	}
 
@@ -673,7 +684,7 @@ func (c *TVClient) EnrichEpisode(episode *models.Episode, seriesTVDBID int) erro
 	if episodeID > 0 {
 		episodeDetails, err := c.GetEpisodeDetails(episodeID)
 		if err != nil {
-			log.Printf("Failed to get episode details: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to get episode details")
 			return nil
 		}
 

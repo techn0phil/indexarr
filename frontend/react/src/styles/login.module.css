@@ -23,33 +23,110 @@
   margin-bottom: 24px;
 }
 
-.logo {
+.logo-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 20px;
 }
 
-.logoIcon {
-  width: 28px;
-  height: 28px;
-  color: var(--color-primary);
-}
-
-.logoText {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.logoMark {
-  width: 22px;
-  height: 22px;
-  background-color: #1D9E75;
-  border-radius: var(--border-radius-md);
+.logo {
+  position: relative;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.glass {
+  height: 28px; /* adjust to control the size  */
+  aspect-ratio: 1/cos(30deg);
+  clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
+  background: conic-gradient(from 45deg, #1d9e75, #085041);
+}
+
+.glass::after {
+  content: '';
+  display: block;
+  --b: 2px; /* adjust to control the border */
+  height: 28px; /* adjust to control the size */
+  aspect-ratio: 1/cos(30deg);
+  clip-path:
+    polygon(0 50%,50% -50%,100% 50%,50% 150%,0 50%,
+    var(--b) 50%,
+    calc(25% + var(--b)*cos(60deg)) calc(100% - var(--b)*sin(60deg)),
+    calc(75% - var(--b)*cos(60deg)) calc(100% - var(--b)*sin(60deg)),
+    calc(100% - var(--b)) 50%,
+    calc(75% - var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
+    calc(25% + var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
+    var(--b) 50%);
+  background: var(--color-primary-logo);
+}
+
+.handle {
+  position: absolute;
+  width: 1.2em;
+  height: .3em;
+  background: var(--color-primary-logo);
+  border-radius: .05em;
+  transform: rotate(30deg) translateX(1.9em);
+}
+
+.handle::after {
+  content: "";
+  position: absolute;
+  background: var(--color-primary-logo);
+  top: -0.1em;
+  left: 0.35em;
+  bottom: -0.1em;
+  right: -0.2em;
+  border-radius: 0.2em 0.5em 0.5em 0.2em;
+}
+
+.index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  gap: 0.2em;
+}
+
+.item::after {
+  content: "";
+  display: block;
+  height: 2px;
+  aspect-ratio: 5;
+  background: white;
+  border-radius: .04em;
+}
+
+.item::before {
+  content: "";
+  display: block;
+  width: 2px;
+  aspect-ratio: 1;
+  background: white;
+  border-radius: .04em;
+  transform: scale(1.33);
+}
+
+.logo-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .themeToggle {

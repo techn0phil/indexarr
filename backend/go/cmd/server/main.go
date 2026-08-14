@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,25 +19,28 @@ func main() {
 	// Load .env file
 	godotenv.Load()
 
+	// Initialize logger
+	logger := config.InitLogger()
+
 	// Load configuration
 	cfg := config.Load()
 
 	// Initialize database
 	db, err := repository.InitDB(cfg.DBPath)
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		logger.Fatal().Err(err).Msg("Failed to initialize database")
 	}
 	defer db.Close()
 
 	// Seed database with mock data (only if empty)
 	if err := repository.SeedMockData(db); err != nil {
-		log.Fatalf("Failed to seed mock data: %v", err)
+		logger.Fatal().Err(err).Msg("Failed to seed mock data")
 	}
 
 	// Initialize WebSocket broadcaster
 	broadcaster := services.NewBroadcaster()
 	go broadcaster.Run()
-	log.Println("WebSocket broadcaster started")
+	logger.Info().Msg("WebSocket broadcaster started")
 
 	// Initialize importers based on configuration
 	var movieImporter services.MovieImporter
@@ -68,7 +70,7 @@ func main() {
 		moviesModeDetails = "[⚠️  No Radarr config or library paths]"
 	}
 
-	log.Printf("🎬 Movies import mode: %s %s", moviesMode, moviesModeDetails)
+	logger.Info().Str("mode", moviesMode).Str("details", moviesModeDetails).Msg("🎬 Movies importer configured")
 
 	// Series: Sonarr OR filesystem
 	seriesMode := cfg.GetSeriesImportMode()
@@ -94,18 +96,18 @@ func main() {
 		seriesModeDetails = "[⚠️  No Sonarr config or library paths]"
 	}
 
-	log.Printf("📺 Series import mode: %s %s", seriesMode, seriesModeDetails)
+	logger.Info().Str("mode", seriesMode).Str("details", seriesModeDetails).Msg("📺 Series importer configured")
 
 	if cfg.RadarrURL != "" {
-		log.Printf("📡 Radarr URL: %s", cfg.RadarrURL)
+		logger.Info().Str("url", cfg.RadarrURL).Msg("📡 Radarr defined")
 	}
 
 	if cfg.SonarrURL != "" {
-		log.Printf("🔊 Sonarr URL: %s", cfg.SonarrURL)
+		logger.Info().Str("url", cfg.SonarrURL).Msg("🔊 Sonarr defined")
 	}
 
 	if len(cfg.MediaLibraryPaths) > 0 {
-		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)
+		logger.Info().Strs("paths", cfg.MediaLibraryPaths).Msg("📂 Library paths configured")
 	}
 
 	// Initialize scheduler with both importers
@@ -114,10 +116,10 @@ func main() {
 	if movieImporter != nil || seriesImporter != nil {
 		if cfg.ScanInterval > 0 {
 			scheduler.Start()
-			log.Printf("⏱️  Scheduler started with %d hour interval", cfg.ScanInterval)
+			logger.Info().Int("interval_hours", cfg.ScanInterval).Msg("⏱️  Scheduler started")
 		}
 	} else {
-		log.Println("⚠️  No importers configured, scanning disabled")
+		logger.Warn().Msg("⚠️  No importers configured, scanning disabled")
 	}
 
 	// Initialize user repository for database-backed users
@@ -126,12 +128,12 @@ func main() {
 	// Initialize authentication service
 	authService := services.NewAuthService(cfg, userRepo)
 	if cfg.HasAuthEnabled() {
-		log.Printf("🔐 Authentication mode: %s", cfg.AuthMode)
+		logger.Info().Str("mode", cfg.AuthMode).Msg("🔐 Authentication enabled")
 		if cfg.IsSimpleAuth() && cfg.AuthAdminUsername != "" {
-			log.Printf("👤 Admin user: %s (env)", cfg.AuthAdminUsername)
+			logger.Info().Str("username", cfg.AuthAdminUsername).Msg("👤 Admin user configured")
 		}
 	} else {
-		log.Println("🔓 Authentication disabled")
+		logger.Info().Msg("🔓 Authentication disabled")
 	}
 
 	// Setup API router
@@ -143,7 +145,7 @@ func main() {
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 		<-sigChan
 
-		log.Println("Shutting down...")
+		logger.Info().Msg("Shutting down...")
 		if scheduler != nil {
 			scheduler.Stop()
 		}
@@ -153,9 +155,9 @@ func main() {
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 
-	log.Printf("Indexarr server running on http://localhost:%s", cfg.ServerPort)
+	logger.Info().Str("url", fmt.Sprintf("http://localhost:%s", cfg.ServerPort)).Msg("Indexarr server running")
 
 	if err := http.ListenAndServe(addr, router); err != nil {
-		log.Fatalf("Server error: %v", err)
+		logger.Fatal().Err(err).Msg("Server error")
 	}
 }

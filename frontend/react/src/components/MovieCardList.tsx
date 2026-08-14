@@ -23,12 +23,8 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           <img
             src={movie.poster}
             alt={movie.title}
-            width="100%"
-            height="100%"
-            style={{ objectFit: 'contain' }}
             className={comStyles['card-list-poster-img']}
           />
-          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
       ) : (
         <div className={comStyles['card-list-poster']}>
@@ -38,7 +34,6 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           <div className={comStyles['card-list-poster-title']}>
             {movie.title}
           </div>
-          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
       )}
 

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 )
 
@@ -21,14 +21,18 @@ const (
 
 // TMDBClient handles TMDB API requests
 type TMDBClient struct {
-	apiKey     string
-	httpClient *http.Client
+	apiKey            string
+	detectionLanguage string
+	metadataLanguage  string
+	httpClient        *http.Client
 }
 
 // NewTMDBClient creates a new TMDB client
-func NewTMDBClient(apiKey string) *TMDBClient {
+func NewTMDBClient(apiKey, detectionLanguage, metadataLanguage string) *TMDBClient {
 	return &TMDBClient{
-		apiKey: apiKey,
+		apiKey:            apiKey,
+		detectionLanguage: detectionLanguage,
+		metadataLanguage:  metadataLanguage,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
@@ -142,7 +146,7 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("query", title)
-	params.Set("language", "en-US")
+	params.Set("language", c.detectionLanguage)
 	if year > 0 {
 		params.Set("primary_release_year", strconv.Itoa(year))
 	}
@@ -159,9 +163,9 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
 	if year > 0 {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=en-US&query=%s&primary_release_year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
+		config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/search/movie?api_key=******&language=%s&query=%s&primary_release_year=%d", tmdbBaseURL, c.detectionLanguage, title, year)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Search movie (with year)")
 	} else {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+		config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/search/movie?api_key=******&language=%s&query=%s", tmdbBaseURL, c.detectionLanguage, title)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Search movie")
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -174,8 +178,17 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 		return nil, err
 	}
 
+	// Retry without year filter
+	if year > 0 && result.TotalResults == 0 {
+		return c.SearchMovie(title, 0)
+	}
+
 	// Log number of results found
-	log.Printf("Found %d results for movie '%s' (%d)", result.TotalResults, title, year)
+	if year > 0 {
+		config.GlobalLogger.Debug().Int("count", result.TotalResults).Str("title", title).Int("year", year).Msg("Found TMDB results for movie")
+	} else {
+		config.GlobalLogger.Debug().Int("count", result.TotalResults).Str("title", title).Msg("Found TMDB results for movie")
+	}
 
 	return &result, nil
 }
@@ -188,7 +201,7 @@ func (c *TMDBClient) SearchTV(title string, year int) (*TMDBTVSearchResult, erro
 
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
-	params.Set("language", "en-US")
+	params.Set("language", c.detectionLanguage)
 	params.Set("query", title)
 	if year > 0 {
 		params.Set("first_air_date_year", strconv.Itoa(year))
@@ -207,9 +220,9 @@ func (c *TMDBClient) SearchTV(title string, year int) (*TMDBTVSearchResult, erro
 	duration := time.Since(startTime)
 
 	if year > 0 {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s&first_air_date_year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
+		config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/search/tv?api_key=******&language=%s&query=%s&first_air_date_year=%d", tmdbBaseURL, c.detectionLanguage, title, year)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Search series (with year)")
 	} else {
-		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+		config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/search/tv?api_key=******&language=%s&query=%s", tmdbBaseURL, c.detectionLanguage, title)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Search series")
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -222,11 +235,16 @@ func (c *TMDBClient) SearchTV(title string, year int) (*TMDBTVSearchResult, erro
 		return nil, err
 	}
 
+	// Retry without year filter
+	if year > 0 && result.TotalResults == 0 {
+		return c.SearchTV(title, 0)
+	}
+
 	// Log number of results found
 	if year > 0 {
-		log.Printf("Found %d results for series '%s' (%d)", result.TotalResults, title, year)
+		config.GlobalLogger.Debug().Int("count", result.TotalResults).Str("title", title).Int("year", year).Msg("Found TMDB results for series")
 	} else {
-		log.Printf("Found %d results for series '%s'", result.TotalResults, title)
+		config.GlobalLogger.Debug().Int("count", result.TotalResults).Str("title", title).Msg("Found TMDB results for series")
 	}
 
 	return &result, nil
@@ -240,7 +258,7 @@ func (c *TMDBClient) GetMovieDetails(tmdbID int) (*TMDBMovieDetails, error) {
 
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
-	params.Set("language", "fr-FR")
+	params.Set("language", c.metadataLanguage)
 	params.Set("append_to_response", "credits")
 
 	// Get time before request for logging
@@ -254,7 +272,7 @@ func (c *TMDBClient) GetMovieDetails(tmdbID int) (*TMDBMovieDetails, error) {
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/movie/%d?api_key=******&language=fr-FR&append_to_response=credits", tmdbBaseURL, tmdbID), resp.StatusCode, duration.Milliseconds())
+	config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/movie/%d?api_key=******&language=%s&append_to_response=credits", tmdbBaseURL, tmdbID, c.metadataLanguage)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Get movie details")
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -277,7 +295,7 @@ func (c *TMDBClient) GetTVDetails(tmdbID int) (*TMDBTVDetails, error) {
 
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
-	params.Set("language", "fr-FR")
+	params.Set("language", c.metadataLanguage)
 	params.Set("append_to_response", "external_ids")
 
 	// Get time before request for logging
@@ -291,7 +309,7 @@ func (c *TMDBClient) GetTVDetails(tmdbID int) (*TMDBTVDetails, error) {
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/tv/%d?api_key=******&language=fr-FR&append_to_response=external_ids", tmdbBaseURL, tmdbID), resp.StatusCode, duration.Milliseconds())
+	config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/tv/%d?api_key=******&language=%s&append_to_response=external_ids", tmdbBaseURL, tmdbID, c.metadataLanguage)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Get series details")
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -314,7 +332,7 @@ func (c *TMDBClient) GetEpisodeDetails(tmdbID, season, episode int) (*TMDBEpisod
 
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
-	params.Set("language", "fr-FR")
+	params.Set("language", c.metadataLanguage)
 
 	// Get time before request for logging
 	startTime := time.Now()
@@ -327,7 +345,7 @@ func (c *TMDBClient) GetEpisodeDetails(tmdbID, season, episode int) (*TMDBEpisod
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/tv/%d/season/%d/episode/%d?api_key=******&language=fr-FR", tmdbBaseURL, tmdbID, season, episode), resp.StatusCode, duration.Milliseconds())
+	config.GlobalLogger.Trace().Str("request", fmt.Sprintf("GET %s/tv/%d/season/%d/episode/%d?api_key=******&language=%s", tmdbBaseURL, tmdbID, season, episode, c.metadataLanguage)).Int("status", resp.StatusCode).Int64("duration_ms", duration.Milliseconds()).Msg("TMDB API: Get episode details")
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)

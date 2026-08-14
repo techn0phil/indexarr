@@ -14,6 +14,7 @@ type VideoTrack struct {
 	Bitrate    string  `json:"bitrate"`    // 35.2 Mbps
 	HDR        string  `json:"hdr"`        // Dolby Vision, HDR10, HDR10+, none
 	ColorSpace string  `json:"colorSpace"` // BT.2020, BT.709, etc
+	Source     string  `json:"source"`     // Extra source field for Blurays (e.g. "00001.m2ts")
 }
 
 type AudioTrack struct {
