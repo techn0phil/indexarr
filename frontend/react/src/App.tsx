@@ -45,12 +45,16 @@ const AppContent = () => {
   
   if (!context) return null;
 
-  const activeNav = useMemo<'movies' | 'series'>(() => {
-    return location.pathname.startsWith('/series') ? 'series' : 'movies';
+  const activeNav = useMemo<'movies' | 'series' | 'users'>(() => {
+    if (location.pathname.startsWith('/admin/users')) return 'users';
+    if (location.pathname.startsWith('/series')) return 'series';
+    return 'movies';
   }, [location.pathname]);
 
-  const handleSidebarNav = (page: 'movies' | 'series') => {
-    navigate(page === 'movies' ? '/movies' : '/series');
+  const handleSidebarNav = (page: 'movies' | 'series' | 'users') => {
+    if (page === 'movies') navigate('/movies');
+    else if (page === 'series') navigate('/series');
+    else if (page === 'users') navigate('/admin/users');
   };
 
   const handleBack = () => {

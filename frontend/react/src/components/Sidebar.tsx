@@ -4,8 +4,8 @@ import { useAppContext } from '../hooks/useAppContext';
 import { apiClient } from '../api/client';
 
 interface SidebarProps {
-  activeNav: 'movies' | 'series';
-  onNavClick: (page: 'movies' | 'series') => void;
+  activeNav: 'movies' | 'series' | 'users';
+  onNavClick: (page: 'movies' | 'series' | 'users') => void;
 }
 
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
@@ -111,8 +111,8 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             </div>
 
             <div
-              className={`${styles['nav-item']} ${activeNav === 'admin-users' ? styles.active : ''}`}
-              onClick={() => onNavClick('admin-users')}
+              className={`${styles['nav-item']} ${activeNav === 'users' ? styles.active : ''}`}
+              onClick={() => onNavClick('users')}
             >
               <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="6" cy="5" r="2.5" />
