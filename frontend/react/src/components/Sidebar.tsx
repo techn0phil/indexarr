@@ -139,7 +139,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                   fontWeight: 500,
                 }}
               >
-                Purger DB
+                Supprimer les médias
               </button>
 
               {showPurgeConfirm && (
