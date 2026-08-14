@@ -1,6 +1,8 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -37,9 +39,22 @@ type Config struct {
 	ScanTimeout        int            // timeout in seconds per file
 	DetectionLanguage  string         // language code for media detection (e.g., "en", "fr")
 	MetadataLanguage   string         // language code for metadata fetching (e.g., "en", "fr")
+
+	// Authentication settings
+	AuthMode          string // none, simple, oidc
+	AuthAdminUsername string // admin username (for simple auth)
+	AuthAdminPassword string // admin password (for simple auth)
+	AuthSessionSecret string // secret for signing session tokens
+	AuthSessionMaxAge int    // session duration in hours (default: 168 = 7 days)
 }
 
 func Load() *Config {
+	// Generate random session secret if not provided
+	sessionSecret := getEnv("AUTH_SESSION_SECRET", "")
+	if sessionSecret == "" {
+		sessionSecret = generateRandomSecret()
+	}
+
 	return &Config{
 		ServerPort:         getEnv("SERVER_PORT", "8080"),
 		DBPath:             getEnv("DB_PATH", "./indexarr.db"),
@@ -61,6 +76,13 @@ func Load() *Config {
 		ScanTimeout:        getEnvInt("SCAN_TIMEOUT", 30),
 		DetectionLanguage:  getEnv("DETECTION_LANGUAGE", "en"),
 		MetadataLanguage:   getEnv("METADATA_LANGUAGE", "en"),
+
+		// Authentication
+		AuthMode:          getEnv("AUTH_MODE", "none"),
+		AuthAdminUsername: getEnv("AUTH_ADMIN_USERNAME", ""),
+		AuthAdminPassword: getEnv("AUTH_ADMIN_PASSWORD", ""),
+		AuthSessionSecret: sessionSecret,
+		AuthSessionMaxAge: getEnvInt("AUTH_SESSION_MAX_AGE", 168), // 7 days
 	}
 }
 
@@ -251,4 +273,29 @@ func InitLogger() *zerolog.Logger {
 	GlobalLogger = &logger
 
 	return &logger
+}
+
+// generateRandomSecret generates a random 32-byte hex string for session signing
+func generateRandomSecret() string {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to a default (not ideal, but better than crashing)
+		return "indexarr-default-secret-change-me"
+	}
+	return hex.EncodeToString(bytes)
+}
+
+// HasAuthEnabled returns true if authentication is enabled
+func (c *Config) HasAuthEnabled() bool {
+	return c.AuthMode == "simple" || c.AuthMode == "oidc"
+}
+
+// IsSimpleAuth returns true if simple authentication mode is enabled
+func (c *Config) IsSimpleAuth() bool {
+	return c.AuthMode == "simple"
+}
+
+// IsOIDCAuth returns true if OIDC authentication mode is enabled
+func (c *Config) IsOIDCAuth() bool {
+	return c.AuthMode == "oidc"
 }

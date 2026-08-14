@@ -114,6 +114,11 @@ indexarr/
 | `DETECTION_LANGUAGE` | `en` | Language code for media detection (e.g., "en", "fr") |
 | `METADATA_LANGUAGE` | `en` | Language code for metadata fetching (e.g., "en", "fr") |
 | `LOG_LEVEL` | `INFO` | Logging level |
+| `AUTH_MODE` | `none` | Authentication mode (none, simple, or oidc) |
+| `AUTH_ADMIN_USERNAME` | - | Username of administrator account |
+| `AUTH_ADMIN_PASSWORD` | - | Password of administrator account |
+| `AUTH_SESSION_SECRET` | - | A random secret (auto-generated if not provided) |
+| `AUTH_SESSION_MAX_AGE` | `168` | Maximum session validity (default to 168 hours, ie. 7 days) |
 | `TZ` | `UTC` | Container timezone |
 | `GIN_MODE` | `release` | Go server mode |
 

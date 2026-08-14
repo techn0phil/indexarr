@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, broadcaster *services.Broadcaster) *chi.Mux {
+func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, broadcaster *services.Broadcaster, authService *services.AuthService) *chi.Mux {
 	r := chi.NewRouter()
 
 	// CORS middleware
@@ -20,11 +20,11 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-API-Key"},
 		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
+		AllowCredentials: true, // Required for cookies
 		MaxAge:           300,
 	}))
 
-	// Health check
+	// Health check (always public)
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -33,39 +33,55 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 
 	// API routes
 	r.Route("/api", func(r chi.Router) {
-		// Config
-		r.Get("/config", GetConfig(cfg))
+		// Public auth routes (no middleware)
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/config", HandleAuthConfig(authService))
+			r.Post("/login", HandleLogin(authService))
+			r.Post("/logout", HandleLogout())
+		})
 
-		// Movies
-		r.Get("/movies", ListMovies(db))
-		r.Get("/movies/{id}", GetMovie(db))
+		// Protected routes (require authentication if enabled)
+		r.Group(func(r chi.Router) {
+			// Apply auth middleware
+			r.Use(AuthMiddleware(authService))
 
-		// Series
-		r.Get("/series", ListSeries(db))
-		r.Get("/series/{id}", GetSeriesByID(db))
+			// Auth - current user
+			r.Get("/auth/me", HandleMe(authService))
 
-		// Stats
-		r.Get("/stats", GetStats(db))
+			// Config
+			r.Get("/config", GetConfig(cfg))
 
-		// Purge
-		r.Post("/purge", Purge(db))
+			// Movies
+			r.Get("/movies", ListMovies(db))
+			r.Get("/movies/{id}", GetMovie(db))
 
-		// Scan (only if scheduler is provided)
-		if scheduler != nil {
-			r.Post("/scan", TriggerScan(scheduler))
-			r.Post("/scan/movies", TriggerMoviesScan(scheduler))
-			r.Post("/scan/series", TriggerSeriesScan(scheduler))
-			r.Get("/scan/status", GetScanStatus(scheduler))
-			r.Post("/scan/stop", StopScan(scheduler))
+			// Series
+			r.Get("/series", ListSeries(db))
+			r.Get("/series/{id}", GetSeriesByID(db))
 
-			r.Post("/movies/{id}/refresh", RefreshMovie(scheduler))
-			r.Post("/series/{id}/refresh", RefreshSeries(scheduler))
+			// Stats
+			r.Get("/stats", GetStats(db))
 
-			// WebSocket endpoint for real-time scan updates
-			if broadcaster != nil {
-				r.Get("/scan/ws", HandleWebSocket(db, broadcaster))
+			// Purge
+			r.Post("/purge", Purge(db))
+
+			// Scan (only if scheduler is provided)
+			if scheduler != nil {
+				r.Post("/scan", TriggerScan(scheduler))
+				r.Post("/scan/movies", TriggerMoviesScan(scheduler))
+				r.Post("/scan/series", TriggerSeriesScan(scheduler))
+				r.Get("/scan/status", GetScanStatus(scheduler))
+				r.Post("/scan/stop", StopScan(scheduler))
+
+				r.Post("/movies/{id}/refresh", RefreshMovie(scheduler))
+				r.Post("/series/{id}/refresh", RefreshSeries(scheduler))
+
+				// WebSocket endpoint for real-time scan updates
+				if broadcaster != nil {
+					r.Get("/scan/ws", HandleWebSocket(db, broadcaster))
+				}
 			}
-		}
+		})
 	})
 
 	return r

@@ -122,8 +122,19 @@ func main() {
 		logger.Warn().Msg("⚠️  No importers configured, scanning disabled")
 	}
 
+	// Initialize authentication service
+	authService := services.NewAuthService(cfg)
+	if cfg.HasAuthEnabled() {
+		logger.Info().Str("mode", cfg.AuthMode).Msg("🔐 Authentication enabled")
+		if cfg.IsSimpleAuth() && cfg.AuthAdminUsername != "" {
+			logger.Info().Str("username", cfg.AuthAdminUsername).Msg("👤 Admin user configured")
+		}
+	} else {
+		logger.Info().Msg("🔓 Authentication disabled")
+	}
+
 	// Setup API router
-	router := api.SetupRoutes(db, cfg, scheduler, broadcaster)
+	router := api.SetupRoutes(db, cfg, scheduler, broadcaster, authService)
 
 	// Handle graceful shutdown
 	go func() {

@@ -1,0 +1,243 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background-tertiary);
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-background-primary);
+  border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-tertiary);
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.glass {
+  height: 28px; /* adjust to control the size  */
+  aspect-ratio: 1/cos(30deg);
+  clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
+  background: conic-gradient(from 45deg, #1d9e75, #085041);
+}
+
+.glass::after {
+  content: '';
+  display: block;
+  --b: 2px; /* adjust to control the border */
+  height: 28px; /* adjust to control the size */
+  aspect-ratio: 1/cos(30deg);
+  clip-path:
+    polygon(0 50%,50% -50%,100% 50%,50% 150%,0 50%,
+    var(--b) 50%,
+    calc(25% + var(--b)*cos(60deg)) calc(100% - var(--b)*sin(60deg)),
+    calc(75% - var(--b)*cos(60deg)) calc(100% - var(--b)*sin(60deg)),
+    calc(100% - var(--b)) 50%,
+    calc(75% - var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
+    calc(25% + var(--b)*cos(60deg)) calc(var(--b)*sin(60deg)),
+    var(--b) 50%);
+  background: var(--color-primary-logo);
+}
+
+.handle {
+  position: absolute;
+  width: 1.2em;
+  height: .3em;
+  background: var(--color-primary-logo);
+  border-radius: .05em;
+  transform: rotate(30deg) translateX(1.9em);
+}
+
+.handle::after {
+  content: "";
+  position: absolute;
+  background: var(--color-primary-logo);
+  top: -0.1em;
+  left: 0.35em;
+  bottom: -0.1em;
+  right: -0.2em;
+  border-radius: 0.2em 0.5em 0.5em 0.2em;
+}
+
+.index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  gap: 0.2em;
+}
+
+.item::after {
+  content: "";
+  display: block;
+  height: 2px;
+  aspect-ratio: 5;
+  background: white;
+  border-radius: .04em;
+}
+
+.item::before {
+  content: "";
+  display: block;
+  width: 2px;
+  aspect-ratio: 1;
+  background: white;
+  border-radius: .04em;
+  transform: scale(1.33);
+}
+
+.logo-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--color-badge-missing-text);
+  background: var(--color-badge-missing);
+  border-radius: var(--border-radius-md);
+}
+
+.errorIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--color-primary);
+  background: #1D9E75;
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  margin-top: 8px;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  background: #085041;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
