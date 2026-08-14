@@ -9,6 +9,7 @@ import (
 	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
+	"indexarr/internal/services"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -149,6 +150,19 @@ func GetConfig(cfg *config.Config) http.HandlerFunc {
 	}
 }
 
+// GetScanStatus returns the current scan status
+func GetScanStatus(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		status, err := scheduler.GetScanStatus()
+		if err != nil {
+			respondError(w, 500, "Failed to get scan status: "+err.Error())
+			return
+		}
+
+		respond(w, status)
+	}
+}
+
 func respond(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
@@ -161,19 +175,4 @@ func respondError(w http.ResponseWriter, code int, message string) {
 		"success": false,
 		"error":   message,
 	})
-}
-
-func Purge(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := repository.PurgeDatabase(db)
-		if err != nil {
-			respondError(w, 500, "Failed to purge database: "+err.Error())
-			return
-		}
-
-		respond(w, map[string]interface{}{
-			"success": true,
-			"message": "Database purged successfully",
-		})
-	}
 }

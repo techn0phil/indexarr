@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -670,6 +671,167 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": true,
 			"message": "Mot de passe modifié",
+		})
+	}
+}
+
+// ============================================================================
+// Scan and Refresh Handlers (Admin only)
+// ============================================================================
+
+// TriggerScan starts a manual scan
+func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		// Start scan in goroutine so we can return immediately
+		go func() {
+			scheduler.TriggerScan()
+		}()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Scan started",
+		})
+	}
+}
+
+// TriggerMoviesScan starts a manual scan for movies only
+func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		go func() {
+			scheduler.TriggerMoviesScan()
+		}()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Movies scan started",
+		})
+	}
+}
+
+// TriggerSeriesScan starts a manual scan for series only
+func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		go func() {
+			scheduler.TriggerSeriesScan()
+		}()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Series scan started",
+		})
+	}
+}
+
+// StopScan stops the currently running scan
+func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		scheduler.StopCurrentScan()
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Stop signal sent",
+		})
+	}
+}
+
+func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil {
+			respondError(w, 400, "Invalid movie ID")
+			return
+		}
+
+		result, err := scheduler.TriggerSingleMovieScan(id)
+		if err != nil {
+			respondError(w, 500, "Failed to refresh movie: "+err.Error())
+			return
+		}
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Movie refresh started",
+			"result":  result,
+		})
+	}
+}
+
+func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil {
+			respondError(w, 400, "Invalid series ID")
+			return
+		}
+
+		result, err := scheduler.TriggerSingleSeriesScan(id)
+		if err != nil {
+			respondError(w, 500, "Failed to refresh series: "+err.Error())
+			return
+		}
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Series refresh started",
+			"result":  result,
+		})
+	}
+}
+
+// Purge deletes all data from the database (admin only)
+func Purge(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if requireAdmin(w, r) == nil {
+			return
+		}
+
+		err := repository.PurgeDatabase(db)
+		if err != nil {
+			respondError(w, 500, "Failed to purge database: "+err.Error())
+			return
+		}
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Database purged successfully",
 		})
 	}
 }
