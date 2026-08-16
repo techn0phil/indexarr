@@ -83,6 +83,9 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
             </span>
           )}
         </div> */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+          {series.status == 'complete' && <span className={comStyles['badge-ended']}>Terminée</span>}
+        </div>
       </div>
     </div>
   );
