@@ -221,10 +221,46 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
-        <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
-        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.moviesDiskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['films manquants', `${context?.stats?.missingMovies || 0} total`]} />
+        <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} icon={
+          <svg viewBox="0 0 24 24">
+            <path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" />
+          </svg>
+        } />
+        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <defs>
+              <mask id="cutout-4k">
+                {/* White background means keep/show */}
+                <rect width="24" height="18" rx="4" y="4" fill="white" />
+                {/* Black shapes mean cut out / transparent */}
+                <text
+                  x="12"
+                  y="13.5"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  font-family="system-ui, -apple-system, sans-serif"
+                  font-size="12px"
+                  font-weight="900"
+                  fill="black"
+                >
+                  4K
+                </text>
+              </mask>
+            </defs>
+            {/* The main box with the mask applied so 4K cuts through it */}
+            <rect width="24" height="24" rx="4" mask="url(#cutout-4k)" />
+          </svg>
+        } />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.moviesDiskSpaceGB?.toFixed(1) || 0} Go total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5H5V5h14v3zm0 5H5v-3h14v3zm0 5H5v-3h14v3zM7 6h2v2H7V6zm0 5h2v2H7v-2zm0 5h2v2H7v-2z"/>
+          </svg>
+        } />
+        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['films manquants', `${context?.stats?.missingMovies || 0} total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        } />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
