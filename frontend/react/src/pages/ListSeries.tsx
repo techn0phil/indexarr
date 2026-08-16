@@ -222,10 +222,26 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
-        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
-        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes - loadedStats.missingEpisodes} / ${loadedStats.episodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.seriesDiskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} />
+        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} complètes`, `${context?.stats?.totalSeries || 0} total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.9-.9 1.9-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+          </svg>
+        } />
+        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes - loadedStats.missingEpisodes} / ${loadedStats.episodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M7 2h15v13.5h-2V4H7V2zM4.5 4.5h15V18h-2V6.5h-13V4.5zM2 7h15v14H2V7zm6 4v6l5.5-3L8 11z"/>
+          </svg>
+        } />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.seriesDiskSpaceGB?.toFixed(1) || 0} Go total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5H5V5h14v3zm0 5H5v-3h14v3zm0 5H5v-3h14v3zM7 6h2v2H7V6zm0 5h2v2H7v-2zm0 5h2v2H7v-2z"/>
+          </svg>
+        } />
+        <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        } />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 

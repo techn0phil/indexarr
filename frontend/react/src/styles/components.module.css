@@ -43,6 +43,21 @@
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-lg);
   padding: 12px 14px;
+  position: relative;
+}
+
+.stat-watermark {
+  position: absolute;
+  right: 14px;
+  height: 80px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.stat-watermark svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-text-tertiary);
 }
 
 .stat-label {
