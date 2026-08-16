@@ -1,4 +1,4 @@
-import { Movie, Series, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse, AuthConfig, LoginResponse } from '../types/index';
+import { Movie, Series, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse, AuthConfig, LoginResponse, UsersResponse, UserResponse, CreateUserRequest, UpdateUserRequest } from '../types/index';
 
 const API_BASE = '/api';
 
@@ -39,6 +39,55 @@ export const apiClient = {
       throw new Error('Not authenticated');
     }
     return response.json() as Promise<LoginResponse>;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await fetchWithCredentials(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    return response.json() as Promise<{ success: boolean; error?: string; message?: string }>;
+  },
+
+  // User management endpoints (admin only)
+  getUsers: async () => {
+    const response = await fetchWithCredentials(`${API_BASE}/users`);
+    return response.json() as Promise<UsersResponse>;
+  },
+
+  createUser: async (data: CreateUserRequest) => {
+    const response = await fetchWithCredentials(`${API_BASE}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json() as Promise<UserResponse>;
+  },
+
+  updateUser: async (id: number, data: UpdateUserRequest) => {
+    const response = await fetchWithCredentials(`${API_BASE}/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json() as Promise<UserResponse>;
+  },
+
+  deleteUser: async (id: number) => {
+    const response = await fetchWithCredentials(`${API_BASE}/users/${id}`, {
+      method: 'DELETE',
+    });
+    return response.json() as Promise<{ success: boolean; error?: string; message?: string }>;
+  },
+
+  adminSetPassword: async (id: number, newPassword: string) => {
+    const response = await fetchWithCredentials(`${API_BASE}/users/${id}/password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword }),
+    });
+    return response.json() as Promise<{ success: boolean; error?: string; message?: string }>;
   },
 
   getMovies: async (page: number = 1, pageSize: number = 50, filters: Record<string, string> = {}) => {

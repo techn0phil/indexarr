@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useState, useContext } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
-import { AppContext } from '../hooks/useAppContext';
+import { useAppContext } from '../hooks/useAppContext';
 
 interface MovieDetailProps {
   movieId: number;
@@ -12,7 +12,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const appContext = useContext(AppContext);
+  const { authMode, config, isDark, user } = useAppContext();
 
   // Fetch movie function, used for both initial load and refresh
   const fetchMovie = async () => {
@@ -100,7 +100,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             )}
 
             {/* Popup contextual menu */}
-            <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+            {authMode === 'simple' && user?.role === 'admin' && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
               <button
                 className={comStyles['menu-button']}
                 aria-label="Menu"
@@ -159,7 +159,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                   </button>
                 </div>
               )}
-            </div>
+            </div>)}
           </h1>
           <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <span>{movie.year}</span>
@@ -244,14 +244,14 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-            {appContext?.config?.radarrUrl && (
-              <a href={`${appContext.config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {authMode === 'simple' && user?.role === 'admin' && config?.radarrUrl && (
+              <a href={`${config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/radarr-light.png" alt="Radarr Light" style={{ width: '12px', height: '12px' }} />
                 Radarr
               </a>
             )}
             <a href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-dark.png'} alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
+              <img src={isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-dark.png'} alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
               TMDB
             </a>
           </div>

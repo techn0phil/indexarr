@@ -9,7 +9,7 @@ interface ScanStatusProps {
 }
 
 export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
-  const { scanStatus: wsStatus } = useAppContext();
+  const { scanStatus: wsStatus, authMode, user } = useAppContext();
   const [status, setStatus] = useState<ScanStatusType | null>(null);
   const [triggering, setTriggering] = useState(false);
   const onScanCompleteRef = useRef(onScanComplete);
@@ -151,7 +151,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
         </div>
       )}
 
-      <div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
+      {authMode === 'simple' && user?.role === 'admin' && (<div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
         {status?.status === 'running' ? (
           <button
             onClick={handleStopScan}
@@ -185,7 +185,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
             {triggering ? 'Démarrage...' : 'Lancer un scan'}
           </button>
         )}
-      </div>
+      </div>)}
 
       <style>{`
         @keyframes pulse {

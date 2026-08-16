@@ -6,6 +6,7 @@ import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
+import { UsersPage } from './pages/UsersPage';
 import { LoginPage } from './pages/LoginPage';
 import { AppContext, AppContextProvider } from './hooks/useAppContext.tsx';
 import layoutStyles from './styles/layout.module.css';
@@ -44,12 +45,16 @@ const AppContent = () => {
   
   if (!context) return null;
 
-  const activeNav = useMemo<'movies' | 'series'>(() => {
-    return location.pathname.startsWith('/series') ? 'series' : 'movies';
+  const activeNav = useMemo<'movies' | 'series' | 'users'>(() => {
+    if (location.pathname.startsWith('/admin/users')) return 'users';
+    if (location.pathname.startsWith('/series')) return 'series';
+    return 'movies';
   }, [location.pathname]);
 
-  const handleSidebarNav = (page: 'movies' | 'series') => {
-    navigate(page === 'movies' ? '/movies' : '/series');
+  const handleSidebarNav = (page: 'movies' | 'series' | 'users') => {
+    if (page === 'movies') navigate('/movies');
+    else if (page === 'series') navigate('/series');
+    else if (page === 'users') navigate('/admin/users');
   };
 
   const handleBack = () => {
@@ -113,6 +118,14 @@ const AppContent = () => {
               element={(
                 <div className={layoutStyles.page + ' ' + layoutStyles.active}>
                   <SeriesDetailFromRoute />
+                </div>
+              )}
+            />
+            <Route
+              path="/admin/users"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <UsersPage />
                 </div>
               )}
             />

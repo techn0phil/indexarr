@@ -45,8 +45,18 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 			// Apply auth middleware
 			r.Use(AuthMiddleware(authService))
 
-			// Auth - current user
+			// Auth - current user and password change
 			r.Get("/auth/me", HandleMe(authService))
+			r.Post("/auth/change-password", HandleChangePassword(authService))
+
+			// User management (admin only, simple auth mode only)
+			r.Route("/users", func(r chi.Router) {
+				r.Get("/", HandleListUsers(authService))
+				r.Post("/", HandleCreateUser(authService))
+				r.Put("/{id}", HandleUpdateUser(authService))
+				r.Delete("/{id}", HandleDeleteUser(authService))
+				r.Post("/{id}/password", HandleAdminSetPassword(authService))
+			})
 
 			// Config
 			r.Get("/config", GetConfig(cfg))

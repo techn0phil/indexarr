@@ -122,8 +122,11 @@ func main() {
 		logger.Warn().Msg("⚠️  No importers configured, scanning disabled")
 	}
 
+	// Initialize user repository for database-backed users
+	userRepo := repository.NewUserRepository(db)
+
 	// Initialize authentication service
-	authService := services.NewAuthService(cfg)
+	authService := services.NewAuthService(cfg, userRepo)
 	if cfg.HasAuthEnabled() {
 		logger.Info().Str("mode", cfg.AuthMode).Msg("🔐 Authentication enabled")
 		if cfg.IsSimpleAuth() && cfg.AuthAdminUsername != "" {
