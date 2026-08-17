@@ -100,7 +100,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             )}
 
             {/* Popup contextual menu */}
-            {authMode === 'simple' && user?.role === 'admin' && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+            {(authMode === 'none' || user?.role === 'admin') && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
               <button
                 className={comStyles['menu-button']}
                 aria-label="Menu"
@@ -244,7 +244,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-            {authMode === 'simple' && user?.role === 'admin' && config?.radarrUrl && (
+            {(authMode === 'none' || user?.role === 'admin') && config?.radarrUrl && (
               <a href={`${config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/radarr-light.png" alt="Radarr Light" style={{ width: '12px', height: '12px' }} />
                 Radarr

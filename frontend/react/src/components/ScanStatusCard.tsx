@@ -151,7 +151,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
         </div>
       )}
 
-      {authMode === 'simple' && user?.role === 'admin' && (<div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
+      {(authMode === 'none' || user?.role === 'admin') && (<div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
         {status?.status === 'running' ? (
           <button
             onClick={handleStopScan}

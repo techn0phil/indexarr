@@ -130,7 +130,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               )}
 
               {/* Popup contextual menu */}
-              {authMode === 'simple' && user?.role === 'admin' && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+              {(authMode === 'none' || user?.role === 'admin') && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
                 <button
                   className={comStyles['menu-button']}
                   aria-label="Menu"
@@ -284,7 +284,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-              {authMode === 'simple' && user?.role === 'admin' && config?.sonarrUrl && (
+              {(authMode === 'none' || user?.role === 'admin') && config?.sonarrUrl && (
                 <a href={`${config.sonarrUrl}/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/sonarr-light.png" alt="Sonarr Light" style={{ width: '12px', height: '12px' }} />
                   Sonarr
