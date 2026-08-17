@@ -28,11 +28,13 @@ export interface Series {
   seasonCount: number;
   episodeCount: number;
   missingEpisodeCount: number;
+  totalSeasonCount: number;
+  totalEpisodeCount: number;
   synopsis: string;
   genres: string;
   rating: number;
   popularity: number;
-  status: 'complete' | 'ongoing' | 'partial';
+  status: 'complete' | 'ongoing' | 'upcoming';
   fileSize: number;
   dateAdded: string;
   tmdbId: number;

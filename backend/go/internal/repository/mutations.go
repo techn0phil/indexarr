@@ -280,11 +280,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 		defer tx.Rollback()
 
 		result, err := tx.Exec(`
-			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug, total_season_count, total_episode_count)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug)
+			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.TotalSeasonCount, series.TotalEpisodeCount)
 		if err != nil {
 			return err
 		}

@@ -14,8 +14,8 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
     .toUpperCase()
     .slice(0, 2);
 
-  const statusColor =
-    series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
+  const completenessColor =
+    series.episodeCount === series.totalEpisodeCount ? '#1D9E75' : series.episodeCount > 0 ? '#EF9F27' : '#E24B4A';
 
   return (
     <div className={comStyles['tv-show-card']} onClick={onClick}>
@@ -59,7 +59,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
             </div>
           </>
         )}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: statusColor }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: completenessColor }} />
       </div>
       <div style={{ padding: '9px 10px' }}>
         <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px' }}>
@@ -77,14 +77,14 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks[0]?.hdr.includes('HDR10+') && (
             <span className={comStyles['badge-hdr']}>HDR10+</span>
           )}
-          {series.status === 'partial' && (
-            <span className={comStyles['badge-codec']}>
-              {series.seasonCount * 10 - series.episodeCount} ep. manq.
+          {series.episodeCount < series.totalEpisodeCount && (
+            <span className={comStyles['badge-missing']}>
+              {series.totalEpisodeCount - series.episodeCount} ep. manq.
             </span>
           )}
         </div> */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {series.status == 'complete' && <span className={comStyles['badge-ended']}>Terminée</span>}
+          {series.status === 'complete' && <span className={comStyles['badge-ended']}>Terminée</span>}
         </div>
       </div>
     </div>

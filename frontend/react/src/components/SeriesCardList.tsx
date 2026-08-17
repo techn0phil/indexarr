@@ -14,7 +14,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
     .toUpperCase()
     .slice(0, 2);
 
-  const statusColor = series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
+  const completenessColor = series.episodeCount === series.totalEpisodeCount ? '#1D9E75' : series.episodeCount > 0 ? '#EF9F27' : '#E24B4A';
 
   return (
     <div className={comStyles['card-list']} onClick={onClick}>
@@ -69,8 +69,8 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           <span>·</span>
           <span>{series.episodeCount} épisodes</span>
           <span>·</span>
-          <span style={{ color: statusColor, fontWeight: 500 }}>
-            {series.status === 'complete' ? 'Complète' : series.status === 'ongoing' ? 'En cours' : 'Partielle'}
+          <span style={{ color: completenessColor, fontWeight: 500 }}>
+            {series.episodeCount === series.totalEpisodeCount ? 'Complète' : series.episodeCount > 0 ? 'Partielle' : 'Manquante'}
           </span>
         </div>
         <div className={comStyles['card-list-meta']}>
@@ -86,7 +86,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
             <span className={comStyles['badge-hdr']}>HDR10+</span>
           )}
-          {series.status === 'partial' && (
+          {series.episodeCount < series.totalEpisodeCount && (
             <span className={comStyles['badge-codec']}>
               {series.seasons?.[0]?.episodes?.length ?? 0} ep. manq.
             </span>
