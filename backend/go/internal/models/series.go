@@ -9,11 +9,13 @@ type Series struct {
 	SeasonCount         int      `json:"seasonCount"`
 	EpisodeCount        int      `json:"episodeCount"`
 	MissingEpisodeCount int      `json:"missingEpisodeCount"`
+	TotalSeasonCount    int      `json:"totalSeasonCount"`
+	TotalEpisodeCount   int      `json:"totalEpisodeCount"`
 	Synopsis            string   `json:"synopsis"`
 	Genres              string   `json:"genres"` // comma-separated
 	Rating              float64  `json:"rating"` // TVDB rating
 	Popularity          float64  `json:"popularity"`
-	Status              string   `json:"status"`    // complete, ongoing, partial
+	Status              string   `json:"status"`    // complete, ongoing, upcoming
 	FileSize            int64    `json:"fileSize"`  // bytes
 	DateAdded           string   `json:"dateAdded"` // ISO 8601
 	TMDBId              int64    `json:"tmdbId"`

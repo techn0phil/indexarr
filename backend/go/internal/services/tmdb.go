@@ -471,6 +471,8 @@ func (c *TMDBClient) EnrichSeries(series *models.Series) error {
 	series.IMDbId = details.ExternalIDs.IMDbID
 	series.SeasonCount = details.NumberOfSeasons
 	series.EpisodeCount = details.NumberOfEpisodes
+	series.TotalSeasonCount = details.NumberOfSeasons
+	series.TotalEpisodeCount = details.NumberOfEpisodes
 
 	// Parse years
 	if details.FirstAirDate != "" && len(details.FirstAirDate) >= 4 {
@@ -484,8 +486,10 @@ func (c *TMDBClient) EnrichSeries(series *models.Series) error {
 	switch details.Status {
 	case "Ended", "Canceled":
 		series.Status = "complete"
-	case "Returning Series", "In Production":
+	case "Returning Series":
 		series.Status = "ongoing"
+	case "In Production":
+		series.Status = "upcoming"
 	default:
 		series.Status = "ongoing"
 	}

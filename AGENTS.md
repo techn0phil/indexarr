@@ -388,7 +388,7 @@ type ApiResponse struct {
 **Series**:
 - ID, Title, Years (start-end), Season count, Episode count
 - Rating, Popularity
-- Status (complete, ongoing, partial)
+- Status (complete, ongoing, upcoming)
 - External IDs (TVDB, IMDb)
 - Seasons → Episodes
 

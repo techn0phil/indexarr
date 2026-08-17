@@ -403,20 +403,22 @@ func (si *SonarrImporter) processSonarrEpisode(seriesID int64, se *SonarrEpisode
 // mapSonarrSeries converts a SonarrSeries to our internal Series model
 func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 	series := &models.Series{
-		Title:        ss.Title,
-		Slug:         slugify(ss.Title),
-		YearStart:    ss.Year,
-		SeasonCount:  ss.SeasonCount,
-		EpisodeCount: ss.Statistics.EpisodeCount,
-		Synopsis:     ss.Overview,
-		Status:       si.mapSeriesStatus(ss.Status),
-		FileSize:     ss.Statistics.SizeOnDisk,
-		TMDBId:       int64(ss.TmdbId),
-		TVDBId:       int64(ss.TvdbId),
-		IMDbId:       ss.ImdbId,
-		SonarrID:     int64(ss.ID),
-		TitleSlug:    ss.TitleSlug,
-		DateAdded:    ss.Added,
+		Title:             ss.Title,
+		Slug:              slugify(ss.Title),
+		YearStart:         ss.Year,
+		SeasonCount:       ss.SeasonCount,
+		EpisodeCount:      ss.Statistics.EpisodeCount,
+		TotalSeasonCount:  ss.SeasonCount,
+		TotalEpisodeCount: ss.Statistics.TotalEpisodeCount - ss.Seasons[0].Statistics.TotalEpisodeCount,
+		Synopsis:          ss.Overview,
+		Status:            si.mapSeriesStatus(ss.Status),
+		FileSize:          ss.Statistics.SizeOnDisk,
+		TMDBId:            int64(ss.TmdbId),
+		TVDBId:            int64(ss.TvdbId),
+		IMDbId:            ss.ImdbId,
+		SonarrID:          int64(ss.ID),
+		TitleSlug:         ss.TitleSlug,
+		DateAdded:         ss.Added,
 	}
 
 	if series.TMDBId == 0 {
@@ -494,6 +496,8 @@ func (si *SonarrImporter) mapSeriesStatus(sonarrStatus string) string {
 		return "ongoing"
 	case "ended":
 		return "complete"
+	case "upcoming":
+		return "upcoming"
 	default:
 		return "ongoing"
 	}

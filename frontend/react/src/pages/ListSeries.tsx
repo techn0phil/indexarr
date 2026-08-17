@@ -21,9 +21,9 @@ type ViewType = 'grid' | 'list';
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
-    { value: 'complete', label: 'Complète' },
+    { value: 'complete', label: 'Terminée' },
     { value: 'ongoing', label: 'En cours' },
-    { value: 'partial', label: 'Partielle' },
+    { value: 'upcoming', label: 'À venir' },
   ],
   resolution: [
     { value: '3840', label: '4K - Ultra HD (3840 x 2160)' },
@@ -125,12 +125,13 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
 
   // Calculate stats from loaded series
   const loadedStats = useMemo(() => {
-    const complete = series.filter((s) => s.status === 'complete').length;
+    const complete = series.filter((s) => s.episodeCount === s.totalEpisodeCount).length;
     const episodes = series.reduce((sum, s) => sum + s.episodeCount, 0);
-    const missingEpisodes = series.reduce((sum, s) => sum + s.missingEpisodeCount, 0);
+    const totalEpisodes = series.reduce((sum, s) => sum + s.totalEpisodeCount, 0);
+    const missingEpisodes = series.reduce((sum, s) => sum + s.totalEpisodeCount - s.episodeCount, 0);
     const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024);
 
-    return { complete, total: series.length, episodes, diskSpace, missingEpisodes };
+    return { complete, total: series.length, episodes, totalEpisodes, diskSpace, missingEpisodes };
   }, [series, context?.stats]);
 
   const handleViewChange = (newView: ViewType) => {
@@ -227,7 +228,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
             <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.9-.9 1.9-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
           </svg>
         } />
-        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes - loadedStats.missingEpisodes} / ${loadedStats.episodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} icon={
+        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} / ${loadedStats.totalEpisodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M7 2h15v13.5h-2V4H7V2zM4.5 4.5h15V18h-2V6.5h-13V4.5zM2 7h15v14H2V7zm6 4v6l5.5-3L8 11z"/>
           </svg>

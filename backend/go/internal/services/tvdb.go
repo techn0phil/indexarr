@@ -579,6 +579,8 @@ func (c *TVClient) EnrichSeries(series *models.Series) error {
 		series.Status = "complete"
 	case "continuing":
 		series.Status = "ongoing"
+	case "upcoming":
+		series.Status = "upcoming"
 	default:
 		series.Status = "ongoing"
 	}
