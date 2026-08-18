@@ -10,6 +10,7 @@ import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
 import { ScanStatusCard } from '../components/ScanStatusCard';
+import { useTranslation } from 'react-i18next';
 
 interface ListSeriesProps {
   onSelectSeries: (id: number) => void;
@@ -21,9 +22,9 @@ type ViewType = 'grid' | 'list';
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
-    { value: 'complete', label: 'Terminée' },
-    { value: 'ongoing', label: 'En cours' },
-    { value: 'upcoming', label: 'À venir' },
+    { value: 'complete', label: 'complete' },
+    { value: 'ongoing', label: 'ongoing' },
+    { value: 'upcoming', label: 'upcoming' },
   ],
   resolution: [
     { value: '3840', label: '4K - Ultra HD (3840 x 2160)' },
@@ -59,6 +60,7 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
 };
 
 export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps) => {
+  const { t } = useTranslation('series-list');
   const [activeFilters, setActiveFilters] = useState<Record<FilterType, string[]>>({
     status: [],
     resolution: [],
@@ -158,11 +160,11 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       {/* Filters */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
+          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>{t('filter.label')}</span>
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
-            label="Statut"
+            label={t('filter.status.label')}
             active={activeFilters.status.length > 0}
             count={activeFilters.status.length}
             onClick={() => setModalFilter('status')}
@@ -170,7 +172,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
-            label="Résolution"
+            label={t('filter.resolution.label')}
             active={activeFilters.resolution.length > 0}
             count={activeFilters.resolution.length}
             onClick={() => setModalFilter('resolution')}
@@ -178,7 +180,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
-            label="Codec"
+            label={t('filter.codec.label')}
             active={activeFilters.codec.length > 0}
             count={activeFilters.codec.length}
             onClick={() => setModalFilter('codec')}
@@ -186,7 +188,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
-            label="Audio"
+            label={t('filter.audio.label')}
             active={activeFilters.audio.length > 0}
             count={activeFilters.audio.length}
             onClick={() => setModalFilter('audio')}
@@ -194,7 +196,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="2.5"/><line x1="6" y1="1" x2="6" y2="3"/><line x1="6" y1="9" x2="6" y2="11"/><line x1="1" y1="6" x2="3" y2="6"/><line x1="9" y1="6" x2="11" y2="6"/><line x1="3.5" y1="3.5" x2="2.2" y2="2.2"/><line x1="8.5" y1="3.5" x2="9.8" y2="2.2"/><line x1="3.5" y1="8.5" x2="2.2" y2="9.8"/><line x1="8.5" y1="8.5" x2="9.8" y2="9.8"/></svg>}
-            label="HDR"
+            label={t('filter.hdr.label')}
             active={activeFilters.hdr.length > 0}
             count={activeFilters.hdr.length}
             onClick={() => setModalFilter('hdr')}
@@ -213,7 +215,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
                 marginLeft: '4px',
               }}
             >
-              Effacer tout
+              {t('filter.button.clearAll')}
             </button>
           )}
         </div>
@@ -223,22 +225,22 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
-        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} complètes`, `${context?.stats?.totalSeries || 0} total`]} icon={
+        <StatCard label={t('statCard.series.title')} value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} ${t('statCard.series.completed')}`, `${context?.stats?.totalSeries || 0} ${t('statCard.series.total')}`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.9-.9 1.9-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
           </svg>
         } />
-        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} / ${loadedStats.totalEpisodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} icon={
+        <StatCard label={t('statCard.episodes.title')} value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} / ${loadedStats.totalEpisodes} ${t('statCard.episodes.available')}`, `${context?.stats?.totalEpisodes || 0} ${t('statCard.episodes.total')}`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M7 2h15v13.5h-2V4H7V2zM4.5 4.5h15V18h-2V6.5h-13V4.5zM2 7h15v14H2V7zm6 4v6l5.5-3L8 11z"/>
           </svg>
         } />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.seriesDiskSpaceGB?.toFixed(1) || 0} Go total`]} icon={
+        <StatCard label={t('statCard.storage.title')} value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[t('statCard.storage.diskOccupation'), `${context?.stats?.seriesDiskSpaceGB?.toFixed(1) || 0} Go ${t('statCard.storage.total')}`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5H5V5h14v3zm0 5H5v-3h14v3zm0 5H5v-3h14v3zM7 6h2v2H7V6zm0 5h2v2H7v-2zm0 5h2v2H7v-2z"/>
           </svg>
         } />
-        <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} icon={
+        <StatCard label={t('statCard.problem.title')} value={loadedStats.missingEpisodes || 0} subLabels={[t('statCard.problem.missingEpisodes'), `${context?.stats?.missingEpisodes || 0} ${t('statCard.problem.total')}`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
           </svg>
@@ -249,11 +251,11 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       {/* Grid or List */}
       {isInitialLoading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Chargement...
+          {t('label.loading')}
         </div>
       ) : !series || series.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Aucune série trouvée
+          {t('label.noResults')}
         </div>
       ) : view === 'grid' ? (
         <>
@@ -267,7 +269,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
@@ -285,7 +287,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
@@ -299,9 +301,10 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           isOpen={true}
           onClose={() => setModalFilter(null)}
           onApply={(values) => handleFilterApply(modalFilter, values)}
-          title={`Filtrer par ${modalFilter === 'status' ? 'statut' : modalFilter === 'resolution' ? 'résolution' : modalFilter === 'codec' ? 'codec' : modalFilter === 'audio' ? 'audio' : 'HDR'}`}
+          title={t(`filter.${modalFilter}.title`)}
           options={FILTER_OPTIONS[modalFilter]}
           selectedValues={activeFilters[modalFilter]}
+          translationPrefix={modalFilter === 'status' ? 'filter.status.option.' : ''}
         />
       )}
     </div>

@@ -11,7 +11,10 @@
       "option": {
         "available": "Disponibile",
         "missing": "Mancante",
-        "problem": "Problema"
+        "problem": "Problema",
+        "complete": "Completata",
+        "ongoing": "In corso",
+        "upcoming": "In arrivo"
       }
     },
     "resolution": {

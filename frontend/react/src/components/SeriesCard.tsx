@@ -1,5 +1,6 @@
 import { Series } from '../types';
 import comStyles from '../styles/components.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface SeriesCardProps {
   series: Series;
@@ -7,6 +8,7 @@ interface SeriesCardProps {
 }
 
 export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
+  const { t } = useTranslation('series-list');
   const initials = series.title
     .split(' ')
     .map((word) => word[0])
@@ -84,7 +86,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
           )}
         </div> */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {series.status === 'complete' && <span className={comStyles['badge-ended']}>Terminée</span>}
+          {series.status === 'complete' && <span className={comStyles['badge-ended']}>{t('label.ended')}</span>}
         </div>
       </div>
     </div>
