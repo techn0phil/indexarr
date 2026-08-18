@@ -269,11 +269,11 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       {/* Grid or List */}
       {isInitialLoading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Chargement...
+          {t('label.loading')}
         </div>
       ) : !movies || movies.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Aucun film trouvé
+          {t('label.noResults')}
         </div>
       ) : view === 'grid' ? (
         <>
@@ -287,7 +287,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
@@ -305,7 +305,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
