@@ -1,0 +1,78 @@
+{
+  "filter": {
+    "label": "Filters",
+    "button": {
+      "apply": "Apply",
+      "clear": "Clear"
+    },
+    "status": {
+      "label": "Status",
+      "title": "Filter by status",
+      "option": {
+        "available": "Available",
+        "missing": "Missing",
+        "problem": "Problem"
+      }
+    },
+    "resolution": {
+      "label": "Resolution",
+      "title": "Filter by resolution"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Filter by codec"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Filter by audio"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Filter by HDR"
+    }
+  },
+  "statCard": {
+    "movies": {
+      "title": "Movies",
+      "available": "available",
+      "total": "total"
+    },
+    "4k": {
+      "title": "4K UHD",
+      "total": "total"
+    },
+    "storage": {
+      "title": "Storage",
+      "diskOccupation": "Disk usage",
+      "total": "total"
+    },
+    "problem": {
+      "title": "Problems",
+      "missingMovies": "Missing movies",
+      "total": "total"
+    },
+    "scan": {
+      "title": "Library scan",
+      "status": {
+        "loading": "Loading…",
+        "running": "Scanning…",
+        "completed": "Last scan completed",
+        "error": "Error during scan",
+        "stopped": "Scan stopped",
+        "waiting": "Waiting"
+      },
+      "label": {
+        "never": "Never",
+        "now": "Just now",
+        "ago": "{{time}} ago",
+        "files": "files",
+        "import_stopped_by_user": "Scan stopped by user"
+      },
+      "button": {
+        "start": "Start scan",
+        "starting": "Starting...",
+        "stop": "Stop"
+      }
+    }
+  }
+}

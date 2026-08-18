@@ -1,0 +1,78 @@
+{
+  "filter": {
+    "label": "Filter",
+    "button": {
+      "apply": "Anwenden",
+      "clear": "Zurücksetzen"
+    },
+    "status": {
+      "label": "Status",
+      "title": "Nach Status filtern",
+      "option": {
+        "available": "Verfügbar",
+        "missing": "Fehlend",
+        "problem": "Problem"
+      }
+    },
+    "resolution": {
+      "label": "Auflösung",
+      "title": "Nach Auflösung filtern"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Nach Codec filtern"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Nach Audio filtern"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Nach HDR filtern"
+    }
+  },
+  "statCard": {
+    "movies": {
+      "title": "Filme",
+      "available": "verfügbar",
+      "total": "Gesamt"
+    },
+    "4k": {
+      "title": "4K UHD",
+      "total": "Gesamt"
+    },
+    "storage": {
+      "title": "Speicher",
+      "diskOccupation": "Speicherbelegung",
+      "total": "Gesamt"
+    },
+    "problem": {
+      "title": "Probleme",
+      "missingMovies": "Fehlende Filme",
+      "total": "Gesamt"
+    },
+    "scan": {
+      "title": "Bibliotheksscan",
+      "status": {
+        "loading": "Wird geladen…",
+        "running": "Scan läuft…",
+        "completed": "Letzter Scan abgeschlossen",
+        "error": "Fehler beim Scan",
+        "stopped": "Scan angehalten",
+        "waiting": "Warten"
+      },
+      "label": {
+        "never": "Nie",
+        "now": "Gerade eben",
+        "ago": "Vor {{time}}",
+        "files": "Dateien",
+        "import_stopped_by_user": "Scan vom Benutzer abgebrochen"
+      },
+      "button": {
+        "start": "Scan starten",
+        "starting": "Startet...",
+        "stop": "Stoppen"
+      }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "filter": {
+    "label": "Filtri",
+    "button": {
+      "apply": "Applica",
+      "clear": "Cancella"
+    },
+    "status": {
+      "label": "Stato",
+      "title": "Filtra per stato",
+      "option": {
+        "available": "Disponibile",
+        "missing": "Mancante",
+        "problem": "Problema"
+      }
+    },
+    "resolution": {
+      "label": "Risoluzione",
+      "title": "Filtra per risoluzione"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Filtra per codec"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Filtra per audio"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Filtra per HDR"
+    }
+  },
+  "statCard": {
+    "movies": {
+      "title": "Film",
+      "available": "disponibili",
+      "total": "totale"
+    },
+    "4k": {
+      "title": "4K UHD",
+      "total": "totale"
+    },
+    "storage": {
+      "title": "Archiviazione",
+      "diskOccupation": "Occupazione disco",
+      "total": "totale"
+    },
+    "problem": {
+      "title": "Problemi",
+      "missingMovies": "Film mancanti",
+      "total": "totale"
+    },
+    "scan": {
+      "title": "Scansione libreria",
+      "status": {
+        "loading": "Caricamento…",
+        "running": "Scansione in corso…",
+        "completed": "Ultima scansione completata",
+        "error": "Errore durante la scansione",
+        "stopped": "Scansione interrotta",
+        "waiting": "In attesa"
+      },
+      "label": {
+        "never": "Mai",
+        "now": "Adesso",
+        "ago": "{{time}} fa",
+        "files": "file",
+        "import_stopped_by_user": "Scansione interrotta dall'utente"
+      },
+      "button": {
+        "start": "Avvia scansione",
+        "starting": "Avvio...",
+        "stop": "Interrompi"
+      }
+    }
+  }
+}
