@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, useContext, ReactNode, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
 import { StatsResponse, ScanStatus, AuthMode, User } from '../types';
+import { SUPPORTED_LANGUAGES } from '../i18n/config';
 
 interface AppConfig {
   radarrUrl?: string;
@@ -30,6 +32,11 @@ interface AppContextType {
   // Theme state
   isDark: boolean;
   toggleTheme: () => void;
+  
+  // Locale state
+  locale: string;
+  availableLanguages: string[];
+  setLocale: (lang: string) => void;
   
   // App data state
   config: AppConfig | null;
@@ -69,6 +76,21 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const unmountedRef = useRef(false);
+
+  // Locale state - read from localStorage or use i18next current language
+  const { i18n } = useTranslation();
+  const [locale, setLocaleState] = useState(() => {
+    const saved = localStorage.getItem('locale-preference');
+    return saved || i18n.language;
+  });
+
+  const setLocale = useCallback((lang: string) => {
+    if (SUPPORTED_LANGUAGES.includes(lang)) {
+      setLocaleState(lang);
+      i18n.changeLanguage(lang);
+      localStorage.setItem('locale-preference', lang);
+    }
+  }, [i18n]);
 
   // WebSocket URL generator
   const getWebSocketUrl = useCallback(() => {
@@ -364,7 +386,9 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
       // Auth
       authMode, user, isAuthenticated, authLoading, login, logout,
       // Theme
-      isDark, toggleTheme, 
+      isDark, toggleTheme,
+      // Locale
+      locale, availableLanguages: SUPPORTED_LANGUAGES, setLocale,
       // App data
       config, configLoading, stats, statsLoading, refreshStats, scanStatus, wsConnected, wsReconnecting 
     }}>

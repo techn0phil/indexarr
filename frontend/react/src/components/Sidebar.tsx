@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/sidebar.module.css';
 import { useAppContext } from '../hooks/useAppContext';
 import { apiClient } from '../api/client';
@@ -9,6 +10,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
+  const { t } = useTranslation('sidebar');
   const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
   const context = useAppContext();
@@ -46,7 +48,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
       </div>
 
       <nav className={styles.nav}>
-        <div className={styles['nav-group']}>Librairie</div>
+        <div className={styles['nav-group']}>{t('section.library')}</div>
 
         <div
           className={`${styles['nav-item']} ${activeNav === 'movies' ? styles.active : ''}`}
@@ -56,7 +58,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <rect x="2" y="3" width="12" height="10" rx="1.5" />
             <path d="M5 3v10M11 3v10M2 7h12" />
           </svg>
-          Films
+          {t('nav.movies')}
           <span className={styles['nav-badge']}>{context?.stats?.totalMovies ?? 0}</span>
         </div>
 
@@ -68,7 +70,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <rect x="2" y="2" width="12" height="12" rx="1.5" />
             <path d="M2 6h12M6 6v8" />
           </svg>
-          Séries
+          {t('nav.series')}
           <span className={styles['nav-badge']}>{context?.stats?.totalSeries ?? 0}</span>
         </div>
 
@@ -107,7 +109,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         {(context?.authMode === 'none' || context?.user?.role === 'admin') && (
           <>
             <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
-              Administration
+              {t('section.administration')}
             </div>
 
             {context?.authMode !== 'none' && (
@@ -121,7 +123,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                   <circle cx="12" cy="6" r="2" />
                   <path d="M15 13c0-2 -1.5-3-3.5-3" />
                 </svg>
-                Utilisateurs
+                {t('nav.users')}
               </div>
             )}
 
@@ -141,7 +143,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                   fontWeight: 500,
                 }}
               >
-                Supprimer les médias
+                {t('button.purge')}
               </button>
 
               {showPurgeConfirm && (
@@ -172,10 +174,10 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 500 }}>
-                      Confirmer la suppression
+                      {t('popup.purge.title')}
                     </h3>
                     <p style={{ margin: '0 0 16px 0', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                      Cette action supprimera tous les films et séries de la base de données. Cette opération ne peut pas être annulée.
+                      {t('popup.purge.message')}
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
@@ -193,7 +195,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                           fontWeight: 500,
                         }}
                       >
-                        Annuler
+                        {t('popup.purge.cancel')}
                       </button>
                       <button
                         onClick={handlePurge}
@@ -211,7 +213,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
                           opacity: isPurging ? 0.6 : 1,
                         }}
                       >
-                        {isPurging ? 'Suppression...' : 'Supprimer'}
+                        {isPurging ? t('popup.purge.deleting') : t('popup.purge.delete')}
                       </button>
                     </div>
                   </div>
@@ -226,13 +228,13 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         {context.wsConnected ? (
           <>
             <div className={styles['status-dot']} />
-            <span>Connecté</span>
+            <span>{t('status.connected')}</span>
           </>
         ) : (
           <>
             {/* Display dot according to reconnecting or disconnected status */}
             <div className={`${styles['status-dot']} ${context.wsReconnecting ? styles['connecting'] : styles['disconnected']}`} />
-            <span>{context.wsReconnecting ? 'Reconnexion...' : 'Déconnecté'}</span>
+            <span>{context.wsReconnecting ? t('status.reconnecting') : t('status.disconnected')}</span>
           </>
         )}
       </div>

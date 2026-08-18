@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import { UserMenu } from './UserMenu';
 import styles from '../styles/topbar.module.css';
 
@@ -85,6 +86,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
       </div>
 
       <ThemeToggle />
+      <LanguageToggle />
       <UserMenu />
     </div>
   );
