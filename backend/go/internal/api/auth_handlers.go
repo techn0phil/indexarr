@@ -184,8 +184,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if claims == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Not authenticated",
+				"success":     false,
+				"error":       "notAuthenticated",
+				"description": "Not authenticated",
 			})
 			return
 		}
@@ -194,8 +195,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if authService.IsEnvAdmin(claims) {
 			w.WriteHeader(http.StatusForbidden)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Le mot de passe de l'administrateur principal est géré via les variables d'environnement",
+				"success":     false,
+				"error":       "adminPasswordManagedViaEnv",
+				"description": "Password of the main administrator is managed via environment variables",
 			})
 			return
 		}
@@ -204,8 +206,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid request body",
+				"success":     false,
+				"error":       "invalidRequestBody",
+				"description": "Invalid request body",
 			})
 			return
 		}
@@ -213,8 +216,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if req.CurrentPassword == "" || req.NewPassword == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Les mots de passe sont requis",
+				"success":     false,
+				"error":       "passwordsRequired",
+				"description": "Passwords are required",
 			})
 			return
 		}
@@ -223,8 +227,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -234,8 +239,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Utilisateur non trouvé",
+				"success":     false,
+				"error":       "userNotFound",
+				"description": "User not found",
 			})
 			return
 		}
@@ -244,8 +250,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if !services.VerifyPassword(user.PasswordHash, req.CurrentPassword) {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Mot de passe actuel incorrect",
+				"success":     false,
+				"error":       "wrongPassword",
+				"description": "Current password is incorrect",
 			})
 			return
 		}
@@ -255,8 +262,9 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to hash password",
+				"success":     false,
+				"error":       "hashingPasswordFailed",
+				"description": "Failed to hash password",
 			})
 			return
 		}
@@ -265,15 +273,17 @@ func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
 		if err := userRepo.UpdatePassword(claims.UserID, newHash); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to update password",
+				"success":     false,
+				"error":       "updatePasswordFailed",
+				"description": "Failed to update password",
 			})
 			return
 		}
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": true,
-			"message": "Mot de passe modifié avec succès",
+			"success":     true,
+			"message":     "passwordUpdated",
+			"description": "Password updated successfully",
 		})
 	}
 }

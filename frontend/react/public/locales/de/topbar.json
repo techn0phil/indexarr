@@ -1,0 +1,53 @@
+{
+  "input": {
+    "filter": {
+      "placeholder": "Nach Titel oder Jahr filtern…"
+    }
+  },
+  "button": {
+    "back": "Zurück",
+    "clear": "Löschen",
+    "toggleTheme": "Dunkelmodus umschalten",
+    "lightModeSwitch": "Zum hellen Modus wechseln",
+    "darkModeSwitch": "Zum dunklen Modus wechseln"
+  },
+  "role": {
+    "admin": "Administrator",
+    "guest": "Gast"
+  },
+  "usermenu": {
+    "updatePassword": "Passwort ändern",
+    "logout": "Abmelden"
+  },
+  "popup": {
+    "updatePassword": {
+      "title": "Passwort ändern",
+      "input": {
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "confirmPassword": "Neues Passwort bestätigen"
+      },
+      "button": {
+        "cancel": "Abbrechen",
+        "updating": "Wird aktualisiert...",
+        "update": "Ändern"
+      },
+      "message": {
+        "requiredFields": "Alle Felder sind erforderlich",
+        "passwordMismatch": "Die neuen Passwörter stimmen nicht überein",
+        "passwordTooShort": "Das Passwort muss mindestens 4 Zeichen lang sein",
+        "wrongPassword": "Das aktuelle Passwort ist falsch",
+        "passwordUpdated": "Passwort wurde aktualisiert",
+        "connectionError": "Fehler bei der Verbindung zum Server",
+        "updatePasswordFailed": "Passwortänderung fehlgeschlagen",
+        "notAuthenticated": "Nicht authentifiziert",
+        "adminPasswordManagedViaEnv": "Das Passwort des Hauptadministrators wird über Umgebungsvariablen verwaltet",
+        "invalidRequestBody": "Ungültige Anfrage",
+        "passwordsRequired": "Passwörter sind erforderlich",
+        "userRepositoryNotAvailable": "Benutzer-Repository ist nicht verfügbar",
+        "userNotFound": "Benutzer nicht gefunden",
+        "hashingPasswordFailed": "Passwort-Hashing fehlgeschlagen"
+      }
+    }
+  }
+}

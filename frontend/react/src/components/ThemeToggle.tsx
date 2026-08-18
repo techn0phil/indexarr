@@ -1,8 +1,10 @@
 import { useContext } from 'react';
 import { AppContext } from '../hooks/useAppContext';
 import styles from '../styles/topbar.module.css';
+import { useTranslation } from 'react-i18next';
 
 export const ThemeToggle = () => {
+  const { t } = useTranslation('topbar');
   const context = useContext(AppContext);
   
   if (!context) return null;
@@ -13,8 +15,8 @@ export const ThemeToggle = () => {
     <button 
       className={styles['theme-toggle']} 
       onClick={toggleTheme}
-      aria-label="Toggle dark mode"
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={t('button.toggleTheme')}
+      title={isDark ? t('button.lightModeSwitch') : t('button.darkModeSwitch')}
     >
       {isDark ? (
         // Sun icon for light mode

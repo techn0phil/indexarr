@@ -1,0 +1,53 @@
+{
+  "input": {
+    "filter": {
+      "placeholder": "Filter by title or year…"
+    }
+  },
+  "button": {
+    "back": "Back",
+    "clear": "Clear",
+    "toggleTheme": "Toggle dark mode",
+    "lightModeSwitch": "Switch to light mode",
+    "darkModeSwitch": "Switch to dark mode"
+  },
+  "role": {
+    "admin": "Administrator",
+    "guest": "Guest"
+  },
+  "usermenu": {
+    "updatePassword": "Change password",
+    "logout": "Log out"
+  },
+  "popup": {
+    "updatePassword": {
+      "title": "Change password",
+      "input": {
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm new password"
+      },
+      "button": {
+        "cancel": "Cancel",
+        "updating": "Updating...",
+        "update": "Update"
+      },
+      "message": {
+        "requiredFields": "All fields are required",
+        "passwordMismatch": "New passwords do not match",
+        "passwordTooShort": "Password must be at least 4 characters long",
+        "wrongPassword": "Current password is incorrect",
+        "passwordUpdated": "Password successfully updated",
+        "connectionError": "Server connection error",
+        "updatePasswordFailed": "Update password failed",
+        "notAuthenticated": "Not authenticated",
+        "adminPasswordManagedViaEnv": "Admin password is managed via environment variables",
+        "invalidRequestBody": "Invalid request body",
+        "passwordsRequired": "Passwords are required",
+        "userRepositoryNotAvailable": "User repository not available",
+        "userNotFound": "User not found",
+        "hashingPasswordFailed": "Hashing password failed"
+      }
+    }
+  }
+}
