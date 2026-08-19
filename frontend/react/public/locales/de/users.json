@@ -1,0 +1,77 @@
+{
+  "label": {
+    "title": "Benutzerverwaltung",
+    "noUsers": "Keine Benutzer erstellt",
+    "createFirstUser": "Erstellen Sie Ihren ersten Benutzer, um zu beginnen"
+  },
+  "button": {
+    "add": "Neuer Benutzer",
+    "edit": "Bearbeiten",
+    "changePassword": "Passwort ändern",
+    "deleting": "Löschen...",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "creating": "Erstellen...",
+    "create": "Erstellen",
+    "saving": "Speichern...",
+    "save": "Speichern"
+  },
+  "table": {
+    "column": {
+      "username": "Benutzername",
+      "role": "Rolle",
+      "status": "Status",
+      "createdAt": "Erstellt am",
+      "actions": "Aktionen"
+    }
+  },
+  "role": {
+    "admin": "Administrator",
+    "guest": "Gast"
+  },
+  "status": {
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert"
+  },
+  "popup": {
+    "new": {
+      "title": "Neuer Benutzer",
+      "input": {
+        "username": "Benutzername",
+        "password": "Passwort",
+        "role": "Rolle"
+      }
+    },
+    "edit": {
+      "title": "Benutzer bearbeiten",
+      "input": {
+        "username": "Benutzername",
+        "role": "Rolle",
+        "enabledAccount": "Konto aktiviert"
+      }
+    },
+    "changePassword": {
+      "title": "Passwort ändern",
+      "description": "Neues Passwort für <b>{{username}}</b> festlegen",
+      "input": {
+        "newPassword": "Neues Passwort"
+      }
+    },
+    "delete": {
+      "title": "Benutzer löschen",
+      "description": "Sind Sie sicher, dass Sie den Benutzer <b>{{username}}</b> löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  },
+  "message": {
+    "loading": "Laden...",
+    "loadingError": "Fehler beim Laden der Benutzer",
+    "serverConnectionError": "Fehler bei der Verbindung zum Server",
+    "creationError": "Fehler beim Erstellen des Benutzers",
+    "updateError": "Fehler beim Aktualisieren des Benutzers",
+    "deletionError": "Fehler beim Löschen des Benutzers",
+    "allFieldsRequired": "Alle Felder sind Pflichtfelder",
+    "passwordRequired": "Passwort ist erforderlich",
+    "clickToEnable": "Klicken, um das Konto zu aktivieren",
+    "clickToDisable": "Klicken, um das Konto zu deaktivieren"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "label": {
+    "title": "Gestion des utilisateurs",
+    "noUsers": "Aucun utilisateur créé",
+    "createFirstUser": "Créer votre premier utilisateur pour commencer"
+  },
+  "button": {
+    "add": "Nouvel utilisateur",
+    "edit": "Modifier",
+    "changePassword": "Changer le mot de passe",
+    "deleting": "Suppression...",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "creating": "Création...",
+    "create": "Créer",
+    "saving": "Enregistrement...",
+    "save": "Enregistrer"
+  },
+  "table": {
+    "column": {
+      "username": "Nom d'utilisateur",
+      "role": "Rôle",
+      "status": "Statut",
+      "createdAt": "Créé le",
+      "actions": "Actions"
+    }
+  },
+  "role": {
+    "admin": "Administrateur",
+    "guest": "Invité"
+  },
+  "status": {
+    "enabled": "Activé",
+    "disabled": "Désactivé"
+  },
+  "popup": {
+    "new": {
+      "title": "Nouvel utilisateur",
+      "input": {
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "role": "Rôle"
+      }
+    },
+    "edit": {
+      "title": "Modifier l'utilisateur",
+      "input": {
+        "username": "Nom d'utilisateur",
+        "role": "Rôle",
+        "enabledAccount": "Compte activé"
+      }
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe",
+      "description": "Définir un nouveau mot de passe pour <b>{{username}}</b>",
+      "input": {
+        "newPassword": "Nouveau mot de passe"
+      }
+    },
+    "delete": {
+      "title": "Supprimer l'utilisateur",
+      "description": "Êtes-vous sûr de vouloir supprimer l'utilisateur <b>{{username}}</b> ? Cette action est irréversible."
+    }
+  },
+  "message": {
+    "loading": "Chargement...",
+    "loadingError": "Erreur lors du chargement des utilisateurs",
+    "serverConnectionError": "Erreur de connexion au serveur",
+    "creationError": "Erreur lors de la création de l'utilisateur",
+    "updateError": "Erreur lors de la mise à jour de l'utilisateur",
+    "deletionError": "Erreur lors de la suppression de l'utilisateur",
+    "allFieldsRequired": "Tous les champs sont obligatoires",
+    "passwordRequired": "Le mot de passe est obligatoire",
+    "clickToEnable": "Cliquez pour activer le compte",
+    "clickToDisable": "Cliquez pour désactiver le compte"
+  }
+}
