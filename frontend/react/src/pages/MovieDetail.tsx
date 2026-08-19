@@ -368,7 +368,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.codec')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.codec}
+                        {videoTrack.codec || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -376,7 +376,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.resolution')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.resolution}
+                        {videoTrack.resolution || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -384,7 +384,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.hdr')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.hdr}
+                        {videoTrack.hdr || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -392,7 +392,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.bitrate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.bitrate}
+                        {videoTrack.bitrate || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -400,7 +400,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.fps')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.fps}
+                        {videoTrack.fps || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -408,7 +408,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.colorSpace')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.colorSpace}
+                        {videoTrack.colorSpace || t('value.unknown')}
                       </td>
                     </tr>
                   </tbody>
@@ -432,7 +432,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.audio.codec')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.codec}
+                        {audioTrack.codec || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -440,7 +440,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.audio.channels')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.channels}
+                        {audioTrack.channels || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -456,7 +456,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.audio.bitrate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.bitrate}
+                        {audioTrack.bitrate || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
@@ -464,7 +464,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.audio.sampleRate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.sampleRate}
+                        {audioTrack.sampleRate || t('value.unknown')}
                       </td>
                     </tr>
                   </tbody>
@@ -489,7 +489,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.subtitle.format')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {subtitleTrack.format}
+                        {subtitleTrack.format || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>

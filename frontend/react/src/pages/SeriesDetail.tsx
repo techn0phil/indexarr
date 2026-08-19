@@ -541,7 +541,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                               {ep.mediaInfo.videoTracks[0].hdr && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
                                   <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.hdr')}</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].hdr}</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].hdr || '—'}</span>
                                 </div>
                               )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
