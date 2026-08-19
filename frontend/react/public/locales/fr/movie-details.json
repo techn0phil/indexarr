@@ -1,0 +1,94 @@
+{
+  "message": {
+    "loading": "Chargement...",
+    "movieNotFound": "Film non trouvé"
+  },
+  "button": {
+    "refresh": "Rafraîchir"
+  },
+  "status": {
+    "available": "Disponible",
+    "missing": "Manquant"
+  },
+  "section": {
+    "cast": "Distribution",
+    "metadata": "Métadonnées"
+  },
+  "metadata": {
+    "file": {
+      "title": "Fichier",
+      "path": "Chemin",
+      "size": "Taille"
+    },
+    "video": {
+      "title": "Vidéo — Piste {{track}}",
+      "codec": "Codec",
+      "resolution": "Résolution",
+      "hdr": "HDR",
+      "bitrate": "Débit",
+      "fps": "FPS",
+      "colorSpace": "Espace colorimétrique"
+    },
+    "audio": {
+      "title": "Audio — Piste {{track}}",
+      "codec": "Codec",
+      "channels": "Canaux",
+      "language": "Langue",
+      "bitrate": "Débit",
+      "sampleRate": "Fréquence d'échantillonnage"
+    },
+    "subtitle": {
+      "title": "Sous-titres — Piste {{track}}",
+      "format": "Format",
+      "language": "Langue",
+      "forced": "Forcé"
+    }
+  },
+  "value": {
+    "unknown": "Inconnu",
+    "yes": "Oui",
+    "no": "Non",
+    "language": {
+      "en": "Anglais",
+      "fr": "Français",
+      "es": "Espagnol",
+      "de": "Allemand",
+      "it": "Italien",
+      "ja": "Japonais",
+      "ko": "Coréen",
+      "zh": "Chinois",
+      "pt": "Portugais",
+      "ru": "Russe",
+      "ar": "Arabe",
+      "th": "Thaï",
+      "tr": "Turc",
+      "pl": "Polonais",
+      "uk": "Ukrainien",
+      "ro": "Roumain",
+      "nl": "Néerlandais",
+      "el": "Grec",
+      "sv": "Suédois",
+      "fi": "Finnois",
+      "no": "Norvégien",
+      "da": "Danois",
+      "cs": "Tchèque",
+      "sk": "Slovaque",
+      "hu": "Hongrois",
+      "bg": "Bulgare",
+      "sr": "Serbe",
+      "hr": "Croate",
+      "sl": "Slovène",
+      "lt": "Lituanien",
+      "lv": "Letton",
+      "et": "Estonien",
+      "mt": "Maltais",
+      "ga": "Irlandais",
+      "cy": "Gallois",
+      "is": "Islandais",
+      "sq": "Albanais",
+      "mk": "Macédonien",
+      "bs": "Bosniaque",
+      "af": "Afrikaans"
+    }
+  }
+}

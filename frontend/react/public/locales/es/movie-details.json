@@ -1,0 +1,94 @@
+{
+  "message": {
+    "loading": "Cargando...",
+    "movieNotFound": "Película no encontrada"
+  },
+  "button": {
+    "refresh": "Actualizar"
+  },
+  "status": {
+    "available": "Disponible",
+    "missing": "Faltante"
+  },
+  "section": {
+    "cast": "Reparto",
+    "metadata": "Metadatos"
+  },
+  "metadata": {
+    "file": {
+      "title": "Archivo",
+      "path": "Ruta",
+      "size": "Tamaño"
+    },
+    "video": {
+      "title": "Vídeo — Pista {{track}}",
+      "codec": "Códec",
+      "resolution": "Resolución",
+      "hdr": "HDR",
+      "bitrate": "Tasa de bits",
+      "fps": "FPS",
+      "colorSpace": "Espacio de color"
+    },
+    "audio": {
+      "title": "Audio — Pista {{track}}",
+      "codec": "Códec",
+      "channels": "Canales",
+      "language": "Idioma",
+      "bitrate": "Tasa de bits",
+      "sampleRate": "Frecuencia de muestreo"
+    },
+    "subtitle": {
+      "title": "Subtítulos — Pista {{track}}",
+      "format": "Formato",
+      "language": "Idioma",
+      "forced": "Forzado"
+    }
+  },
+  "value": {
+    "unknown": "Desconocido",
+    "yes": "Sí",
+    "no": "No",
+    "language": {
+      "en": "Inglés",
+      "fr": "Francés",
+      "es": "Español",
+      "de": "Alemán",
+      "it": "Italiano",
+      "ja": "Japonés",
+      "ko": "Coreano",
+      "zh": "Chino",
+      "pt": "Portugués",
+      "ru": "Ruso",
+      "ar": "Árabe",
+      "th": "Tailandés",
+      "tr": "Turco",
+      "pl": "Polaco",
+      "uk": "Ucraniano",
+      "ro": "Rumano",
+      "nl": "Neerlandés",
+      "el": "Griego",
+      "sv": "Sueco",
+      "fi": "Finlandés",
+      "no": "Noruego",
+      "da": "Danés",
+      "cs": "Checo",
+      "sk": "Eslovaco",
+      "hu": "Húngaro",
+      "bg": "Búlgaro",
+      "sr": "Serbio",
+      "hr": "Croata",
+      "sl": "Esloveno",
+      "lt": "Lituano",
+      "lv": "Letón",
+      "et": "Estonio",
+      "mt": "Maltés",
+      "ga": "Irlandés",
+      "cy": "Galés",
+      "is": "Islandés",
+      "sq": "Albanés",
+      "mk": "Macedonio",
+      "bs": "Bosnio",
+      "af": "Afrikáans"
+    }
+  }
+}

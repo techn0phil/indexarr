@@ -1,0 +1,94 @@
+{
+  "message": {
+    "loading": "Wird geladen...",
+    "movieNotFound": "Film nicht gefunden"
+  },
+  "button": {
+    "refresh": "Aktualisieren"
+  },
+  "status": {
+    "available": "Verfügbar",
+    "missing": "Fehlt"
+  },
+  "section": {
+    "cast": "Besetzung",
+    "metadata": "Metadaten"
+  },
+  "metadata": {
+    "file": {
+      "title": "Datei",
+      "path": "Pfad",
+      "size": "Größe"
+    },
+    "video": {
+      "title": "Video — Spur {{track}}",
+      "codec": "Codec",
+      "resolution": "Auflösung",
+      "hdr": "HDR",
+      "bitrate": "Bitrate",
+      "fps": "FPS",
+      "colorSpace": "Farbraum"
+    },
+    "audio": {
+      "title": "Audio — Spur {{track}}",
+      "codec": "Codec",
+      "channels": "Kanäle",
+      "language": "Sprache",
+      "bitrate": "Bitrate",
+      "sampleRate": "Abtastrate"
+    },
+    "subtitle": {
+      "title": "Untertitel — Spur {{track}}",
+      "format": "Format",
+      "language": "Sprache",
+      "forced": "Erzwungen"
+    }
+  },
+  "value": {
+    "unknown": "Unbekannt",
+    "yes": "Ja",
+    "no": "Nein",
+    "language": {
+      "en": "Englisch",
+      "fr": "Französisch",
+      "es": "Spanisch",
+      "de": "Deutsch",
+      "it": "Italienisch",
+      "ja": "Japanisch",
+      "ko": "Koreanisch",
+      "zh": "Chinesisch",
+      "pt": "Portugiesisch",
+      "ru": "Russisch",
+      "ar": "Arabisch",
+      "th": "Thailändisch",
+      "tr": "Türkisch",
+      "pl": "Polnisch",
+      "uk": "Ukrainisch",
+      "ro": "Rumänisch",
+      "nl": "Niederländisch",
+      "el": "Griechisch",
+      "sv": "Schwedisch",
+      "fi": "Finnisch",
+      "no": "Norwegisch",
+      "da": "Dänisch",
+      "cs": "Tschechisch",
+      "sk": "Slowakisch",
+      "hu": "Ungarisch",
+      "bg": "Bulgarisch",
+      "sr": "Serbisch",
+      "hr": "Kroatisch",
+      "sl": "Slowenisch",
+      "lt": "Litauisch",
+      "lv": "Lettisch",
+      "et": "Estnisch",
+      "mt": "Maltesisch",
+      "ga": "Irisch",
+      "cy": "Walisisch",
+      "is": "Isländisch",
+      "sq": "Albanisch",
+      "mk": "Mazedonisch",
+      "bs": "Bosnisch",
+      "af": "Afrikaans"
+    }
+  }
+}
