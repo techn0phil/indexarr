@@ -1,0 +1,101 @@
+{
+  "message": {
+    "loading": "Cargando...",
+    "seriesNotFound": "Serie no encontrada",
+    "none": "Ninguno"
+  },
+  "button": {
+    "refresh": "Actualizar"
+  },
+  "label": {
+    "season_one": "{{count}} temporada",
+    "season_other": "{{count}} temporadas",
+    "episode_one": "{{count}} episodio",
+    "episode_other": "{{count}} episodios",
+    "available_one": "{{count}} disponible",
+    "available_other": "{{count}} disponibles",
+    "missing_one": "{{count}} faltante",
+    "missing_other": "{{count}} faltantes"
+  },
+  "status": {
+    "complete": "Completa",
+    "ongoing": "En emisión",
+    "upcoming": "Próximamente",
+    "missing": "Faltante"
+  },
+  "section": {
+    "season": "Temporada {{number}}"
+  },
+  "metadata": {
+    "video": {
+      "title": "Vídeo",
+      "codec": "Códec",
+      "resolution": "Resolución",
+      "hdr": "HDR",
+      "bitrate": "Tasa de bits",
+      "frameRate": "Tasa de fotogramas",
+      "colorSpace": "Espacio de color"
+    },
+    "audio": {
+      "title": "Audio {{track}}",
+      "codec": "Códec",
+      "channels": "Canales",
+      "sampleRate": "Frecuencia de muestreo",
+      "bitrate": "Tasa de bits",
+      "language": "Idioma"
+    },
+    "subtitle": {
+      "title": "Subtítulos {{track}}",
+      "language": "Idioma",
+      "format": "Formato",
+      "forced": "Forzado"
+    }
+  },
+  "value": {
+    "unknown": "Desconocido",
+    "yes": "Sí",
+    "no": "No",
+    "language": {
+      "en": "Inglés",
+      "fr": "Francés",
+      "es": "Español",
+      "de": "Alemán",
+      "it": "Italiano",
+      "ja": "Japonés",
+      "ko": "Coreano",
+      "zh": "Chino",
+      "pt": "Portugués",
+      "ru": "Ruso",
+      "ar": "Árabe",
+      "th": "Tailandés",
+      "tr": "Turco",
+      "pl": "Polaco",
+      "uk": "Ucraniano",
+      "ro": "Rumano",
+      "nl": "Neerlandés",
+      "el": "Griego",
+      "sv": "Sueco",
+      "fi": "Finlandés",
+      "no": "Noruego",
+      "da": "Danés",
+      "cs": "Checo",
+      "sk": "Eslovaco",
+      "hu": "Húngaro",
+      "bg": "Búlgaro",
+      "sr": "Serbio",
+      "hr": "Croata",
+      "sl": "Esloveno",
+      "lt": "Lituano",
+      "lv": "Letón",
+      "et": "Estonio",
+      "mt": "Maltés",
+      "ga": "Irlandés",
+      "cy": "Galés",
+      "is": "Islandés",
+      "sq": "Albanés",
+      "mk": "Macedonio",
+      "bs": "Bosnio",
+      "af": "Afrikáans"
+    }
+  }
+}

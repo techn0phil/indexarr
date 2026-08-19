@@ -3,12 +3,14 @@ import { Series } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
 import { useAppContext } from '../hooks/useAppContext';
+import { useTranslation } from 'react-i18next';
 
 interface SeriesDetailProps {
   seriesId: number;
 }
 
 export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
+  const { t } = useTranslation('series-details');
   const [series, setSeries] = useState<Series | null>(null);
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -61,10 +63,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seriesId]);
 
-  if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
-  if (!series) return <div style={{ padding: '20px' }}>Série non trouvée</div>;
+  if (loading) return <div style={{ padding: '20px' }}>{t('message.loading')}</div>;
+  if (!series) return <div style={{ padding: '20px' }}>{t('message.seriesNotFound')}</div>;
 
   const season = series.seasons?.[currentSeason];
+  const statusColor = series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
 
   return (
     <div>
@@ -159,7 +162,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       borderRadius: '8px',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
                       zIndex: 10,
-                      minWidth: '120px',
+                      minWidth: '140px',
                     }}
                     tabIndex={-1}
                   >
@@ -185,7 +188,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         <path d="M12 2.5v2.5H9.5" />
                         <path d="M4 13.5v-2.5H6.5" />
                       </svg>
-                      Rafraîchir
+                      {t('button.refresh')}
                     </button>
                   </div>
                 )}
@@ -199,17 +202,17 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 <span>·</span>
               </>) : null}
               <span>
-                {series.seasonCount} saisons
+                {t('label.season', { count: series.seasonCount })}
               </span>
               <span>·</span>
               <span>
-                {series.episodeCount} épisodes
+                {t('label.episode', { count: series.episodeCount })}
               </span>
               <span>·</span>
               <span>{series.genres}</span>
               <span>·</span>
-              <span style={{ color: '#1D9E75', fontWeight: 500 }}>
-                {series.status === 'complete' ? 'Complète' : 'En cours'}
+              <span style={{ color: statusColor, fontWeight: 500 }}>
+                {series.status === 'complete' ? t('status.complete') : series.status === 'ongoing' ? t('status.ongoing') : t('status.upcoming')}
               </span>
             </div>
 
@@ -319,7 +322,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               transition: 'all 0.15s',
             }}
           >
-            Saison {s.number}
+            {t('section.season', { number: s.number })}
           </button>
         ))}
       </div>
@@ -329,11 +332,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
         <div style={{ padding: '16px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
-              Saison {season.number} — {season.episodes?.length} épisodes
+              {t('section.season', { number: season.number })} — {t('label.episode', { count: season.episodes?.length || 0 })}
             </h2>
             <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
-              <span style={{ color: '#1D9E75' }}>{season.availableEps} disponibles</span>
-              {season.missingEps > 0 && <span style={{ color: '#E24B4A' }}>{season.missingEps} manquant{season.missingEps > 1 ? 's' : ''}</span>}
+              <span style={{ color: '#1D9E75' }}>{t('label.available', { count: season.availableEps })}</span>
+              {season.missingEps > 0 && <span style={{ color: '#E24B4A' }}>{t('label.missing', { count: season.missingEps })}</span>}
             </div>
           </div>
 
@@ -436,7 +439,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                           {ep.mediaInfo.videoTracks?.[0]?.codec}
                         </span>
                       )}
-                      {ep.status === 'missing' && <span className={comStyles['badge-missing']} style={{ fontSize: '9px', padding: '2px 6px' }}>Manquant</span>}
+                      {ep.status === 'missing' && <span className={comStyles['badge-missing']} style={{ fontSize: '9px', padding: '2px 6px' }}>{t('status.missing')}</span>}
                     </div>
 
                     <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right', flexShrink: 0 }}>
@@ -522,35 +525,35 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                               <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                               <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
                             </svg>
-                            Vidéo
+                            {t('metadata.video.title')}
                             <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                           </div>
                           {ep.mediaInfo.videoTracks?.[0] && (
                             <>
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.codec')}</span>
                                 <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].codec || '—'}</span>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Résolution</span>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.resolution')}</span>
                                 <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].resolution || '—'}</span>
                               </div>
                               {ep.mediaInfo.videoTracks[0].hdr && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>HDR</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.hdr')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].hdr}</span>
                                 </div>
                               )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.bitrate')}</span>
                                 <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].bitrate || '—'}</span>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Fréquence d'images</span>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.frameRate')}</span>
                                 <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].fps || '—'} fps</span>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Espace colorimétrique</span>
+                                <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.video.colorSpace')}</span>
                                 <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].colorSpace || '—'}</span>
                               </div>
                             </>
@@ -578,28 +581,28 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                                     <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                                   </svg>
-                                  Audio {(ep.mediaInfo?.audioTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  {t('metadata.audio.title', { track: trackIdx + 1 })}
                                   <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.audio.codec')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.codec || '—'}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Canaux</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.audio.channels')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.channels || '—'}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Échantillonnage</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.audio.sampleRate')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.sampleRate || '—'}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.audio.bitrate')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.bitrate || '—'}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.audio.language')}</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{t(`value.language.${track.language}`) === `value.language.${track.language}` ? track.language || '—' : t(`value.language.${track.language}`)}</span>
                                 </div>
                               </div>
                             ))
@@ -620,10 +623,10 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                                 <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                               </svg>
-                              Audio
+                              {t('metadata.audio.title', { track: '' })}
                               <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                             </div>
-                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>{t('message.none')}</div>
                           </>)}
                         </div>
 
@@ -649,20 +652,20 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                     <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                                     <path d="M5 8h6M5 10h4" />
                                   </svg>
-                                  Sous-titres {(ep.mediaInfo?.subtitleTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  {t('metadata.subtitle.title', { track: trackIdx + 1 })}
                                   <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.subtitle.language')}</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{t(`value.language.${track.language}`) === `value.language.${track.language}` ? track.language || '—' : t(`value.language.${track.language}`)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Format</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.subtitle.format')}</span>
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.format || '—'}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Forcé</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.forced ? 'Oui' : 'Non'}</span>
+                                  <span style={{ color: 'var(--color-text-tertiary)' }}>{t('metadata.subtitle.forced')}</span>
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.forced ? t('value.yes') : t('value.no')}</span>
                                 </div>
                               </div>
                             ))
@@ -684,11 +687,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                 <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                                 <path d="M5 8h6M5 10h4" />
                               </svg>
-                              Sous-titres
+                              {t('metadata.subtitle.title', { track: '' })}
                               <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                             </div>
 
-                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>{t('message.none')}</div>
                           </>)}
                         </div>
 

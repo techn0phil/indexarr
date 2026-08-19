@@ -1,0 +1,101 @@
+{
+  "message": {
+    "loading": "Wird geladen...",
+    "seriesNotFound": "Serie nicht gefunden",
+    "none": "Keine"
+  },
+  "button": {
+    "refresh": "Aktualisieren"
+  },
+  "label": {
+    "season_one": "{{count}} Staffel",
+    "season_other": "{{count}} Staffeln",
+    "episode_one": "{{count}} Episode",
+    "episode_other": "{{count}} Episoden",
+    "available_one": "{{count}} verfügbar",
+    "available_other": "{{count}} verfügbar",
+    "missing_one": "{{count}} fehlend",
+    "missing_other": "{{count}} fehlend"
+  },
+  "status": {
+    "complete": "Abgeschlossen",
+    "ongoing": "Laufend",
+    "upcoming": "Demnächst",
+    "missing": "Fehlend"
+  },
+  "section": {
+    "season": "Staffel {{number}}"
+  },
+  "metadata": {
+    "video": {
+      "title": "Video",
+      "codec": "Codec",
+      "resolution": "Auflösung",
+      "hdr": "HDR",
+      "bitrate": "Bitrate",
+      "frameRate": "Bildfrequenz",
+      "colorSpace": "Farbraum"
+    },
+    "audio": {
+      "title": "Audio {{track}}",
+      "codec": "Codec",
+      "channels": "Kanäle",
+      "sampleRate": "Abtastrate",
+      "bitrate": "Bitrate",
+      "language": "Sprache"
+    },
+    "subtitle": {
+      "title": "Untertitel {{track}}",
+      "language": "Sprache",
+      "format": "Format",
+      "forced": "Erzwungen"
+    }
+  },
+  "value": {
+    "unknown": "Unbekannt",
+    "yes": "Ja",
+    "no": "Nein",
+    "language": {
+      "en": "Englisch",
+      "fr": "Französisch",
+      "es": "Spanisch",
+      "de": "Deutsch",
+      "it": "Italienisch",
+      "ja": "Japanisch",
+      "ko": "Koreanisch",
+      "zh": "Chinesisch",
+      "pt": "Portugiesisch",
+      "ru": "Russisch",
+      "ar": "Arabisch",
+      "th": "Thailändisch",
+      "tr": "Türkisch",
+      "pl": "Polnisch",
+      "uk": "Ukrainisch",
+      "ro": "Rumänisch",
+      "nl": "Niederländisch",
+      "el": "Griechisch",
+      "sv": "Schwedisch",
+      "fi": "Finnisch",
+      "no": "Norwegisch",
+      "da": "Dänisch",
+      "cs": "Tschechisch",
+      "sk": "Slowakisch",
+      "hu": "Ungarisch",
+      "bg": "Bulgarisch",
+      "sr": "Serbisch",
+      "hr": "Kroatisch",
+      "sl": "Slowenisch",
+      "lt": "Litauisch",
+      "lv": "Lettisch",
+      "et": "Estnisch",
+      "mt": "Maltesisch",
+      "ga": "Irisch",
+      "cy": "Walisisch",
+      "is": "Isländisch",
+      "sq": "Albanisch",
+      "mk": "Mazedonisch",
+      "bs": "Bosnisch",
+      "af": "Afrikaans"
+    }
+  }
+}
