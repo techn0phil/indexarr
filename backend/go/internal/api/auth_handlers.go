@@ -690,11 +690,11 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 // ============================================================================
 
 // TriggerScan starts a manual scan
-func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -711,11 +711,11 @@ func TriggerScan(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // TriggerMoviesScan starts a manual scan for movies only
-func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerMoviesScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -731,11 +731,11 @@ func TriggerMoviesScan(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // TriggerSeriesScan starts a manual scan for series only
-func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
+func TriggerSeriesScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -751,11 +751,11 @@ func TriggerSeriesScan(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // StopScan stops the currently running scan
-func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
+func StopScan(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -768,11 +768,11 @@ func StopScan(scheduler *services.Scheduler) http.HandlerFunc {
 	}
 }
 
-func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
+func RefreshMovie(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -796,11 +796,11 @@ func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 	}
 }
 
-func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
+func RefreshSeries(scheduler *services.Scheduler, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
@@ -825,11 +825,11 @@ func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
 }
 
 // Purge deletes all data from the database (admin only)
-func Purge(db *sql.DB) http.HandlerFunc {
+func Purge(db *sql.DB, authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if requireAdmin(w, r) == nil {
+		if authService.GetAuthMode() != "none" && requireAdmin(w, r) == nil {
 			return
 		}
 
