@@ -1,0 +1,28 @@
+{
+  "section": {
+    "library": "Biblioteca",
+    "administration": "Administración"
+  },
+  "nav": {
+    "movies": "Películas",
+    "series": "Series",
+    "users": "Usuarios"
+  },
+  "button": {
+    "purge": "Eliminar todos los medios"
+  },
+  "popup": {
+    "purge": {
+      "title": "Confirmar eliminación",
+      "message": "Esto eliminará todas las películas y series de la base de datos. Esta operación no se puede deshacer.",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "deleting": "Eliminando..."
+    }
+  },
+  "status": {
+    "connected": "Conectado",
+    "reconnecting": "Reconectando...",
+    "disconnected": "Desconectado"
+  }
+}

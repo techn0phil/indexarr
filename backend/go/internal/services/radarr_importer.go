@@ -197,7 +197,7 @@ func (ri *RadarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 			if !suppressBroadcasts {
 				status.Status = "stopped"
 				status.CompletedAt = time.Now().Format(time.RFC3339)
-				status.ErrorMessage = "Import stopped by user"
+				status.ErrorMessage = "import_stopped_by_user"
 				repository.UpdateScanStatus(ri.db, status)
 				if ri.broadcaster != nil {
 					ri.broadcaster.BroadcastScanStopped()

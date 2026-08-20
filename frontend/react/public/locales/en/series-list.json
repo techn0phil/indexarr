@@ -1,0 +1,69 @@
+{
+  "filter": {
+    "label": "Filters",
+    "button": {
+      "apply": "Apply",
+      "clear": "Clear",
+      "clearAll": "Clear all"
+    },
+    "status": {
+      "label": "Status",
+      "title": "Filter by status",
+      "option": {
+        "complete": "Ended",
+        "ongoing": "Ongoing",
+        "upcoming": "Upcoming"
+      }
+    },
+    "resolution": {
+      "label": "Resolution",
+      "title": "Filter by resolution"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Filter by codec"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Filter by audio"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Filter by HDR"
+    }
+  },
+  "statCard": {
+    "series": {
+      "title": "Series",
+      "completed": "complete",
+      "total": "total"
+    },
+    "episodes": {
+      "title": "Episodes",
+      "available": "available",
+      "total": "total"
+    },
+    "storage": {
+      "title": "Storage",
+      "diskOccupation": "Disk usage",
+      "total": "total"
+    },
+    "problem": {
+      "title": "Issues",
+      "missingEpisodes": "Missing episodes",
+      "total": "total"
+    }
+  },
+  "label": {
+    "loading": "Loading...",
+    "noResults": "No series found",
+    "completed": "Complete",
+    "partial": "Partial",
+    "missing": "Missing",
+    "season_one": "{{count}} season",
+    "season_other": "{{count}} seasons",
+    "episode_one": "{{count}} episode",
+    "episode_other": "{{count}} episodes",
+    "ended": "Ended"
+  }
+}

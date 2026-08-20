@@ -3,12 +3,14 @@ import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
 import { useAppContext } from '../hooks/useAppContext';
+import { useTranslation } from 'react-i18next';
 
 interface MovieDetailProps {
   movieId: number;
 }
 
 export const MovieDetail = ({ movieId }: MovieDetailProps) => {
+  const { t } = useTranslation('movie-details');
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,8 +46,8 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movieId]);
 
-  if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
-  if (!movie) return <div style={{ padding: '20px' }}>Film non trouvé</div>;
+  if (loading) return <div style={{ padding: '20px' }}>{t('message.loading')}</div>;
+  if (!movie) return <div style={{ padding: '20px' }}>{t('message.movieNotFound')}</div>;
 
   return (
     <div style={{ paddingBottom: '24px' }}>
@@ -129,7 +131,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     borderRadius: '8px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
                     zIndex: 10,
-                    minWidth: '120px',
+                    minWidth: '140px',
                   }}
                   tabIndex={-1}
                 >
@@ -155,7 +157,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                       <path d="M12 2.5v2.5H9.5" />
                       <path d="M4 13.5v-2.5H6.5" />
                     </svg>
-                    Rafraîchir
+                    {t('button.refresh')}
                   </button>
                 </div>
               )}
@@ -169,7 +171,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             <span>{movie.genres}</span>
             <span>·</span>
             <span style={{ color: '#1D9E75', fontWeight: 500 }}>
-              {movie.status === 'available' ? 'Disponible' : 'Manquant'}
+              {movie.status === 'available' ? t('status.available') : t('status.missing')}
             </span>
           </div>
 
@@ -262,7 +264,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       {movie.cast?.length && (
         <div style={{ marginBottom: '24px', padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
-            Cast principal
+            {t('section.cast')}
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '14px 16px' }}>
             {movie.cast.map((c) => (
@@ -317,7 +319,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       {movie.mediaInfo && (
         <div style={{ padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
-            Métadonnées du fichier
+            {t('section.metadata')}
           </h2>
           <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* File */}
@@ -326,13 +328,13 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 <path d="M4.5 2h5l3 3v9a1 1 0 01-1 1h-7a1 1 0 01-1-1V3a1 1 0 011-1z"></path>
                 <path d="M9.5 2v3h3"></path>
               </svg>
-              Fichier
+              {t('metadata.file.title')}
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                    Chemin
+                    {t('metadata.file.path')}
                   </td>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
                     {movie.filePath}
@@ -340,7 +342,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 </tr>
                 <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                    Taille
+                    {t('metadata.file.size')}
                   </td>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
                   {movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`}
@@ -357,56 +359,56 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                     <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
                   </svg>
-                  Vidéo — piste {index + 1}
+                  {t('metadata.video.title', { track: index + 1 })}
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Codec
+                        {t('metadata.video.codec')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.codec}
+                        {videoTrack.codec || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Résolution
+                        {t('metadata.video.resolution')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.resolution}
+                        {videoTrack.resolution || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        HDR
+                        {t('metadata.video.hdr')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.hdr}
+                        {videoTrack.hdr || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Bitrate
+                        {t('metadata.video.bitrate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.bitrate}
+                        {videoTrack.bitrate || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        FPS
+                        {t('metadata.video.fps')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.fps}
+                        {videoTrack.fps || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Espace colorimétrique
+                        {t('metadata.video.colorSpace')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.colorSpace}
+                        {videoTrack.colorSpace || t('value.unknown')}
                       </td>
                     </tr>
                   </tbody>
@@ -421,48 +423,48 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                     <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                   </svg>
-                  Audio — piste {index + 1}
+                  {t('metadata.audio.title', { track: index + 1 })}
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Codec
+                        {t('metadata.audio.codec')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.codec}
+                        {audioTrack.codec || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Canaux
+                        {t('metadata.audio.channels')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.channels}
+                        {audioTrack.channels || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Langue
+                        {t('metadata.audio.language')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.language}
+                        {t(`value.language.${audioTrack.language}`) === `value.language.${audioTrack.language}` ? audioTrack.language : t(`value.language.${audioTrack.language}`)}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Bitrate
+                        {t('metadata.audio.bitrate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.bitrate}
+                        {audioTrack.bitrate || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Fréquence d'échantillonnage
+                        {t('metadata.audio.sampleRate')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {audioTrack.sampleRate}
+                        {audioTrack.sampleRate || t('value.unknown')}
                       </td>
                     </tr>
                   </tbody>
@@ -478,32 +480,32 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                     <path d="M5 8h6M5 10h4" />
                   </svg>
-                  Sous-titres — piste {index + 1}
+                  {t('metadata.subtitle.title', { track: index + 1 })}
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Format
+                        {t('metadata.subtitle.format')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {subtitleTrack.format}
+                        {subtitleTrack.format || t('value.unknown')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Langue
+                        {t('metadata.subtitle.language')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {subtitleTrack.language}
+                        {t(`value.language.${subtitleTrack.language}`) === `value.language.${subtitleTrack.language}` ? subtitleTrack.language : t(`value.language.${subtitleTrack.language}`)}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', padding: '7px 8px', width: '38%' }}>
-                        Forcé
+                        {t('metadata.subtitle.forced')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {subtitleTrack.forced ? 'Oui' : 'Non'}
+                        {subtitleTrack.forced ? t('value.yes') : t('value.no')}
                       </td>
                     </tr>
                   </tbody>

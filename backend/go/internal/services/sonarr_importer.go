@@ -196,7 +196,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 			if !suppressBroadcasts {
 				status.Status = "stopped"
 				status.CompletedAt = time.Now().Format(time.RFC3339)
-				status.ErrorMessage = "Import stopped by user"
+				status.ErrorMessage = "import_stopped_by_user"
 				repository.UpdateScanStatus(si.db, status)
 				if si.broadcaster != nil {
 					si.broadcaster.BroadcastScanStopped()

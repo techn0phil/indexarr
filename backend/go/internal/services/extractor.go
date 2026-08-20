@@ -178,7 +178,7 @@ func (e *Extractor) parseVideoCodec(track MediainfoTrack) string {
 	format := track.Format
 
 	if format == "" {
-		return "Unknown"
+		return ""
 	}
 
 	// Normalize common codec names
@@ -203,7 +203,7 @@ func (e *Extractor) parseResolution(track MediainfoTrack) string {
 	height := strings.TrimSpace(track.Height)
 
 	if width == "" || height == "" {
-		return "Unknown"
+		return ""
 	}
 
 	// Remove any non-numeric suffixes
@@ -276,7 +276,7 @@ func (e *Extractor) parseAudioCodec(track MediainfoTrack) string {
 	title := track.Title
 
 	if format == "" {
-		return "Unknown"
+		return ""
 	}
 
 	// Handle TrueHD with Atmos
@@ -367,34 +367,19 @@ func (e *Extractor) parseChannels(track MediainfoTrack) string {
 
 func (e *Extractor) formatLanguage(code string) string {
 	if code == "" {
-		return "Unknown"
+		return ""
 	}
 
-	switch strings.ToLower(code) {
-	case "en":
-		return "English"
-	case "fr":
-		return "French"
-	case "es":
-		return "Spanish"
-	case "de":
-		return "German"
-	case "it":
-		return "Italian"
-	case "ja":
-		return "Japanese"
-	case "ko":
-		return "Korean"
-	case "zh":
-		return "Chinese"
-	default:
-		return code
+	if len(code) == 2 {
+		return strings.ToLower(code)
 	}
+
+	return code
 }
 
 func (e *Extractor) formatBitrate(bitrate string) string {
 	if bitrate == "" {
-		return "Unknown"
+		return ""
 	}
 
 	// Parse as integer (bits per second)
@@ -417,7 +402,7 @@ func (e *Extractor) formatBitrate(bitrate string) string {
 
 func (e *Extractor) formatSampleRate(rate string) string {
 	if rate == "" {
-		return "Unknown"
+		return ""
 	}
 
 	return fmt.Sprintf("%s Hz", strings.Split(rate, " ")[0])

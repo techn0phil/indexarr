@@ -1,0 +1,28 @@
+{
+  "section": {
+    "library": "Bibliothèque",
+    "administration": "Administration"
+  },
+  "nav": {
+    "movies": "Films",
+    "series": "Séries",
+    "users": "Utilisateurs"
+  },
+  "button": {
+    "purge": "Supprimer les médias"
+  },
+  "popup": {
+    "purge": {
+      "title": "Confirmer la suppression",
+      "message": "Cette action supprimera tous les films et séries de la base de données. Cette opération ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleting": "Suppression..."
+    }
+  },
+  "status": {
+    "connected": "Connecté",
+    "reconnecting": "Reconnexion...",
+    "disconnected": "Déconnecté"
+  }
+}

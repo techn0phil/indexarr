@@ -200,7 +200,7 @@ func (s *Scheduler) runImport() {
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = totalProcessed
-		status.ErrorMessage = "Import stopped by user"
+		status.ErrorMessage = "import_stopped_by_user"
 		repository.UpdateScanStatus(s.db, status)
 		if s.broadcaster != nil {
 			s.broadcaster.BroadcastScanStopped()
@@ -257,7 +257,7 @@ func (s *Scheduler) runImport() {
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = totalProcessed
-		status.ErrorMessage = "Import stopped by user"
+		status.ErrorMessage = "import_stopped_by_user"
 		repository.UpdateScanStatus(s.db, status)
 		if s.broadcaster != nil {
 			s.broadcaster.BroadcastScanStopped()
@@ -399,7 +399,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = result.FilesProcessed
-		status.ErrorMessage = "Import stopped by user"
+		status.ErrorMessage = "import_stopped_by_user"
 		repository.UpdateScanStatus(s.db, status)
 		if s.broadcaster != nil {
 			s.broadcaster.BroadcastScanStopped()
@@ -452,7 +452,7 @@ func (s *Scheduler) TriggerScan() (*models.ScanResult, error) {
 		status.Status = "stopped"
 		status.CompletedAt = time.Now().Format(time.RFC3339)
 		status.FilesProcessed = result.FilesProcessed
-		status.ErrorMessage = "Import stopped by user"
+		status.ErrorMessage = "import_stopped_by_user"
 		repository.UpdateScanStatus(s.db, status)
 		if s.broadcaster != nil {
 			s.broadcaster.BroadcastScanStopped()

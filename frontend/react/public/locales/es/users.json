@@ -1,0 +1,77 @@
+{
+  "label": {
+    "title": "Gestión de usuarios",
+    "noUsers": "Ningún usuario creado",
+    "createFirstUser": "Cree su primer usuario para comenzar"
+  },
+  "button": {
+    "add": "Nuevo usuario",
+    "edit": "Editar",
+    "changePassword": "Cambiar contraseña",
+    "deleting": "Eliminando...",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "creating": "Creando...",
+    "create": "Crear",
+    "saving": "Guardando...",
+    "save": "Guardar"
+  },
+  "table": {
+    "column": {
+      "username": "Nombre de usuario",
+      "role": "Rol",
+      "status": "Estado",
+      "createdAt": "Creado el",
+      "actions": "Acciones"
+    }
+  },
+  "role": {
+    "admin": "Administrador",
+    "guest": "Invitado"
+  },
+  "status": {
+    "enabled": "Habilitado",
+    "disabled": "Deshabilitado"
+  },
+  "popup": {
+    "new": {
+      "title": "Nuevo usuario",
+      "input": {
+        "username": "Nombre de usuario",
+        "password": "Contraseña",
+        "role": "Rol"
+      }
+    },
+    "edit": {
+      "title": "Editar usuario",
+      "input": {
+        "username": "Nombre de usuario",
+        "role": "Rol",
+        "enabledAccount": "Cuenta habilitada"
+      }
+    },
+    "changePassword": {
+      "title": "Cambiar contraseña",
+      "description": "Establecer una nueva contraseña para <b>{{username}}</b>",
+      "input": {
+        "newPassword": "Nueva contraseña"
+      }
+    },
+    "delete": {
+      "title": "Eliminar usuario",
+      "description": "¿Está seguro de que desea eliminar al usuario <b>{{username}}</b>? Esta acción es irreversible."
+    }
+  },
+  "message": {
+    "loading": "Cargando...",
+    "loadingError": "Error al cargar los usuarios",
+    "serverConnectionError": "Error de conexión con el servidor",
+    "creationError": "Error al crear el usuario",
+    "updateError": "Error al actualizar el usuario",
+    "deletionError": "Error al eliminar el usuario",
+    "allFieldsRequired": "Todos los campos son obligatorios",
+    "passwordRequired": "La contraseña es obligatoria",
+    "clickToEnable": "Haga clic para habilitar la cuenta",
+    "clickToDisable": "Haga clic para deshabilitar la cuenta"
+  }
+}

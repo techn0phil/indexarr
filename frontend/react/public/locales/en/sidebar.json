@@ -1,0 +1,28 @@
+{
+  "section": {
+    "library": "Library",
+    "administration": "Administration"
+  },
+  "nav": {
+    "movies": "Movies",
+    "series": "Series",
+    "users": "Users"
+  },
+  "button": {
+    "purge": "Delete all media"
+  },
+  "popup": {
+    "purge": {
+      "title": "Confirm deletion",
+      "message": "This will delete all movies and series from the database. This operation cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "status": {
+    "connected": "Connected",
+    "reconnecting": "Reconnecting...",
+    "disconnected": "Disconnected"
+  }
+}

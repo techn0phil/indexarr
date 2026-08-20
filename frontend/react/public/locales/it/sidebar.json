@@ -1,0 +1,28 @@
+{
+  "section": {
+    "library": "Collezione",
+    "administration": "Amministrazione"
+  },
+  "nav": {
+    "movies": "Film",
+    "series": "Serie",
+    "users": "Utenti"
+  },
+  "button": {
+    "purge": "Elimina tutti i media"
+  },
+  "popup": {
+    "purge": {
+      "title": "Conferma eliminazione",
+      "message": "Questo eliminerà tutti i film e le serie dal database. Questa operazione non può essere annullata.",
+      "cancel": "Annulla",
+      "delete": "Elimina",
+      "deleting": "Eliminazione in corso..."
+    }
+  },
+  "status": {
+    "connected": "Connesso",
+    "reconnecting": "Riconnessione...",
+    "disconnected": "Disconnesso"
+  }
+}

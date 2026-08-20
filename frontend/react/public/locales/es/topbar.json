@@ -1,0 +1,53 @@
+{
+  "input": {
+    "filter": {
+      "placeholder": "Filtrar por título o año…"
+    }
+  },
+  "button": {
+    "back": "Volver",
+    "clear": "Limpiar",
+    "toggleTheme": "Alternar modo oscuro",
+    "lightModeSwitch": "Cambiar a modo claro",
+    "darkModeSwitch": "Cambiar a modo oscuro"
+  },
+  "role": {
+    "admin": "Administrador",
+    "guest": "Invitado"
+  },
+  "usermenu": {
+    "updatePassword": "Cambiar contraseña",
+    "logout": "Cerrar sesión"
+  },
+  "popup": {
+    "updatePassword": {
+      "title": "Cambiar contraseña",
+      "input": {
+        "currentPassword": "Contraseña actual",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword": "Confirmar nueva contraseña"
+      },
+      "button": {
+        "cancel": "Cancelar",
+        "updating": "Actualizando...",
+        "update": "Cambiar"
+      },
+      "message": {
+        "requiredFields": "Todos los campos son obligatorios",
+        "passwordMismatch": "Las nuevas contraseñas no coinciden",
+        "passwordTooShort": "La contraseña debe tener al menos 4 caracteres",
+        "wrongPassword": "La contraseña actual es incorrecta",
+        "passwordUpdated": "Contraseña actualizada con éxito",
+        "connectionError": "Error de conexión con el servidor",
+        "updatePasswordFailed": "Error al cambiar la contraseña",
+        "notAuthenticated": "No autenticado",
+        "adminPasswordManagedViaEnv": "La contraseña del administrador principal se gestiona mediante variables de entorno",
+        "invalidRequestBody": "Solicitud no válida",
+        "passwordsRequired": "Se requieren las contraseñas",
+        "userRepositoryNotAvailable": "El repositorio de usuarios no está disponible",
+        "userNotFound": "Usuario no encontrado",
+        "hashingPasswordFailed": "Error al generar el hash de la contraseña"
+      }
+    }
+  }
+}

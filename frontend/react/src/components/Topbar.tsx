@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import { UserMenu } from './UserMenu';
 import styles from '../styles/topbar.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface TopbarProps {
   showBack: boolean;
@@ -12,6 +14,7 @@ interface TopbarProps {
 }
 
 export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearchChange }: TopbarProps) => {
+  const { t } = useTranslation('topbar');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
             <svg className={styles['back-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M10 12L6 8l4-4" />
             </svg>
-            Retour
+            {t('button.back')}
           </button>
           <div className={styles.separator} />
         </>
@@ -56,7 +59,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
           ref={searchInputRef}
           type="text"
           className={styles['search-input']}
-          placeholder="Filtrer par titre ou par année…"
+          placeholder={t('input.filter.placeholder')}
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
@@ -64,7 +67,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
           <button
             type="button"
             className={styles['clear-btn']}
-            aria-label="Effacer la recherche"
+            aria-label={t('button.clear')}
             tabIndex={0}
             onClick={() => {
               onSearchChange?.('');
@@ -85,6 +88,7 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
       </div>
 
       <ThemeToggle />
+      <LanguageToggle />
       <UserMenu />
     </div>
   );

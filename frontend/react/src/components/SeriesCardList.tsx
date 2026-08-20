@@ -1,5 +1,6 @@
 import { Series } from '../types';
 import comStyles from '../styles/components.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface SeriesCardListProps {
   series: Series;
@@ -7,6 +8,7 @@ interface SeriesCardListProps {
 }
 
 export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
+  const { t } = useTranslation('series-list');
   const initials = series.title
     .split(' ')
     .map((word) => word[0])
@@ -65,12 +67,12 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
         <div className={comStyles['card-list-meta']}>
           <span>{series.yearStart}{series.yearEnd ? `-${series.yearEnd}` : '+'}</span>
           <span>·</span>
-          <span>{series.seasonCount} saison{series.seasonCount > 1 ? 's' : ''}</span>
+          <span>{t('label.season', { count: series.seasonCount })}</span>
           <span>·</span>
-          <span>{series.episodeCount} épisodes</span>
+          <span>{t('label.episode', { count: series.episodeCount })}</span>
           <span>·</span>
           <span style={{ color: completenessColor, fontWeight: 500 }}>
-            {series.episodeCount === series.totalEpisodeCount ? 'Complète' : series.episodeCount > 0 ? 'Partielle' : 'Manquante'}
+            {series.episodeCount === series.totalEpisodeCount ? t('label.completed') : series.episodeCount > 0 ? t('label.partial') : t('label.missing')}
           </span>
         </div>
         <div className={comStyles['card-list-meta']}>

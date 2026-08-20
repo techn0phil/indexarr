@@ -1,0 +1,53 @@
+{
+  "input": {
+    "filter": {
+      "placeholder": "Filtra per titolo o anno…"
+    }
+  },
+  "button": {
+    "back": "Indietro",
+    "clear": "Cancella",
+    "toggleTheme": "Attiva/disattiva modalità scura",
+    "lightModeSwitch": "Passa alla modalità chiara",
+    "darkModeSwitch": "Passa alla modalità scura"
+  },
+  "role": {
+    "admin": "Amministratore",
+    "guest": "Ospite"
+  },
+  "usermenu": {
+    "updatePassword": "Modifica password",
+    "logout": "Disconnetti"
+  },
+  "popup": {
+    "updatePassword": {
+      "title": "Modifica password",
+      "input": {
+        "currentPassword": "Password attuale",
+        "newPassword": "Nuova password",
+        "confirmPassword": "Conferma nuova password"
+      },
+      "button": {
+        "cancel": "Annulla",
+        "updating": "Aggiornamento in corso...",
+        "update": "Modifica"
+      },
+      "message": {
+        "requiredFields": "Tutti i campi sono obbligatori",
+        "passwordMismatch": "Le nuove password non corrispondono",
+        "passwordTooShort": "La password deve contenere almeno 4 caratteri",
+        "wrongPassword": "La password attuale non è corretta",
+        "passwordUpdated": "Password aggiornata con successo",
+        "connectionError": "Errore di connessione al server",
+        "updatePasswordFailed": "Modifica della password non riuscita",
+        "notAuthenticated": "Non autenticato",
+        "adminPasswordManagedViaEnv": "La password dell'amministratore principale è gestita tramite variabili d'ambiente",
+        "invalidRequestBody": "Richiesta non valida",
+        "passwordsRequired": "Le password sono obbligatorie",
+        "userRepositoryNotAvailable": "Repository utenti non disponibile",
+        "userNotFound": "Utente non trovato",
+        "hashingPasswordFailed": "Hashing della password non riuscito"
+      }
+    }
+  }
+}

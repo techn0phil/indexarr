@@ -3,12 +3,14 @@ import { ScanStatus as ScanStatusType } from '../types';
 import { apiClient } from '../api/client';
 import { useAppContext } from '../hooks/useAppContext';
 import comStyles from '../styles/components.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface ScanStatusProps {
   onScanComplete?: () => void;
 }
 
 export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
+  const { t } = useTranslation('movie-list');
   const { scanStatus: wsStatus, authMode, user } = useAppContext();
   const [status, setStatus] = useState<ScanStatusType | null>(null);
   const [triggering, setTriggering] = useState(false);
@@ -66,26 +68,10 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return "À l'instant";
-    if (diffMins < 60) return `Il y a ${diffMins} min`;
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    return `Il y a ${diffDays}j`;
-  };
-
-  const getStatusLabel = () => {
-    if (!status) return 'Chargement...';
-    switch (status.status) {
-      case 'running':
-        return 'Scan en cours...';
-      case 'completed':
-        return 'Dernier scan terminé';
-      case 'error':
-        return 'Erreur lors du scan';
-      case 'stopped':
-        return 'Scan arrêté';
-      default:
-        return 'En attente';
-    }
+    if (diffMins < 1) return t('statCard.scan.label.now');
+    if (diffMins < 60) return t('statCard.scan.label.ago', { time: `${diffMins} min` });
+    if (diffHours < 24) return t('statCard.scan.label.ago', { time: `${diffHours}h` });
+    return t('statCard.scan.label.ago', { time: `${diffDays}j` });
   };
 
   const getProgress = () => {
@@ -95,7 +81,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
 
   return (
     <div className={comStyles.stat} style={{ position: 'relative' }}>
-      <div className={comStyles['stat-label']}>Scan de la bibliothèque</div>
+      <div className={comStyles['stat-label']}>{t('statCard.scan.title')}</div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
         <div style={{ 
@@ -107,7 +93,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
                           'var(--color-text-tertiary)',
           animation: status?.status === 'running' ? 'pulse 1.5s infinite' : 'none'
         }} />
-        <span style={{ fontSize: '13px', fontWeight: 500 }}>{getStatusLabel()}</span>
+        <span style={{ fontSize: '13px', fontWeight: 500 }}>{t(`statCard.scan.status.${status?.status || 'loading'}`)}</span>
       </div>
 
       {status?.status === 'running' && (
@@ -130,7 +116,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
             color: 'var(--color-text-tertiary)', 
             marginTop: '4px' 
           }}>
-            {status.filesProcessed} / {status.filesFound} fichiers ({getProgress()}%)
+            {status.filesProcessed} / {status.filesFound} {t('statCard.scan.label.files')} ({getProgress()}%)
           </div>
         </div>
       )}
@@ -147,7 +133,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
           color: '#E24B4A', 
           marginTop: '4px' 
         }}>
-          {status.errorMessage}
+          {t(`statCard.scan.label.${status.errorMessage}`) === `statCard.scan.label.${status.errorMessage}` ? status.errorMessage : t(`statCard.scan.label.${status.errorMessage}`)}
         </div>
       )}
 
@@ -165,7 +151,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
               cursor: 'pointer',
             }}
           >
-            Arrêter
+            {t('statCard.scan.button.stop')}
           </button>
         ) : (
           <button
@@ -182,7 +168,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
               opacity: triggering ? 0.7 : 1,
             }}
           >
-            {triggering ? 'Démarrage...' : 'Lancer un scan'}
+            {triggering ? t('statCard.scan.button.starting') : t('statCard.scan.button.start')}
           </button>
         )}
       </div>)}

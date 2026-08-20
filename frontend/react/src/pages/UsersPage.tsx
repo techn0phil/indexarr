@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
 import { UserDetails, CreateUserRequest } from '../types';
 import styles from '../styles/users.module.css';
 
 export const UsersPage = () => {
+  const { t } = useTranslation('users');
   const [users, setUsers] = useState<UserDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +33,10 @@ export const UsersPage = () => {
       if (response.success && response.data) {
         setUsers(response.data);
       } else {
-        setError(response.error || 'Erreur lors du chargement des utilisateurs');
+        setError(response.error || t('message.loadingError'));
       }
     } catch (err) {
-      setError('Erreur de connexion');
+      setError(t('message.serverConnectionError'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export const UsersPage = () => {
 
   const handleCreate = async () => {
     if (!formUsername || !formPassword) {
-      setFormError('Tous les champs sont requis');
+      setFormError(t('message.allFieldsRequired'));
       return;
     }
     
@@ -93,10 +95,10 @@ export const UsersPage = () => {
         setShowCreateModal(false);
         fetchUsers();
       } else {
-        setFormError(response.error || 'Erreur lors de la création');
+        setFormError(response.error || t('message.creationError'));
       }
     } catch (err) {
-      setFormError('Erreur de connexion');
+      setFormError(t('message.serverConnectionError'));
     } finally {
       setFormLoading(false);
     }
@@ -118,10 +120,10 @@ export const UsersPage = () => {
         setShowEditModal(false);
         fetchUsers();
       } else {
-        setFormError(response.error || 'Erreur lors de la mise à jour');
+        setFormError(response.error || t('message.updateError'));
       }
     } catch (err) {
-      setFormError('Erreur de connexion');
+      setFormError(t('message.serverConnectionError'));
     } finally {
       setFormLoading(false);
     }
@@ -138,10 +140,10 @@ export const UsersPage = () => {
         setShowDeleteModal(false);
         fetchUsers();
       } else {
-        setFormError(response.error || 'Erreur lors de la suppression');
+        setFormError(response.error || t('message.deletionError'));
       }
     } catch (err) {
-      setFormError('Erreur de connexion');
+      setFormError(t('message.serverConnectionError'));
     } finally {
       setFormLoading(false);
     }
@@ -149,7 +151,7 @@ export const UsersPage = () => {
 
   const handleSetPassword = async () => {
     if (!selectedUser || !formPassword) {
-      setFormError('Le mot de passe est requis');
+      setFormError(t('message.passwordRequired'));
       return;
     }
     
@@ -161,10 +163,10 @@ export const UsersPage = () => {
       if (response.success) {
         setShowPasswordModal(false);
       } else {
-        setFormError(response.error || 'Erreur lors de la modification');
+        setFormError(response.error || t('message.updateError'));
       }
     } catch (err) {
-      setFormError('Erreur de connexion');
+      setFormError(t('message.serverConnectionError'));
     } finally {
       setFormLoading(false);
     }
@@ -194,7 +196,7 @@ export const UsersPage = () => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Chargement...</div>
+        <div className={styles.loading}>{t('message.loading')}</div>
       </div>
     );
   }
@@ -202,12 +204,12 @@ export const UsersPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Gestion des utilisateurs</h1>
+        <h1 className={styles.title}>{t('label.title')}</h1>
         <button className={styles.createButton} onClick={openCreateModal}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className={styles.buttonIcon}>
             <path d="M8 3v10M3 8h10" />
           </svg>
-          Nouvel utilisateur
+          {t('button.add')}
         </button>
       </div>
 
@@ -221,17 +223,17 @@ export const UsersPage = () => {
             <circle cx="12" cy="6" r="2" />
             <path d="M15 13c0-2 -1.5-3-3.5-3" />
           </svg>
-          <p>Aucun utilisateur créé</p>
-          <p className={styles.emptySubtext}>Créez votre premier utilisateur pour commencer</p>
+          <p>{t('label.noUsers')}</p>
+          <p className={styles.emptySubtext}>{t('label.createFirstUser')}</p>
         </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.tableHeader}>
-            <div className={styles.colUsername}>Nom d'utilisateur</div>
-            <div className={styles.colRole}>Rôle</div>
-            <div className={styles.colStatus}>Statut</div>
-            <div className={styles.colDate}>Créé le</div>
-            <div className={styles.colActions}>Actions</div>
+            <div className={styles.colUsername}>{t('table.column.username')}</div>
+            <div className={styles.colRole}>{t('table.column.role')}</div>
+            <div className={styles.colStatus}>{t('table.column.status')}</div>
+            <div className={styles.colDate}>{t('table.column.createdAt')}</div>
+            <div className={styles.colActions}>{t('table.column.actions')}</div>
           </div>
           {users.map((user) => (
             <div key={user.id} className={styles.tableRow}>
@@ -240,33 +242,33 @@ export const UsersPage = () => {
               </div>
               <div className={styles.colRole}>
                 <span className={`${styles.roleBadge} ${user.role === 'admin' ? styles.roleAdmin : styles.roleGuest}`}>
-                  {user.role === 'admin' ? 'Administrateur' : 'Invité'}
+                  {user.role === 'admin' ? t('role.admin') : t('role.guest')}
                 </span>
               </div>
               <div className={styles.colStatus}>
                 <button
                   className={`${styles.statusToggle} ${user.enabled ? styles.enabled : styles.disabled}`}
                   onClick={() => toggleUserEnabled(user)}
-                  title={user.enabled ? 'Cliquer pour désactiver' : 'Cliquer pour activer'}
+                  title={user.enabled ? t('message.clickToDisable') : t('message.clickToEnable')}
                 >
                   <span className={styles.statusDot} />
-                  {user.enabled ? 'Actif' : 'Désactivé'}
+                  {user.enabled ? t('status.enabled') : t('status.disabled')}
                 </button>
               </div>
               <div className={styles.colDate}>{formatDate(user.createdAt)}</div>
               <div className={styles.colActions}>
-                <button className={styles.actionButton} onClick={() => openEditModal(user)} title="Modifier">
+                <button className={styles.actionButton} onClick={() => openEditModal(user)} title={t('button.edit')}>
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z" />
                   </svg>
                 </button>
-                <button className={styles.actionButton} onClick={() => openPasswordModal(user)} title="Changer le mot de passe">
+                <button className={styles.actionButton} onClick={() => openPasswordModal(user)} title={t('button.changePassword')}>
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="7" width="10" height="7" rx="1" />
                     <path d="M5 7V5a3 3 0 016 0v2" />
                   </svg>
                 </button>
-                <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => openDeleteModal(user)} title="Supprimer">
+                <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => openDeleteModal(user)} title={t('button.delete')}>
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6 7v5M10 7v5M4 4l.8 9a1 1 0 001 .9h4.4a1 1 0 001-.9l.8-9" />
                   </svg>
@@ -281,10 +283,10 @@ export const UsersPage = () => {
       {showCreateModal && (
         <div className={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>Nouvel utilisateur</h2>
+            <h2 className={styles.modalTitle}>{t('popup.new.title')}</h2>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Nom d'utilisateur</label>
+              <label className={styles.label}>{t('popup.new.input.username')}</label>
               <input
                 type="text"
                 className={styles.input}
@@ -296,7 +298,7 @@ export const UsersPage = () => {
             </div>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Mot de passe</label>
+              <label className={styles.label}>{t('popup.new.input.password')}</label>
               <input
                 type="password"
                 className={styles.input}
@@ -307,14 +309,14 @@ export const UsersPage = () => {
             </div>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Rôle</label>
+              <label className={styles.label}>{t('popup.new.input.role')}</label>
               <select
                 className={styles.select}
                 value={formRole}
                 onChange={(e) => setFormRole(e.target.value as 'admin' | 'guest')}
               >
-                <option value="guest">Invité</option>
-                <option value="admin">Administrateur</option>
+                <option value="guest">{t('role.guest')}</option>
+                <option value="admin">{t('role.admin')}</option>
               </select>
             </div>
             
@@ -322,10 +324,10 @@ export const UsersPage = () => {
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowCreateModal(false)} disabled={formLoading}>
-                Annuler
+                {t('button.cancel')}
               </button>
               <button className={styles.submitButton} onClick={handleCreate} disabled={formLoading}>
-                {formLoading ? 'Création...' : 'Créer'}
+                {formLoading ? t('button.creating') : t('button.create')}
               </button>
             </div>
           </div>
@@ -336,10 +338,10 @@ export const UsersPage = () => {
       {showEditModal && selectedUser && (
         <div className={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>Modifier l'utilisateur</h2>
+            <h2 className={styles.modalTitle}>{t('popup.edit.title')}</h2>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Nom d'utilisateur</label>
+              <label className={styles.label}>{t('popup.edit.input.username')}</label>
               <input
                 type="text"
                 className={styles.input}
@@ -350,14 +352,14 @@ export const UsersPage = () => {
             </div>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Rôle</label>
+              <label className={styles.label}>{t('popup.edit.input.role')}</label>
               <select
                 className={styles.select}
                 value={formRole}
                 onChange={(e) => setFormRole(e.target.value as 'admin' | 'guest')}
               >
-                <option value="guest">Invité</option>
-                <option value="admin">Administrateur</option>
+                <option value="guest">{t('role.guest')}</option>
+                <option value="admin">{t('role.admin')}</option>
               </select>
             </div>
             
@@ -368,7 +370,7 @@ export const UsersPage = () => {
                   checked={formEnabled}
                   onChange={(e) => setFormEnabled(e.target.checked)}
                 />
-                Compte actif
+                {t('popup.edit.input.enabledAccount')}
               </label>
             </div>
             
@@ -376,10 +378,10 @@ export const UsersPage = () => {
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowEditModal(false)} disabled={formLoading}>
-                Annuler
+                {t('button.cancel')}
               </button>
               <button className={styles.submitButton} onClick={handleUpdate} disabled={formLoading}>
-                {formLoading ? 'Enregistrement...' : 'Enregistrer'}
+                {formLoading ? t('button.saving') : t('button.save')}
               </button>
             </div>
           </div>
@@ -390,21 +392,23 @@ export const UsersPage = () => {
       {showDeleteModal && selectedUser && (
         <div className={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>Supprimer l'utilisateur</h2>
+            <h2 className={styles.modalTitle}>{t('popup.delete.title')}</h2>
             
             <p className={styles.modalText}>
-              Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{selectedUser.username}</strong> ?
-              Cette action est irréversible.
+              <Trans t={t} i18nKey="popup.delete.description" values={{ username: selectedUser.username }} components={{ b: <strong /> }}>
+                Are you sure you want to delete the user <strong>{selectedUser.username}</strong>?
+                This action is irreversible.
+              </Trans>
             </p>
             
             {formError && <div className={styles.formError}>{formError}</div>}
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowDeleteModal(false)} disabled={formLoading}>
-                Annuler
+                {t('button.cancel')}
               </button>
               <button className={styles.deleteSubmitButton} onClick={handleDelete} disabled={formLoading}>
-                {formLoading ? 'Suppression...' : 'Supprimer'}
+                {formLoading ? t('button.deleting') : t('button.delete')}
               </button>
             </div>
           </div>
@@ -415,14 +419,16 @@ export const UsersPage = () => {
       {showPasswordModal && selectedUser && (
         <div className={styles.modalOverlay} onClick={() => setShowPasswordModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>Changer le mot de passe</h2>
+            <h2 className={styles.modalTitle}>{t('popup.changePassword.title')}</h2>
             
             <p className={styles.modalSubtext}>
-              Définir un nouveau mot de passe pour <strong>{selectedUser.username}</strong>
+              <Trans t={t} i18nKey="popup.changePassword.description" values={{ username: selectedUser.username }} components={{ b: <strong /> }}>
+                Set a new password for <strong>{selectedUser.username}</strong>
+              </Trans>
             </p>
             
             <div className={styles.formField}>
-              <label className={styles.label}>Nouveau mot de passe</label>
+              <label className={styles.label}>{t('popup.changePassword.input.newPassword')}</label>
               <input
                 type="password"
                 className={styles.input}
@@ -437,10 +443,10 @@ export const UsersPage = () => {
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowPasswordModal(false)} disabled={formLoading}>
-                Annuler
+                {t('button.cancel')}
               </button>
               <button className={styles.submitButton} onClick={handleSetPassword} disabled={formLoading}>
-                {formLoading ? 'Enregistrement...' : 'Enregistrer'}
+                {formLoading ? t('button.saving') : t('button.save')}
               </button>
             </div>
           </div>

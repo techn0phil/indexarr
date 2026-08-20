@@ -1,0 +1,28 @@
+{
+  "section": {
+    "library": "Bibliothek",
+    "administration": "Verwaltung"
+  },
+  "nav": {
+    "movies": "Filme",
+    "series": "Serien",
+    "users": "Benutzer"
+  },
+  "button": {
+    "purge": "Alle Medien löschen"
+  },
+  "popup": {
+    "purge": {
+      "title": "Löschung bestätigen",
+      "message": "Dies löscht alle Filme und Serien aus der Datenbank. Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "deleting": "Wird gelöscht..."
+    }
+  },
+  "status": {
+    "connected": "Verbunden",
+    "reconnecting": "Erneute Verbindung...",
+    "disconnected": "Getrennt"
+  }
+}

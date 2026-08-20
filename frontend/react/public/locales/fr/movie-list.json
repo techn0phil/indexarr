@@ -1,0 +1,85 @@
+{
+  "filter": {
+    "label": "Filtres",
+    "button": {
+      "apply": "Appliquer",
+      "clear": "Effacer"
+    },
+    "status": {
+      "label": "Statut",
+      "title": "Filtrer par statut",
+      "option": {
+        "available": "Disponible",
+        "missing": "Manquant",
+        "problem": "Problème",
+        "complete": "Terminée",
+        "ongoing": "En cours",
+        "upcoming": "À venir"
+      }
+    },
+    "resolution": {
+      "label": "Résolution",
+      "title": "Filtrer par résolution"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Filtrer par codec"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Filtrer par audio"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Filtrer par HDR"
+    }
+  },
+  "statCard": {
+    "movies": {
+      "title": "Films",
+      "available": "disponibles",
+      "total": "total"
+    },
+    "4k": {
+      "title": "4K UHD",
+      "total": "total"
+    },
+    "storage": {
+      "title": "Stockage",
+      "diskOccupation": "Occupation du disque",
+      "total": "total"
+    },
+    "problem": {
+      "title": "Problèmes",
+      "missingMovies": "Films manquants",
+      "total": "total"
+    },
+    "scan": {
+      "title": "Scan de la bibliothèque",
+      "status": {
+        "loading": "Chargement…",
+        "running": "Scan en cours…",
+        "completed": "Dernier scan terminé",
+        "error": "Erreur lors du scan",
+        "stopped": "Scan arrêté",
+        "waiting": "En attente"
+      },
+      "label": {
+        "never": "Jamais",
+        "now": "À l'instant",
+        "ago": "Il y a {{time}}",
+        "files": "fichiers",
+        "import_stopped_by_user": "Scan arrêté par l'utilisateur"
+      },
+      "button": {
+        "start": "Lancer un scan",
+        "starting": "Démarrage...",
+        "stop": "Arrêter"
+      }
+    }
+  },
+  "label": {
+    "loading": "Chargement...",
+    "noResults": "Aucun film trouvé"
+  }
+}
