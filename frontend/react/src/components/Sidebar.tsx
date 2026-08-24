@@ -229,12 +229,16 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           <>
             <div className={styles['status-dot']} />
             <span>{t('status.connected')}</span>
+            ·
+            <span>{import.meta.env.VITE_APP_VERSION}</span>
           </>
         ) : (
           <>
             {/* Display dot according to reconnecting or disconnected status */}
             <div className={`${styles['status-dot']} ${context.wsReconnecting ? styles['connecting'] : styles['disconnected']}`} />
             <span>{context.wsReconnecting ? t('status.reconnecting') : t('status.disconnected')}</span>
+            ·
+            <span>{import.meta.env.VITE_APP_VERSION}</span>
           </>
         )}
       </div>
