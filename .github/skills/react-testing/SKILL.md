@@ -28,11 +28,12 @@ Generate comprehensive tests for Indexarr's React frontend using Vitest and Reac
 - CSS Modules for styling
 
 **Key Testing Targets**:
-- Components: MovieCard, FilterChip, Sidebar, ScanStatusCard
+- Components: MovieCard, FilterChip, Sidebar, ScanStatusCard, UserMenu
 - Pages: ListFilms, ListSeries, MovieDetail, SeriesDetail
 - Hooks: useInfiniteList (pagination), useAppContext (navigation state)
 - API client: All fetch operations
 - User interactions: Filter selection, infinite scroll, search
+- Authentication: Login flow, JWT token storage, protected routes
 
 ## Setup Testing Infrastructure
 
@@ -567,7 +568,218 @@ describe('ListFilms', () => {
 });
 ```
 
-### 6. User Interaction Testing
+### 6. UserMenu Component Testing
+
+Test user menu with login/logout flows:
+
+```typescript
+// src/components/UserMenu.test.tsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { UserMenu } from './UserMenu';
+import * as apiClient from '../api/client';
+
+vi.mock('../api/client', () => ({
+  apiClient: {
+    logout: vi.fn(),
+    getCurrentUser: vi.fn(),
+  },
+}));
+
+describe('UserMenu', () => {
+  beforeEach(() => {
+    // Clear localStorage before each test
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it('shows login button when user is not authenticated', () => {
+    localStorage.removeItem('token');
+    render(<UserMenu />);
+    expect(screen.getByText('Login')).toBeInTheDocument();
+  });
+
+  it('displays username when user is authenticated', () => {
+    localStorage.setItem('token', 'test-jwt-token');
+    localStorage.setItem('username', 'john_doe');
+    render(<UserMenu />);
+    expect(screen.getByText('john_doe')).toBeInTheDocument();
+  });
+
+  it('logs out user when logout is clicked', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('token', 'test-jwt-token');
+    localStorage.setItem('username', 'john_doe');
+
+    (apiClient.apiClient.logout as any).mockResolvedValue({ success: true });
+
+    render(<UserMenu />);
+
+    const userDisplay = screen.getByText('john_doe');
+    await user.click(userDisplay); // Open menu
+
+    const logoutButton = screen.getByText('Logout');
+    await user.click(logoutButton);
+
+    await waitFor(() => {
+      expect(localStorage.getItem('token')).toBeNull();
+    });
+  });
+
+  it('displays user role in menu', () => {
+    localStorage.setItem('token', 'test-jwt-token');
+    localStorage.setItem('username', 'john_doe');
+    localStorage.setItem('role', 'admin');
+    render(<UserMenu />);
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+  });
+});
+```
+
+### 7. Authentication Flow Testing
+
+Test login and token management:
+
+```typescript
+// src/pages/LoginPage.test.tsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { LoginPage } from './LoginPage';
+import * as apiClient from '../api/client';
+
+vi.mock('../api/client', () => ({
+  apiClient: {
+    login: vi.fn(),
+  },
+}));
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
+describe('LoginPage', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it('renders login form', () => {
+    render(<LoginPage />);
+    expect(screen.getByLabelText('Username')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it('submits login form with credentials', async () => {
+    const user = userEvent.setup();
+    (apiClient.apiClient.login as any).mockResolvedValue({
+      success: true,
+      token: 'test-jwt-token',
+      user: { username: 'john_doe', role: 'admin' },
+    });
+
+    render(<LoginPage />);
+
+    await user.type(screen.getByLabelText('Username'), 'john_doe');
+    await user.type(screen.getByLabelText('Password'), 'password123');
+    await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(apiClient.apiClient.login).toHaveBeenCalledWith('john_doe', 'password123');
+    });
+  });
+
+  it('stores token and user info on successful login', async () => {
+    const user = userEvent.setup();
+    (apiClient.apiClient.login as any).mockResolvedValue({
+      success: true,
+      token: 'test-jwt-token',
+      user: { username: 'john_doe', role: 'admin' },
+    });
+
+    render(<LoginPage />);
+
+    await user.type(screen.getByLabelText('Username'), 'john_doe');
+    await user.type(screen.getByLabelText('Password'), 'password123');
+    await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem('token')).toBe('test-jwt-token');
+      expect(localStorage.getItem('username')).toBe('john_doe');
+      expect(localStorage.getItem('role')).toBe('admin');
+    });
+  });
+
+  it('displays error message on login failure', async () => {
+    const user = userEvent.setup();
+    (apiClient.apiClient.login as any).mockResolvedValue({
+      success: false,
+      error: 'Invalid credentials',
+    });
+
+    render(<LoginPage />);
+
+    await user.type(screen.getByLabelText('Username'), 'john_doe');
+    await user.type(screen.getByLabelText('Password'), 'wrong_password');
+    await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+    });
+  });
+});
+```
+
+### 8. Protected Route Testing
+
+Test route protection with authentication:
+
+```typescript
+// src/components/ProtectedRoute.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { ProtectedRoute } from './ProtectedRoute';
+
+describe('ProtectedRoute', () => {
+  it('renders component when user is authenticated', () => {
+    localStorage.setItem('token', 'test-jwt-token');
+
+    render(
+      <MemoryRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+  });
+
+  it('redirects to login when user is not authenticated', () => {
+    localStorage.removeItem('token');
+
+    render(
+      <MemoryRouter initialEntries={['/protected']}>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    // Should redirect to login (verify with navigate mock or URL check)
+  });
+});
+```
+
+### 9. User Interaction Testing
 
 Test complex user interactions:
 
@@ -681,16 +893,24 @@ frontend/react/
 │   ├── components/
 │   │   ├── MovieCard.tsx
 │   │   ├── MovieCard.test.tsx
+│   │   ├── UserMenu.tsx
+│   │   ├── UserMenu.test.tsx
 │   │   ├── FilterChip.tsx
 │   │   ├── FilterChip.test.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   ├── ProtectedRoute.test.tsx
 │   │   └── ...
 │   ├── pages/
 │   │   ├── ListFilms.tsx
 │   │   ├── ListFilms.test.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── LoginPage.test.tsx
 │   │   └── ...
 │   ├── hooks/
 │   │   ├── useInfiniteList.ts
 │   │   ├── useInfiniteList.test.ts
+│   │   ├── useAuth.ts
+│   │   ├── useAuth.test.ts
 │   │   └── ...
 │   ├── api/
 │   │   ├── client.ts
@@ -735,16 +955,21 @@ npm test --changed
 6. **Use Shared Utilities**: Create `renderWithProviders` helper
 7. **Test Error States**: Loading states, error messages, empty states
 8. **Isolate Tests**: Each test should be independent
+9. **Test Authentication**: Test login flows, token storage, protected routes
+10. **Clear localStorage**: Reset auth tokens between tests to prevent test pollution
 
 ## Common Testing Gotchas
 
 - **CSS Modules**: Ensure `css: true` in vitest.config.ts to resolve imports
 - **IntersectionObserver**: Mock in setup.ts for infinite scroll components
-- **LocalStorage**: Mock or clear between tests
+- **LocalStorage**: Mock or clear between tests to prevent auth token bleeding
 - **Fetch API**: Mock globally or per-test basis
 - **Context Providers**: Wrap components in providers for context-dependent tests
 - **Async Operations**: Always use `waitFor` for async updates
 - **Timers**: Use `vi.useFakeTimers()` for setTimeout/setInterval tests
+- **JWT Tokens**: Mock token storage and expiration; test token refresh flows
+- **Protected Routes**: Ensure localStorage is cleared before testing unauthenticated state
+- **API Headers**: Verify Authorization header is sent with token in authenticated requests
 
 ## Helper Utilities
 
@@ -807,6 +1032,38 @@ export const mockSeries: Series = {
   imdbId: 'tt7654321',
   poster: null,
 };
+
+// Mock authenticated user
+export const mockAuthUser = {
+  id: 1,
+  username: 'test_user',
+  role: 'admin',
+};
+
+// Mock JWT token
+export const mockJWTToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiMTIzIn0.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
+```
+
+Create `src/test/authTestUtils.ts`:
+
+```typescript
+// Utility functions for authentication testing
+
+export const setAuthToken = (token: string, username: string, role: string = 'user') => {
+  localStorage.setItem('token', token);
+  localStorage.setItem('username', username);
+  localStorage.setItem('role', role);
+};
+
+export const clearAuthToken = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  localStorage.removeItem('role');
+};
+
+export const mockAuthHeader = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+});
 ```
 
 ## Next Steps After Creating Tests

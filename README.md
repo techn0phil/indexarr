@@ -1,61 +1,64 @@
 # Indexarr
 
-**Indexarr** is a media library application inspired by Sonarr and Radarr. It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
+**Indexarr** is a media library application inspired by [Sonarr](https://sonarr.tv/) and [Radarr](https://radarr.video/). It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
 
 ![Main movie page screenshot](ux-ui/movies.png)
 
 
 ## Table of contents
 
-  - [Features](#features)
-  - [Getting started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation steps](#installation-steps)
-    - [Configuration reference](#configuration-reference)
-    - [Common operations](#common-operations)
-    - [Using pre-built image from GitHub Container Registry](#using-pre-built-image-from-github-container-registry)
-  - [Development setup](#development-setup)
-    - [Prerequisites](#prerequisites)
-    - [Backend setup](#backend-setup)
-    - [Frontend setup](#frontend-setup)
-    - [Building Docker image locally](#building-docker-image-locally)
-    - [Project Structure](#project-structure)
-    - [Design & implementation](#design--implementation)
-  - [Common issues](#common-issues)
-    - [Incorrect matching](#incorrect-matching)
-    - [Media permissions](#media-permissions)
-    - [Extra files](#extra-files)
-  - [License](#license)
+- [Features](#features)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Configuration reference](#configuration-reference)
+- [Development setup](#development-setup)
+  - [Prerequisites](#prerequisites-1)
+  - [Backend setup](#backend-setup)
+  - [Frontend setup](#frontend-setup)
+  - [Building Docker image locally](#building-docker-image-locally)
+- [Common issues](#common-issues)
+  - [Incorrect matching](#incorrect-matching)
+  - [Media permissions](#media-permissions)
+  - [Extra files](#extra-files)
+- [License](#license)
 
 
 ## Features
-- Centralized movie and TV series catalog
-- Blu-ray formats support (uncompressed folder and ISO files)
-- Advanced multi-criteria filtering (title, year, status, resolution, codec, audio, HDR)
-- Real-time statistics (total count, disk space, 4K %, issues)
-- Detailed media info (video, audio, and subtitle tracks)
-- Responsive UI with grid/list views
-- RESTful API backend
+
+- **Centralized movies and series catalog**
+  - **Radarr / Sonarr integrations** — Import from existing Radarr / Sonarr libraries
+  - **Filesystem scanning** — Discover media from local directories
+  - **Blu-ray formats support** — Uncompressed folder and ISO files
+- **Accurate media intelligence**
+  - **Detailed media info detection** — video, audio, and subtitle tracks
+  - **Multi-criteria filtering** — title, year, status, resolution, codec, audio, HDR
+  - **Real-time statistics** — total count, disk space, 4K %, problem counts
+- **Easy user experience**
+  - **Multi-language support** — English, Français, Español, Italiano, Deutsch
+  - **Responsive UI** — Supports desktop, tablet, and mobile devices
+  - **User authentication** — Builtin authentication with local users
 
 
 ## Getting started
 
-The easiest and recommended way to run Indexarr is with Docker Compose. The provided `docker-compose.yml` is production-ready with automatic restarts, data persistence, and proper networking.
+The easiest and recommended way to run Indexarr is with Docker Compose. The provided [docker-compose.yml](docker-compose.yml) is production-ready with automatic restarts, data persistence, and proper networking.
+
 
 ### Prerequisites
-- Docker and Docker Compose installed
-- TMDB and TVDB API keys (optional, but recommended for full metadata)
+- [Docker](https://docs.docker.com/engine/install/) installed
+- [TMDB](https://www.themoviedb.org/settings/api) and [TVDB](https://www.thetvdb.com/api-information) API keys (optional, but highly recommended for full metadata)
 
 
-### Installation steps
+### Installation
 
 1. **Create docker-compose file:**
 
-   Download or copy content from https://github.com/techn0phil/indexarr/blob/main/docker-compose.yml
+   Download or copy content from [docker-compose.yml](docker-compose.yml)
    
 2. **Configure environment variables:**
    
-   Download or copy content from https://github.com/techn0phil/indexarr/blob/main/.env.example
+   Download or copy content from [.env.example](.env.example)
 
    Create a `.env` file with your configuration:
    ```bash
@@ -82,91 +85,50 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 
 5. **Access the application:**
    - **Frontend:** http://localhost:8787
-   - **API:** http://localhost:8787/api
    - **Health check:** http://localhost:8787/health
 
-### Configuration reference
+
+## Configuration reference
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `TMDB_API_KEY` | - | No | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
-| `TVDB_API_KEY` | - | No | TVDB API key for series metadata ([get here](https://www.thetvdb.com/api-information)) |
-| `MOVIES_HOST_PATH` | - | No | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
-| `SERIES_HOST_PATH` | - | No | Comma-separated paths to series folder on the host (e.g., `/series` or `/mnt/nas/tv,/external/tv`) |
+| `MOVIES_HOST_PATH` | - | Yes | Comma-separated paths to movies folders on the host for volume mount (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
+| `SERIES_HOST_PATH` | - | Yes | Comma-separated paths to series folders on the host for volume mount (e.g., `/series` or `/mnt/nas/tv,/external/tv`) |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest [**Deprecated**: prefer `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS`] |
 | `MOVIES_LIBRARY_PATHS` | /data/movies | No | Comma-separated paths to movies on the guest |
 | `SERIES_LIBRARY_PATHS` | /data/series | No | Comma-separated paths to series on the guest |
-| `SKIP_FOLDERS` | - | No | Comma-separated list of folder names to skip during scanning |
-| `IGNORE_FILE_PATTERN` | - | No | Regular expression pattern to ignore certain files during scanning |
+| `SKIP_FOLDERS` | - | No | Comma-separated list of folders to skip during scanning |
+| `IGNORE_FILE_PATTERN` | - | No | Regular expression pattern to ignore matching files during scanning |
+| `TMDB_API_KEY` | - | No, but recommended | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
+| `TVDB_API_KEY` | - | No, but recommended | TVDB API key for series metadata ([get here](https://www.thetvdb.com/api-information)) |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
 | `RADARR_API_KEY` | - | No | Radarr API key for importing movies from Radarr |
 | `RADARR_PATH_MAPPING` | - | No | Used to map Radarr paths to local paths (e.g. `/movies:/data/movies`) |
 | `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
 | `SONARR_API_KEY` | - | No | Sonarr API key for importing series from Sonarr |
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
-| `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
-| `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `DETECTION_LANGUAGE` | en | No | Language code for media detection (e.g., "en", "fr") |
 | `METADATA_LANGUAGE` | en | No | Language code for metadata fetching (e.g., "en", "fr") |
-| `LOG_LEVEL` | `INFO` | No | Logging level |
-| `AUTH_MODE` | `none` | No | Authentication mode (none, simple, or oidc) |
+| `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
+| `SCAN_TIMEOUT` | 30 | No | Timeout in seconds for media info extraction during scan |
+| `AUTH_MODE` | `none` | No | Authentication mode (`none` or `simple`) |
 | `AUTH_ADMIN_USERNAME` | - | Yes if `AUTH_MODE` is `simple` | Username of administrator account |
 | `AUTH_ADMIN_PASSWORD` | - | Yes if `AUTH_MODE` is `simple` | Password of administrator account |
 | `AUTH_SESSION_SECRET` | - | No | A random secret (auto-generated if not provided) |
 | `AUTH_SESSION_MAX_AGE` | 168 | No | Maximum session validity (default to 168 hours, ie. 7 days) |
-| `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
+| `LOG_LEVEL` | `INFO` | No | Logging level (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`) |
 | `UID` | 1000 | No | User ID inside container (match your media library owner) |
 | `GID` | 1000 | No | Group ID inside container (match your media library owner) |
+| `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
 
-### Common operations
-
-**View logs in real-time:**
-```bash
-docker compose logs -f
-```
-
-**Stop the application:**
-```bash
-docker compose down
-```
-
-**Stop and remove all data:**
-```bash
-docker compose down -v
-```
-
-**Restart the application:**
-```bash
-docker compose restart
-```
-
-**Update to latest version:**
-```bash
-docker compose pull
-docker compose up -d
-```
-
-### Using pre-built image from GitHub Container Registry
-
-```bash
-docker pull ghcr.io/techn0phil/indexarr:latest
-docker run -d -p 8787:8787 \
-      -v indexarr_data:/app/data \
-      -v /mnt/movies:/data/movies \
-      -v /mnt/series:/data/series \
-      -e TMDB_API_KEY=fffffffffffffffff \
-      -e TVDB_API_KEY=fffffffffffffffff \
-      -e RADARR_URL=http://radarr:7878 \
-      -e SONARR_URL=http://sonarr:8989 \
-      ghcr.io/techn0phil/indexarr:latest
-```
 
 ## Development setup
 
 ### Prerequisites
 - Node.js (>=24)
-- Go (>=1.26)
-- mediainfo CLI
+- Go (>=1.25)
+- mediainfo CLI (for video file analysis)
+
 
 ### Backend setup
 1. Navigate to backend:
@@ -191,6 +153,7 @@ docker run -d -p 8787:8787 \
    go test ./...
    ```
 
+
 ### Frontend setup
 1. Navigate to frontend:
    ```bash
@@ -209,70 +172,17 @@ docker run -d -p 8787:8787 \
    npm test
    ```
 
-### Building Docker image locally
 
-```bash
-# Build the image
-docker build -t indexarr:latest .
-
-# Run the container
-docker run -d -p 80:80 -v indexarr_data:/app/data indexarr:latest
-```
-
-### Project Structure
-
-```
-indexarr/
-├── .github/                 # GitHub resources
-│   ├── agents/              # Specialized AI agents
-│   ├── skills/              # Custom AI skills
-│   └── workflows/           # GitHub actions
-├── backend/                 # Go backend
-│   └── go/
-│       ├── cmd/server/      # Entry point
-│       ├── internal/
-│       │   ├── api/         # HTTP handlers
-│       │   ├── config/      # Configuration
-│       │   ├── models/      # Data models
-│       │   ├── repository/  # Database layer
-│       │   │   └── migrations/  # Schema migrations scripts
-│       │   └── services/    # Business logic
-│       ├── go.mod           # Go module
-│       └── README.md        # Backend docs
-├── frontend/                # React frontend
-│   └── react/
-│       ├── src/
-│       │   ├── components/  # UI components
-│       │   ├── pages/       # Page components
-│       │   ├── api/         # API client
-│       │   ├── hooks/       # Custom hooks
-│       │   ├── styles/      # CSS modules
-│       │   ├── types/       # TypeScript types
-│       │   └── App.tsx      # Root component
-│       ├── package.json     # Dependencies
-│       └── README.md        # Frontend docs
-├── samples/                 # Data samples
-│   ├── tmdb/                # TheMovieDB samples
-│   │   ├── movies/          # Movies details
-│   │   └── series/          # Series details
-│   └── tvdb/                # TheTVDB samples
-│   │   ├── episodes/        # Episodes details
-│   │   ├── movies/          # Movies details
-│   │   └── series/          # Series details
-│   ├── fake-movies.sh       # Movies generator script
-│   └── fake-series.sh       # Series generator script
-├── ux-ui/                   # UI/UX design
-│   ├── medialib_v5.html     # Full HTML/CSS mockup
-│   └── prompt.md            # Implementation specs
-├── AGENTS.md                # Chat customization guide
-└── LICENSE                  # GPL v3
-```
-
-
-### Design & implementation
-- **Design system:** See `ux-ui/medialib_v5.html` for full mockups and CSS variables.
-- **Implementation guide:** See `ux-ui/prompt.md` for detailed frontend specs.
-- **Chat agent customization:** See `AGENTS.md` for agent and workflow details.
+### Run Docker image locally
+1. Create `.env` file from example:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+2. Run dev compose file:
+   ```bash
+   docker compose -f docker-compose.dev.yml up -d
+   ```
 
 
 ## Common issues
@@ -282,9 +192,10 @@ indexarr/
 If your media files are not correctly detected (no poster, duration, wrong links, etc...), review the files and folders naming with the following recommendations:
 - **Movies**: file must be in a folder named `{movie title} ({year})`
 - **Series**: each series must have a folder named `{series name} ({year})`
-- **Episodes** : file must contain the season and episode number with a standard pattern like `S01E05` or `1x05`
+- **Episodes**: file must contain the season and episode number with a standard pattern like `S01E05` or `1x05`
 
 If the files and folders naming are correct but still have incorrect matches, check whether the title and year are correct on [TheMovieDB](https://www.themoviedb.org/).
+
 
 ### Media permissions
 

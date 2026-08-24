@@ -194,7 +194,181 @@ func TestGetMoviesHandler(t *testing.T) {
 }
 ```
 
-### 5. Integration Tests
+### 5. Authentication & Security Tests
+
+Test JWT tokens, password hashing, and auth handlers:
+
+```go
+func TestAuthService_LoginSuccess(t *testing.T) {
+	t.Parallel()
+	
+	cfg := &config.Config{
+		JWTSecret:     "test-secret-key-32-chars-minimum!",
+		AuthMode:      "database",
+		TokenDuration: time.Hour,
+	}
+	
+	userRepo := &mockUserRepository{
+		getByUsernameFunc: func(username string) (*models.User, error) {
+			// Simulate a user with bcrypt-hashed password
+			hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+			return &models.User{
+				ID:           1,
+				Username:     username,
+				PasswordHash: string(hashedPassword),
+				Role:         "admin",
+				Enabled:      true,
+			}, nil
+		},
+	}
+	
+	authService := services.NewAuthService(cfg, userRepo)
+	
+	token, err := authService.Login("testuser", "password123")
+	if err != nil {
+		t.Fatalf("Login() error = %v", err)
+	}
+	
+	if token == "" {
+		t.Error("expected token to be non-empty")
+	}
+	
+	// Verify token is valid
+	claims, err := authService.ValidateToken(token)
+	if err != nil {
+		t.Fatalf("ValidateToken() error = %v", err)
+	}
+	
+	if claims.Username != "testuser" {
+		t.Errorf("expected username=testuser, got %s", claims.Username)
+	}
+}
+
+func TestAuthService_LoginInvalidCredentials(t *testing.T) {
+	t.Parallel()
+	
+	cfg := &config.Config{
+		JWTSecret:     "test-secret-key-32-chars-minimum!",
+		AuthMode:      "database",
+		TokenDuration: time.Hour,
+	}
+	
+	userRepo := &mockUserRepository{
+		getByUsernameFunc: func(username string) (*models.User, error) {
+			hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+			return &models.User{
+				ID:           1,
+				Username:     username,
+				PasswordHash: string(hashedPassword),
+				Role:         "admin",
+				Enabled:      true,
+			}, nil
+		},
+	}
+	
+	authService := services.NewAuthService(cfg, userRepo)
+	
+	_, err := authService.Login("testuser", "wrongpassword")
+	if err == nil {
+		t.Error("expected error for invalid credentials")
+	}
+	
+	if !errors.Is(err, services.ErrInvalidCredentials) {
+		t.Errorf("expected ErrInvalidCredentials, got %v", err)
+	}
+}
+
+func TestAuthService_TokenExpiration(t *testing.T) {
+	t.Parallel()
+	
+	cfg := &config.Config{
+		JWTSecret:     "test-secret-key-32-chars-minimum!",
+		AuthMode:      "database",
+		TokenDuration: -time.Hour, // Expired token
+	}
+	
+	userRepo := &mockUserRepository{}
+	authService := services.NewAuthService(cfg, userRepo)
+	
+	// Create a token with expired duration
+	claims := &services.UserClaims{
+		UserID:   1,
+		Username: "testuser",
+		Role:     "admin",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+		},
+	}
+	
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, _ := token.SignedString([]byte(cfg.JWTSecret))
+	
+	_, err := authService.ValidateToken(tokenString)
+	if !errors.Is(err, services.ErrTokenExpired) {
+		t.Errorf("expected ErrTokenExpired, got %v", err)
+	}
+}
+
+// Mock user repository for auth testing
+type mockUserRepository struct {
+	getByUsernameFunc func(username string) (*models.User, error)
+}
+
+func (m *mockUserRepository) GetByUsername(username string) (*models.User, error) {
+	if m.getByUsernameFunc != nil {
+		return m.getByUsernameFunc(username)
+	}
+	return nil, repository.ErrUserNotFound
+}
+```
+
+### 6. Protected Endpoint Tests
+
+Test HTTP handlers with JWT authentication:
+
+```go
+func TestGetMoviesHandler_WithAuth(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	
+	// Create a test token
+	token := generateTestJWT("testuser", "admin", "test-secret")
+	
+	req := httptest.NewRequest("GET", "/api/movies", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	
+	handler := NewMovieHandler(db)
+	authMiddleware := middleware.AuthMiddleware("test-secret")
+	
+	// Wrap handler with auth middleware
+	authHandler := authMiddleware(handler.GetMovies)
+	authHandler.ServeHTTP(w, req)
+	
+	resp := w.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected status 200, got %d", resp.StatusCode)
+	}
+}
+
+func TestProtectedEndpoint_MissingToken(t *testing.T) {
+	req := httptest.NewRequest("GET", "/api/movies", nil)
+	// No Authorization header
+	w := httptest.NewRecorder()
+	
+	handler := NewMovieHandler(nil)
+	authMiddleware := middleware.AuthMiddleware("test-secret")
+	authHandler := authMiddleware(handler.GetMovies)
+	authHandler.ServeHTTP(w, req)
+	
+	resp := w.Result()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("expected status 401, got %d", resp.StatusCode)
+	}
+}
+```
+
+### 7. Integration Tests
 
 Test full workflows with real dependencies:
 
@@ -236,17 +410,25 @@ backend/go/
 │   │   ├── queries.go
 │   │   ├── queries_test.go          # Table-driven tests for filters
 │   │   ├── mutations.go
-│   │   └── mutations_test.go        # Insert/update/delete tests
+│   │   ├── mutations_test.go        # Insert/update/delete tests
+│   │   ├── user_repository.go
+│   │   └── user_repository_test.go  # User CRUD operations
 │   ├── services/
 │   │   ├── scanner.go
 │   │   ├── scanner_test.go          # Mock filesystem, DB
 │   │   ├── tmdb.go
 │   │   ├── tmdb_test.go             # Mock HTTP responses
+│   │   ├── auth.go
+│   │   ├── auth_test.go             # JWT, password hashing, login flows
 │   │   ├── extractor.go
 │   │   └── extractor_test.go        # Mock mediainfo output
 │   └── api/
 │       ├── handlers.go
-│       └── handlers_test.go         # httptest with mock DB
+│       ├── handlers_test.go         # httptest with mock DB
+│       ├── auth_handlers.go
+│       ├── auth_handlers_test.go    # Auth endpoints (login, token validation)
+│       ├── middleware.go
+│       └── middleware_test.go       # JWT validation middleware tests
 └── testdata/                        # Test fixtures
     ├── movies/
     │   └── sample.mkv
@@ -282,9 +464,9 @@ go tool cover -html=coverage.out
 
 1. **Test Public APIs**: Focus on exported functions and types
 2. **Use Table-Driven Tests**: For functions with multiple input scenarios
-3. **Mock External Dependencies**: TMDB, TVDB, filesystem operations
+3. **Mock External Dependencies**: TMDB, TVDB, filesystem operations, HTTP clients
 4. **In-Memory DB for Repository**: Use SQLite `:memory:` for fast tests
-5. **Test Edge Cases**: Empty inputs, nil pointers, error conditions
+5. **Test Edge Cases**: Empty inputs, nil pointers, error conditions, invalid tokens
 6. **Keep Tests Fast**: Unit tests should run in milliseconds
 7. **Use `testing.Short()`**: Flag integration tests that require external resources
 8. **Parallel Tests**: Use `t.Parallel()` for tests that can run concurrently
@@ -296,6 +478,10 @@ go tool cover -html=coverage.out
 - **Context Timeouts**: Test context cancellation for long-running operations
 - **Race Conditions**: Run `go test -race` to detect concurrent access issues
 - **Nil Checks**: Scanner services can be nil if not configured—test both cases
+- **JWT Secret Management**: Test with different secret lengths; ensure 32+ chars for HS256
+- **Token Expiration**: Use negative durations or manipulate `ExpiresAt` for testing expired tokens
+- **Password Hashing**: Always use bcrypt for testing; never compare plain text passwords
+- **Auth Modes**: Test both "env-admin" (no DB users) and "database" auth modes
 
 ## Example: Complete Test File
 

@@ -2,7 +2,7 @@
 
 **Indexarr** is a media library management application inspired by Sonarr and Radarr. It provides centralized catalog management for movies and TV series with detailed tracking of media file properties, library statistics, and advanced filtering.
 
-**Status**: Production-ready (~90% complete). Core features implemented, polish and optimization ongoing.
+**Status**: Production-ready (~95% complete). Core features implemented, authentication and multi-language support added, remaining work is polish and optimization.
 
 **Stack**: React + TypeScript (frontend) + Go (backend) + SQLite (database) + Docker (deployment)
 
@@ -43,10 +43,27 @@ npm test                         # Frontend tests (when implemented)
 ### Environment Setup
 
 Copy `.env.example` and configure:
-- **Import Mode 1 (Radarr/Sonarr)**: Set `RADARR_URL` + `RADARR_API_KEY` and/or `SONARR_URL` + `SONARR_API_KEY`
-- **Import Mode 2 (Filesystem)**: Set `MOVIES_LIBRARY_PATHS` and/or `SERIES_LIBRARY_PATHS`
+
+**Media Import (choose at least one)**:
+- **Mode 1 (Radarr/Sonarr)**: Set `RADARR_URL` + `RADARR_API_KEY` and/or `SONARR_URL` + `SONARR_API_KEY`
+- **Mode 2 (Filesystem)**: Set `MOVIES_LIBRARY_PATHS` and/or `SERIES_LIBRARY_PATHS`
 - **Both modes can be mixed**: e.g., Radarr for movies + filesystem for series
-- **Required**: `TMDB_API_KEY` and `TVDB_API_KEY` for metadata enrichment
+
+**Metadata APIs (required)**:
+- `TMDB_API_KEY` — The Movie Database API key
+- `TVDB_API_KEY` — TV Database API key
+
+**Authentication (optional, defaults to no auth)**:
+- `AUTH_MODE` — Authentication mode: `none` (default), `simple`, or `oidc`
+- `AUTH_ADMIN_USERNAME` — Admin username (required if `AUTH_MODE=simple`)
+- `AUTH_ADMIN_PASSWORD` — Admin password (required if `AUTH_MODE=simple`)
+- `AUTH_SESSION_SECRET` — Secret key for JWT signing (generate random string, required if auth enabled)
+- `AUTH_SESSION_MAX_AGE` — Session duration in hours (default: 168 = 7 days)
+
+**Internationalization**:
+- Frontend supports 5 languages: English, Deutsch, Español, Français, Italiano
+- Language preference saved in localStorage, defaults to browser language
+- Switch language via LanguageToggle component in sidebar
 
 ### Database
 
@@ -59,7 +76,7 @@ Copy `.env.example` and configure:
 
 ## What's Implemented
 
-### Backend (Go) — ~95% Complete
+### Backend (Go) — ~98% Complete
 
 **✅ Core Services**:
 - **Dual Import Architecture**: Radarr/Sonarr API clients + filesystem scanner (mix and match)
@@ -69,9 +86,24 @@ Copy `.env.example` and configure:
 - **TMDB/TVDB Clients**: Metadata enrichment with per-scan caching
 - **Statistics Service**: Library totals, disk usage, 4K percentage, problem counts
 - **Scheduler**: Configurable scan intervals (cron-like)
+- **Authentication Service**: JWT-based auth with support for "none", "simple", and "oidc" modes
+- **User Management**: User creation, password changes, role-based access control
 
 **✅ API Endpoints**:
 ```
+# Public endpoints
+GET  /api/auth/config                   # Get auth mode configuration
+POST /api/auth/login                    # Login with credentials
+
+# Protected endpoints
+GET  /api/auth/me                       # Get current user info
+POST /api/auth/change-password          # Change user password
+GET  /api/auth/users                    # List users (admin only)
+POST /api/auth/users                    # Create user (admin only)
+DELETE /api/auth/users/:id              # Delete user (admin only)
+POST /api/auth/logout                   # Logout (clear auth cookie)
+
+# Media endpoints
 GET  /api/movies                        # List with filters (status, resolution, codec, audio, HDR, search)
 GET  /api/movies/:id                    # Movie details + cast + mediainfo
 POST /api/movies/:id/refresh            # Refresh single movie metadata
@@ -98,38 +130,46 @@ GET  /health                            # Health check endpoint
 - **scan_status**: Scan progress tracking
 - **Indexes**: Optimized for common queries
 
-### Frontend (React) — ~85% Complete
+### Frontend (React) — ~93% Complete
 
 **✅ Pages**:
 - **ListFilms**: Grid/list view, infinite scroll, multi-filter chips, stat cards, search
 - **ListSeries**: Grid/list view, infinite scroll, filters
 - **MovieDetail**: Hero section, cast grid, mediainfo tracks table, refresh button
 - **SeriesDetail**: Hero section, season tabs, episode list with technical details
+- **LoginPage**: User authentication with JWT-based login
+- **UsersPage**: User management interface (admin only)
 
 **✅ Components**:
 - **Sidebar**: Fixed 210px navigation with active state, badge counts
-- **Topbar**: Search bar, breadcrumb support (placeholder)
+- **Topbar**: Search bar, breadcrumb support, user menu
 - **MovieCard/SeriesCard**: Poster placeholders, status bar, technical badges
 - **StatCard**: Library statistics
 - **FilterChip/FilterModal**: Multi-select filters with "Clear" and "Apply" buttons
 - **ViewToggle**: Grid/list switcher with localStorage persistence
 - **ScanStatusCard**: Real-time scan progress via WebSocket
-- **ThemeToggle**: Light/dark mode
+- **ThemeToggle**: Light/dark mode toggle
+- **LanguageToggle**: Multi-language support (en, de, es, fr, it)
+- **UserMenu**: User profile and logout menu
 
 **✅ Features**:
 - Infinite scroll pagination (custom `useInfiniteList` hook)
 - Multi-criteria filtering with comma-separated OR logic (e.g., `?resolution=3840,1920`)
-- Real-time WebSocket updates for scan progress
+- Real-time WebSocket updates for scan progress with exponential backoff reconnection
 - Dark mode with CSS variables throughout
 - Type-safe API client and interfaces
+- JWT-based authentication with cookie persistence
+- Multi-language support (i18n) with 5 languages
+- Language preference saved in localStorage
+- User management interface for admins
+- Protected routes based on authentication status
 
 **⚠️ Missing/Incomplete**:
 - Filter persistence — not saved in URL or localStorage (resets on page change)
 - Error boundaries — no React error boundaries
-- WebSocket auto-reconnect — requires manual page refresh
-- Accessibility — no ARIA labels, limited keyboard navigation
+- Accessibility — limited ARIA labels and keyboard navigation
 
-### DevOps — ~90% Complete
+### DevOps — ~95% Complete
 
 **✅ Docker**:
 - Multi-stage build: Node (frontend) + Go (backend) + Alpine runtime
@@ -139,7 +179,6 @@ GET  /health                            # Health check endpoint
 
 **⚠️ Missing**:
 - Monitoring/metrics (no Prometheus, Grafana, etc.)
-- Structured logging (console logs only, no JSON structured logs)
 
 ---
 
@@ -309,22 +348,40 @@ backend/go/
 │       └── main.go              # Entry point
 ├── internal/
 │   ├── services/
-│   │   ├── media.go             # Media Catalog Service
-│   │   ├── scanner.go           # File Scanner
-│   │   ├── mediainfo.go         # Mediainfo Parser
-│   │   ├── search.go            # Search & Filter Engine
-│   │   └── stats.go             # Statistics Service
+│   │   ├── auth.go              # Authentication Service (JWT)
+│   │   ├── broadcaster.go       # WebSocket broadcaster
+│   │   ├── extractor.go         # Mediainfo extraction
+│   │   ├── filesystem_scanner.go # Filesystem scanning
+│   │   ├── importer.go          # Media import orchestration
+│   │   ├── parser.go            # JSON/metadata parsing
+│   │   ├── radarr_client.go     # Radarr API client
+│   │   ├── radarr_importer.go   # Radarr importer
+│   │   ├── scanner.go           # Main scanner service
+│   │   ├── scheduler.go         # Scheduled scans
+│   │   ├── sonarr_client.go     # Sonarr API client
+│   │   ├── sonarr_importer.go   # Sonarr importer
+│   │   ├── tmdb.go              # TMDB API client
+│   │   └── tvdb.go              # TVDB API client
 │   ├── models/
-│   │   ├── movie.go
-│   │   ├── series.go
 │   │   ├── episode.go
-│   │   └── mediainfo.go
+│   │   ├── filter.go
+│   │   ├── mediainfo.go
+│   │   ├── movie.go
+│   │   ├── scan.go
+│   │   ├── series.go
+│   │   └── user.go
 │   ├── api/
-│   │   ├── handlers.go          # HTTP handlers
-│   │   └── routes.go            # Route definitions
-│   ├── repository/              # Database/persistence layer
+│   │   ├── auth_handlers.go     # Auth HTTP handlers
+│   │   ├── handlers.go          # Media HTTP handlers
+│   │   ├── middleware.go        # Auth middleware
+│   │   ├── routes.go            # Route definitions
+│   │   └── websocket.go         # WebSocket handling
 │   ├── config/                  # Configuration management
+│   ├── repository/              # Database/persistence layer
+│   │   └── migrations/          # SQL migrations
 │   └── utils/                   # Helper functions
+├── docs/
+│   └── MIGRATIONS.md            # Database migration guide
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -520,40 +577,59 @@ Use CSS custom properties for light/dark mode compatibility. Define in `:root`:
 
 ```
 indexarr/
-├── LICENSE                                    # GPL v3
-├── AGENTS.md                                  # This file
-├── README.md                                  # Installation & features
-├── plan.md                                    # Phase-by-phase implementation status
-├── DOCKER.md                                  # Docker management guide
-├── docker-compose.yml                         # Production Docker orchestration
-├── Dockerfile                                 # Multi-stage build (frontend + backend)
-├── nginx.conf                                 # Nginx reverse proxy config
-│
-├── backend/go/                                # Go backend
-│   ├── cmd/server/main.go                     # Entry point
-│   ├── internal/
-│   │   ├── api/                               # HTTP handlers, routes, WebSocket
-│   │   ├── config/                            # Environment configuration
-│   │   ├── models/                            # Data models (Movie, Series, Episode, etc.)
-│   │   ├── repository/                        # Database layer (SQLite)
-│   │   └── services/                          # Business logic (scanner, importer, TMDB/TVDB)
-│   ├── go.mod                                 # Module definition
-│   └── indexarr.db                            # SQLite database (dev)
-│
-├── frontend/react/                            # React frontend
-│   ├── src/
-│   │   ├── components/                        # UI components
-│   │   ├── pages/                             # Page components
-│   │   ├── api/client.ts                      # API client
-│   │   ├── hooks/                             # Custom hooks (useInfiniteList, useAppContext)
-│   │   ├── styles/                            # CSS modules + variables
-│   │   └── types/                             # TypeScript interfaces
-│   ├── package.json                           # Dependencies
-│   └── vite.config.ts                         # Vite configuration
-│
-└── ux-ui/
-    ├── medialib_v4_detail_pages.html          # Complete HTML/CSS mockup
-    └── prompt.md                              # Implementation specification
+├── .github/                     # GitHub resources
+│   ├── agents/                  # Specialized AI agents for development
+│   ├── skills/                  # Custom AI skills (go-testing, react-testing, etc.)
+│   └── workflows/               # GitHub Actions CI/CD
+├── backend/                     # Go backend
+│   └── go/
+│       ├── cmd/server/          # Server entry point
+│       ├── internal/
+│       │   ├── api/             # HTTP handlers, routes, WebSocket, auth
+│       │   ├── config/          # Configuration management
+│       │   ├── models/          # Data models (Movie, Series, Episode, User)
+│       │   ├── repository/      # Database layer (SQLite)
+│       │   │   └── migrations/  # SQL migrations (golang-migrate format)
+│       │   └── services/        # Business logic (auth, scanner, importer, APIs)
+│       ├── docs/
+│       │   └── MIGRATIONS.md    # Database migration guide
+│       ├── go.mod               # Go module (Go 1.25+)
+│       └── README.md            # Backend documentation
+├── frontend/                    # React frontend
+│   └── react/
+│       ├── src/
+│       │   ├── components/      # UI components (cards, filters, layout, etc.)
+│       │   ├── pages/           # Page components (ListFilms, MovieDetail, etc.)
+│       │   ├── api/             # API client with JWT auth support
+│       │   ├── hooks/           # Custom hooks (useInfiniteList, useAppContext)
+│       │   ├── i18n/            # Internationalization configuration
+│       │   ├── styles/          # CSS modules with design system variables
+│       │   ├── types/           # TypeScript interfaces (auth, user, media)
+│       │   └── App.tsx          # Root component
+│       ├── public/locales/      # i18n language files (en, de, es, fr, it)
+│       ├── package.json         # Node.js dependencies (React 19, Vite, i18next)
+│       └── README.md            # Frontend documentation
+├── samples/                     # Sample data for testing
+│   ├── tmdb/                    # TheMovieDB API samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── tvdb/                    # TheTVDB API samples
+│   │   ├── episodes/            # Episode metadata samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── fake-movies.sh           # Generate fake movie files for testing
+│   ├── fake-series.sh           # Generate fake series files for testing
+│   └── mediainfo-output.json    # Sample mediainfo extraction output
+├── docs/
+│   └── DOCKER.md                # Docker container management guide
+├── ux-ui/                       # UI/UX design and specifications
+│   └── medialib_v5.html         # Complete HTML/CSS design mockup
+├── AGENTS.md                    # AI agent and skill customization guide
+├── docker-compose.yml           # Production Docker Compose configuration
+├── docker-compose.dev.yml       # Development Docker Compose configuration
+├── Dockerfile                   # Multi-stage build (Node + Go + Alpine runtime)
+├── nginx.conf                   # Nginx reverse proxy configuration
+└── LICENSE                      # GPL v3
 ```
 
 ---
@@ -629,45 +705,62 @@ npm run format
 
 ### Frontend (React)
 
-1. **Filter State Persistence**: When user applies filters, badge counter updates and filtered results display. When returning to list from detail page, filters should be preserved.
+1. **Authentication Flow**: `useAppContext` manages auth state (`authMode`, `isAuthenticated`, `authLoading`). LoginPage redirects to main app on successful auth. Protected routes check `isAuthenticated` before rendering.
 
-2. **Fixed Sidebar Layout**: Sidebar is 210px fixed; main content area uses `flex: 1` with overflow handling. Ensure responsive behavior on smaller screens.
+2. **WebSocket Reconnection**: WebSocket uses exponential backoff (up to 5s between retries) and only connects when `isAuthenticated`. Manual reconnection fallback required if connection drops.
 
-3. **Dynamic Breadcrumbs**: Breadcrumb updates based on current page and detail item. On list pages, breadcrumb is empty; on detail pages, shows "Context / Item Name".
+3. **i18n Integration**: Language preference persists in localStorage and syncs with i18next. All UI strings use `useTranslation()` hook with namespace keys (e.g., `t('sidebar.movies')`). Language files in `public/locales/{lang}/`.
 
-4. **Search Hotkey**: "/" triggers focus on search input (Material Design pattern). Prevent form submission on Enter in search input.
+4. **Filter State Persistence**: When user applies filters, badge counter updates and filtered results display. When returning to list from detail page, filters should be preserved.
 
-5. **Dark Mode via CSS Variables**: All colors use CSS variables. Test both light and dark themes during development. No hardcoded color values.
+5. **Fixed Sidebar Layout**: Sidebar is 210px fixed; main content area uses `flex: 1` with overflow handling. Ensure responsive behavior on smaller screens.
 
-6. **View Toggle State**: Grid/list toggle affects card layout significantly. Persist view preference in localStorage.
+6. **Dynamic Breadcrumbs**: Breadcrumb updates based on current page and detail item. On list pages, breadcrumb is empty; on detail pages, shows "Context / Item Name".
 
-7. **Modal Outside Click**: Filter chips open modals that should close on outside click or "Cancel" button.
+7. **Search Hotkey**: "/" triggers focus on search input (Material Design pattern). Prevent form submission on Enter in search input.
 
-8. **Image Placeholders**: Movie/series posters use placeholder with initials (first letter(s) of title) on secondary background. Posters load from TMDB later.
+8. **Dark Mode via CSS Variables**: All colors use CSS variables. Test both light and dark themes during development. No hardcoded color values.
+
+9. **View Toggle State**: Grid/list toggle affects card layout significantly. Persist view preference in localStorage.
+
+10. **Modal Outside Click**: Filter chips open modals that should close on outside click or "Cancel" button.
+
+11. **Image Placeholders**: Movie/series posters use placeholder with initials (first letter(s) of title) on secondary background. Posters load from TMDB later.
 
 ### Backend (Go)
 
-1. **SQLite Locking**: See [/memories/repo/database-locking-analysis.md](/memories/repo/database-locking-analysis.md) for detailed analysis. Key points:
+1. **Authentication Modes**: Three modes supported:
+   - `none`: No authentication (default for backward compatibility)
+   - `simple`: Username/password with JWT tokens (requires `AUTH_ADMIN_USERNAME`, `AUTH_ADMIN_PASSWORD`, `AUTH_SESSION_SECRET`)
+   - `oidc`: OpenID Connect (future implementation)
+   
+   Auth middleware checks JWT cookie (`auth_token`) and sets user context. Disables auth checks if mode is `none`.
+
+2. **JWT Token Management**: Tokens signed with `AUTH_SESSION_SECRET`, expiration configurable via `AUTH_SESSION_MAX_AGE` (default: 168 hours = 7 days). Token stored in HttpOnly cookie, cleared on logout.
+
+3. **SQLite Locking**: See [/memories/repo/database-locking-analysis.md](/memories/repo/database-locking-analysis.md) for detailed analysis. Key points:
    - WAL mode enabled with 5s busy timeout
    - Connection pool limited to avoid contention
    - Long transactions can cause "database is locked" errors
    - Batch scan status updates instead of per-file updates
 
-2. **Path Mapping**: Radarr/Sonarr paths may differ from local filesystem (Docker mounts). Use `RADARR_PATH_MAPPING` and `SONARR_PATH_MAPPING` to translate paths (e.g., `/downloads:/mnt/media`).
+4. **Path Mapping**: Radarr/Sonarr paths may differ from local filesystem (Docker mounts). Use `RADARR_PATH_MAPPING` and `SONARR_PATH_MAPPING` to translate paths (e.g., `/downloads:/mnt/media`).
 
-3. **Per-Scan Caching**: Scanner caches TVDB lookups per scan to avoid redundant API calls. Cache is cleared at start of each scan.
+5. **Per-Scan Caching**: Scanner caches TVDB lookups per scan to avoid redundant API calls. Cache is cleared at start of each scan.
 
-4. **Memory Management**: Extractor calls `unix.Fadvise(FADV_DONTNEED)` after reading files to clear Linux page cache and avoid memory bloat during large scans.
+6. **Memory Management**: Extractor calls `unix.Fadvise(FADV_DONTNEED)` after reading files to clear Linux page cache and avoid memory bloat during large scans.
 
-5. **Nil Service Checks**: Importers can be `nil` if not configured (e.g., no Radarr URL). Always check `if movieImporter != nil` before calling methods.
+7. **Nil Service Checks**: Importers can be `nil` if not configured (e.g., no Radarr URL). Always check `if movieImporter != nil` before calling methods.
 
-6. **Mediainfo Timeouts**: Mediainfo extraction has 30s timeout per file. Large files or network mounts may timeout.
+8. **Mediainfo Timeouts**: Mediainfo extraction has 30s timeout per file. Large files or network mounts may timeout.
 
-7. **Status Calculation**: Status (available, missing, problem) derived from file existence. Check happens during scan, not on-demand.
+9. **Status Calculation**: Status (available, missing, problem) derived from file existence. Check happens during scan, not on-demand.
 
-8. **Filter Combinations**: Backend supports comma-separated OR logic: `?resolution=3840,1920` means "3840 OR 1920".
+10. **Filter Combinations**: Backend supports comma-separated OR logic: `?resolution=3840,1920` means "3840 OR 1920".
 
-9. **WebSocket Broadcast**: All connected clients receive scan progress updates. No per-client tracking.
+11. **WebSocket Broadcast**: All connected clients receive scan progress updates. No per-client tracking. Broadcast happens without auth gating (public endpoint).
+
+12. **Database Migrations**: Uses golang-migrate format (000001_description.up.sql / .down.sql). Migrations auto-run on startup. User table added in migration 000009.
 
 ---
 
@@ -684,23 +777,23 @@ For detailed UI/UX specifications, design mockups, and full implementation guida
 
 ### Frontend
 - [ ] Filter persistence (URL or localStorage)
-- [ ] Error boundaries for graceful failure handling
-- [ ] WebSocket auto-reconnect on disconnect
+- [ ] No React error boundaries
 - [ ] Accessibility (ARIA labels, keyboard navigation)
 - [ ] Loading skeleton screens
+- [ ] OIDC authentication support
+- [ ] Admin panel for scan scheduling and configuration
 
 ### Backend
-- [ ] TMDB/TVDB rate limit handling with retry logic
-- [ ] Automatic cleanup of deleted files (filesystem scanner)
-- [ ] Structured logging (JSON format)
-- [ ] Unit and integration tests
+- [ ] Full JSON structured logging (currently uses zerolog with mixed format)
+- [ ] Unit and integration tests for auth, scanner services
 - [ ] API documentation (OpenAPI/Swagger)
 - [ ] Metrics/monitoring (Prometheus endpoints)
+- [ ] OIDC provider integration
 
 ### DevOps
 - [ ] Health check on actual database connectivity (not just stats endpoint)
 - [ ] Database backup/restore procedures
-- [ ] Migration rollback documentation
+- [ ] Secrets management for AUTH_SESSION_SECRET in Docker deployment
 
 ## Related Resources
 
