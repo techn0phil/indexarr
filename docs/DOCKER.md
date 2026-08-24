@@ -25,13 +25,35 @@ docker run -d \
 
 # Pull from GitHub Container Registry
 docker pull ghcr.io/techn0phil/indexarr:latest
+
+# Use development docker-compose (builds locally)
+cd /path/to/indexarr
+docker compose -f docker-compose.dev.yml up -d
 ```
+
+### Docker Compose Files
+
+Indexarr provides two docker-compose configurations:
+
+**docker-compose.yml** (Production)
+- Pulls pre-built image from GitHub Container Registry (`ghcr.io/techn0phil/indexarr:latest`)
+- Use for production deployments and faster container startup
+- Requires: `.env` file with API keys and paths
+
+**docker-compose.dev.yml** (Development)
+- Builds image locally from source code
+- Use when developing or testing local changes
+- Rebuilds frontend and backend on every `docker compose up`
+- Useful for testing without pushing to registry
 
 ### Management
 
 ```bash
-# View logs
+# View logs (production)
 docker compose logs -f
+
+# View logs (development)
+docker compose -f docker-compose.dev.yml logs -f
 
 # Restart services
 docker compose restart
@@ -67,27 +89,70 @@ docker inspect indexarr
 # Check if mediainfo is available
 docker compose exec indexarr which mediainfo
 
-# Test backend API
-curl http://localhost/api/stats
+# Test backend API (via Nginx proxy)
+curl http://localhost:8787/api/stats
 
 # Test frontend
-curl http://localhost/
+curl http://localhost:8787/
+
+# Test backend directly (bypass Nginx, if needed)
+curl http://localhost:8080/api/stats
 ```
 
 ## File Structure
 
 ```
 indexarr/
-├── Dockerfile              # Multi-stage build (frontend + backend + runtime)
-├── docker compose.yml      # Orchestration config with volumes
-├── .dockerignore           # Optimize build context
-├── nginx.conf              # Nginx proxy config (frontend + API)
-├── entrypoint.sh           # Container startup script
+├── Dockerfile                   # Multi-stage build (Node 26.7.0, Go 1.27.0, Alpine 3.24.1)
+├── docker-compose.yml           # Production: pulls pre-built image from ghcr.io
+├── docker-compose.dev.yml       # Development: builds image locally from source
+├── .dockerignore                # Optimize build context
+├── nginx.conf                   # Nginx reverse proxy (listens on 8787)
+├── entrypoint.sh                # Container startup script (creates user, manages permissions)
 └── .github/workflows/
-    └── docker-build.yml    # CI/CD pipeline to ghcr.io
+    └── docker-build.yml         # CI/CD pipeline to ghcr.io
 ```
 
+### Dockerfile Stages
+
+The Dockerfile uses a **3-stage build** for optimized image size and security:
+
+**Stage 1: Frontend Builder** (Node.js 26.7.0)
+- Builds React/Vite frontend to static files
+- Output: `/app/frontend/` directory
+
+**Stage 2: Backend Builder** (Go 1.27.0)
+- Compiles Go backend with CGO (SQLite support)
+- Statically linked binary for Alpine
+- Output: `/indexarr` binary
+
+**Stage 3: Runtime** (Alpine Linux 3.24.1)
+- Minimal base image with only runtime dependencies
+- Includes: Nginx, mediainfo, SQLite libs, ca-certificates
+- Copies compiled artifacts from stages 1 & 2
+
 ## Environment Variables
+
+### Build-Time Arguments
+
+Used during `docker build` (in `docker-compose.dev.yml`):
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `UID` | `1000` | User ID for the `appuser` account created at container runtime |
+| `GID` | `1000` | Group ID for the `appuser` group created at container runtime |
+
+**Example** (docker-compose.dev.yml):
+```dockerfile
+build:
+  context: .
+  dockerfile: Dockerfile
+  args:
+    UID: ${UID:-1000}
+    GID: ${GID:-1000}
+```
+
+### Runtime Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -128,7 +193,24 @@ indexarr/
 
 ```yaml
 volumes:
-  - indexarr-data:/app/data
+  data:
+    name: indexarr-data      # Explicit volume name for CLI commands
+    driver: local
+```
+
+**In service**:
+```yaml
+services:
+  indexarr:
+    volumes:
+      - data:/app/data       # Reference by service volume alias
+```
+
+When referencing volumes from CLI, use the explicit name `indexarr-data`:
+```bash
+docker volume ls | grep indexarr-data
+docker volume inspect indexarr-data
+docker volume rm indexarr-data  # CAUTION: Deletes all data
 ```
 
 ### Media Library Access (Optional)
@@ -143,8 +225,23 @@ volumes:
 
 | Port | Service | Description |
 |------|---------|-------------|
-| `80` | Nginx | Frontend + API proxy (exposed) |
-| `8080` | Backend | Go API server (internal only) |
+| `8787` | Nginx | Frontend + API proxy on host (Nginx reverse proxy) |
+| `8080` | Backend | Go API server (internal only, accessed via Nginx) |
+
+### Architecture
+
+The container architecture uses Nginx as a reverse proxy to provide a single entry point:
+
+1. **Nginx (port 8787)**: Reverse proxy that serves:
+   - Static frontend files from `/app/frontend`
+   - API requests are proxied to backend on `/api/*`
+   - Health checks on `/health`
+
+2. **Go Backend (port 8080)**: Only accessible internally:
+   - All API endpoints (scan, stats, movies, series, etc.)
+   - Connected via Nginx proxy
+
+This design provides a clean single port experience while keeping frontend and backend properly separated. All external traffic goes through port 8787 (Nginx).
 
 ## Health Check
 
@@ -154,10 +251,29 @@ The container includes a health check that runs every 30 seconds:
 wget --no-verbose --tries=1 -O /dev/null http://localhost:8787/health
 ```
 
-Check health status:
+The health endpoint is proxied through Nginx to the backend Go server.
+
+### Entrypoint Script
+
+The `entrypoint.sh` script runs at container startup and performs critical setup:
+
+1. **User/Group Creation**: Creates `appuser` with configurable UID/GID
+   - Allows proper file ownership matching your host media library
+   - Example: Set `UID=1000 GID=1000` to match your user/group IDs
+2. **Permission Management**: Fixes ownership of app directories
+3. **Dependency Verification**: Checks that mediainfo is available
+4. **Configuration Logging**: Prints environment variables for debugging
+
+After setup, services (Nginx + backend) run as the non-root `appuser` account.
+
+### Checking Health Status
 
 ```bash
+# Check overall container health
 docker inspect --format='{{.State.Health.Status}}' indexarr
+
+# View health check details
+docker inspect --format='{{json .State.Health}}' indexarr | jq '.'
 ```
 
 ## CI/CD Pipeline
@@ -179,8 +295,11 @@ docker compose logs indexarr
 # Verify environment variables
 docker compose config
 
-# Check if ports are available
-sudo netstat -tlnp | grep -E '(80|8080)'
+# Check if port 8787 is available
+sudo netstat -tlnp | grep 8787
+
+# Check if port 8080 (backend) is in use
+sudo netstat -tlnp | grep 8080
 ```
 
 ### Database issues
@@ -190,7 +309,7 @@ sudo netstat -tlnp | grep -E '(80|8080)'
 docker volume ls | grep indexarr
 
 # Inspect volume
-docker volume inspect indexarr_indexarr_data
+docker volume inspect indexarr-data
 
 # Backup database
 docker cp indexarr:/app/data/indexarr.db ./indexarr.db.backup
@@ -220,6 +339,9 @@ docker compose exec indexarr nginx -t
 
 # Check frontend files exist
 docker compose exec indexarr ls -la /app/frontend/
+
+# Test Nginx directly on port 8787
+curl http://localhost:8787/
 ```
 
 ### API not responding
@@ -228,8 +350,11 @@ docker compose exec indexarr ls -la /app/frontend/
 # Check if backend is running
 docker compose exec indexarr ps aux | grep indexarr
 
-# Test backend directly (bypass Nginx)
-curl http://localhost:8080/api/stats
+# Test backend via Nginx proxy (preferred)
+curl http://localhost:8787/api/stats
+
+# Test backend directly (bypass Nginx, internal only)
+docker compose exec indexarr curl http://127.0.0.1:8080/api/stats
 
 # Check Nginx proxy logs
 docker compose exec indexarr tail -f /var/log/nginx/error.log

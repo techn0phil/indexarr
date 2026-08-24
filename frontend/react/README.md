@@ -13,6 +13,10 @@ This is the React frontend for Indexarr, a media library management application 
 - Responsive sidebar and topbar navigation
 - Real-time scan status with WebSocket updates
 - Dark mode via CSS variables
+- User authentication and login (JWT-based)
+- Multi-language support (5 languages: English, Deutsch, Español, Français, Italiano)
+- User management interface (admin only)
+- Real-time library statistics and scan progress
 
 ## Project Structure
 
@@ -20,12 +24,15 @@ This is the React frontend for Indexarr, a media library management application 
 frontend/react/
 ├── src/
 │   ├── components/   # UI components (MovieCard, Sidebar, StatCard, etc.)
-│   ├── pages/        # Page components (ListFilms, ListSeries, MovieDetail, SeriesDetail)
+│   ├── pages/        # Page components (ListFilms, ListSeries, MovieDetail, SeriesDetail, LoginPage, UsersPage)
 │   ├── api/          # API client functions (REST endpoints)
 │   ├── hooks/        # Custom React hooks (useAppContext, useInfiniteList)
+│   ├── i18n/         # i18n configuration (multi-language support)
 │   ├── styles/       # CSS modules and variables (dark mode, layout)
-│   ├── types/        # TypeScript interfaces (Movie, Series, MediaInfo, etc.)
+│   ├── types/        # TypeScript interfaces (Movie, Series, MediaInfo, User, Auth, etc.)
 │   └── App.tsx       # Root component
+├── public/
+│   └── locales/      # i18n language files (en, de, es, fr, it)
 ├── package.json      # Dependencies and scripts
 ├── tsconfig.json     # TypeScript config
 ├── vite.config.ts    # Vite config (API proxy)
@@ -53,22 +60,38 @@ frontend/react/
 
 ## Main Components & Pages
 
-- **MovieCard, SeriesCard**: Display movie/series poster, title, status, and technical badges
+**Media Browsing**:
+- **MovieCard, SeriesCard**: Display poster, title, status, and technical badges
 - **MovieCardList, SeriesCardList**: Grid/list layouts for media items
-- **ListFilms, ListSeries**: Main pages for browsing movies/series with filters, stats, and infinite scroll
+- **ListFilms, ListSeries**: Main pages with filters, stats, and infinite scroll
 - **MovieDetail, SeriesDetail**: Detail pages with hero section, cast, mediainfo, and refresh actions
 - **FilterChip, FilterModal**: Multi-select filter chips and modal dialogs
 - **StatCard**: Library statistics (totals, disk usage, 4K %)
 - **ScanStatusCard**: Real-time scan progress (WebSocket)
-- **Sidebar, Topbar**: Navigation and search
-- **ThemeToggle, ViewToggle**: Dark mode and grid/list toggle
+
+**Navigation & UI**:
+- **Sidebar, Topbar**: Fixed navigation with active state and badge counts
+- **SearchBar**: Global search input
+- **UserMenu**: User profile and logout menu
+
+**Authentication & Settings**:
+- **LoginPage**: User login with JWT-based authentication
+- **UsersPage**: User management interface (admin only, simple auth mode)
+
+**Theming & Localization**:
+- **ThemeToggle**: Dark/light mode toggle with CSS variables
+- **LanguageToggle**: Multi-language switcher (en, de, es, fr, it)
+- **ViewToggle**: Grid/list layout switcher
 
 ## API & Data
 
 - All API calls are defined in `src/api/client.ts` and use `/api` endpoints (proxied to backend)
-- TypeScript interfaces for all entities in `src/types/index.ts`
+- TypeScript interfaces for all entities in `src/types/` (Movie, Series, MediaInfo, User, Auth, etc.)
 - Infinite scroll and filtering handled by `useInfiniteList` hook
-- App-wide state (theme, navigation, stats, scan status) managed by `useAppContext` hook
+- App-wide state (theme, navigation, auth, stats, scan status) managed by `useAppContext` hook
+- Multi-language support via `useTranslation()` hook (i18next integration)
+- Language preference persisted in localStorage
+- JWT-based authentication with HttpOnly cookie persistence
 
 ## Design System
 
@@ -89,6 +112,10 @@ frontend/react/
 
 - Uses React 19, Vite, and TypeScript
 - Linting via ESLint (`npm run lint`)
+- Internationalization via i18next (`useTranslation()` hook, 5 languages)
+- Authentication state managed via `useAppContext` (JWT + HttpOnly cookies)
+- View preferences (grid/list, theme, language) persisted in localStorage
+- Real-time updates via WebSocket (exponential backoff reconnection)
 - No test suite yet (`npm test` is a placeholder)
 - For backend/API details, see main project README
 

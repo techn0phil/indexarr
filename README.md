@@ -7,40 +7,59 @@
 
 ## Table of contents
 
-  - [Features](#features)
-  - [Getting started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation steps](#installation-steps)
-    - [Configuration reference](#configuration-reference)
-    - [Common operations](#common-operations)
-    - [Using pre-built image from GitHub Container Registry](#using-pre-built-image-from-github-container-registry)
-  - [Development setup](#development-setup)
-    - [Prerequisites](#prerequisites)
-    - [Backend setup](#backend-setup)
-    - [Frontend setup](#frontend-setup)
-    - [Building Docker image locally](#building-docker-image-locally)
-    - [Project Structure](#project-structure)
-    - [Design & implementation](#design--implementation)
-  - [Common issues](#common-issues)
-    - [Incorrect matching](#incorrect-matching)
-    - [Media permissions](#media-permissions)
-    - [Extra files](#extra-files)
-  - [License](#license)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation Steps](#installation-steps)
+  - [Configuration Reference](#configuration-reference)
+  - [Common Operations](#common-operations)
+  - [Using Pre-built Image from GitHub Container Registry](#using-pre-built-image-from-github-container-registry)
+- [Development Setup](#development-setup)
+  - [Prerequisites](#prerequisites-1)
+  - [Backend Setup](#backend-setup)
+  - [Frontend Setup](#frontend-setup)
+  - [Building Docker Image Locally](#building-docker-image-locally)
+  - [Project Structure](#project-structure)
+  - [Design & Implementation](#design--implementation)
+- [Common Issues](#common-issues)
+  - [Incorrect Matching](#incorrect-matching)
+  - [Media Permissions](#media-permissions)
+  - [Extra Files](#extra-files)
+- [License](#license)
 
 
 ## Features
-- Centralized movie and TV series catalog
-- Blu-ray formats support (uncompressed folder and ISO files)
-- Advanced multi-criteria filtering (title, year, status, resolution, codec, audio, HDR)
-- Real-time statistics (total count, disk space, 4K %, issues)
-- Detailed media info (video, audio, and subtitle tracks)
-- Responsive UI with grid/list views
-- RESTful API backend
+
+- **Centralized movies and series catalog**
+  - **Radarr / Sonarr integrations** — Import from existing Radarr / Sonarr libraries
+  - **Filesystem scanning** — Discover media from local directories
+  - **Blu-ray formats support** — Uncompressed folder and ISO files
+- **Accurate media Intelligence**
+  - **Detailed media info detection** — video, audio, and subtitle tracks
+  - **Multi-criteria filtering** — title, year, status, resolution, codec, audio, HDR
+  - **Real-time statistics** — total count, disk space, 4K %, problem counts
+- **Easy user experience**
+  - **Multi-language support** — English, Français, Español, Italiano, Deutsch
+  - **Responsive UI** — Supports desktop, tablet, and mobile devices
+  - **User authentication** — Builtin authentication with local users
 
 
 ## Getting started
 
 The easiest and recommended way to run Indexarr is with Docker Compose. The provided `docker-compose.yml` is production-ready with automatic restarts, data persistence, and proper networking.
+
+### Dual Import Modes
+
+Indexarr supports flexible media import with two modes that can be mixed and matched:
+
+1. **Radarr/Sonarr Integration**: Import existing libraries from Radarr and/or Sonarr with automatic metadata enrichment and stale item cleanup
+2. **Filesystem Scanning**: Discover media directly from local directories with automatic TMDB/TVDB metadata enrichment
+
+**Example configurations:**
+- Movies via Radarr + Series via Sonarr
+- Movies via filesystem + Series via Sonarr
+- All media via filesystem scanning
+- Movies via Radarr + movies via filesystem (both enabled)
 
 ### Prerequisites
 - Docker and Docker Compose installed
@@ -165,8 +184,8 @@ docker run -d -p 8787:8787 \
 
 ### Prerequisites
 - Node.js (>=24)
-- Go (>=1.26)
-- mediainfo CLI
+- Go (>=1.25)
+- mediainfo CLI (for video file analysis)
 
 ### Backend setup
 1. Navigate to backend:
@@ -223,49 +242,60 @@ docker run -d -p 80:80 -v indexarr_data:/app/data indexarr:latest
 
 ```
 indexarr/
-├── .github/                 # GitHub resources
-│   ├── agents/              # Specialized AI agents
-│   ├── skills/              # Custom AI skills
-│   └── workflows/           # GitHub actions
-├── backend/                 # Go backend
+├── .github/                     # GitHub resources
+│   ├── agents/                  # Specialized AI agents for development
+│   ├── skills/                  # Custom AI skills (go-testing, react-testing, etc.)
+│   └── workflows/               # GitHub Actions CI/CD
+├── backend/                     # Go backend
 │   └── go/
-│       ├── cmd/server/      # Entry point
+│       ├── cmd/server/          # Server entry point
 │       ├── internal/
-│       │   ├── api/         # HTTP handlers
-│       │   ├── config/      # Configuration
-│       │   ├── models/      # Data models
-│       │   ├── repository/  # Database layer
-│       │   │   └── migrations/  # Schema migrations scripts
-│       │   └── services/    # Business logic
-│       ├── go.mod           # Go module
-│       └── README.md        # Backend docs
-├── frontend/                # React frontend
+│       │   ├── api/             # HTTP handlers, routes, WebSocket, auth
+│       │   ├── config/          # Configuration management
+│       │   ├── models/          # Data models (Movie, Series, Episode, User)
+│       │   ├── repository/      # Database layer (SQLite)
+│       │   │   └── migrations/  # SQL migrations (golang-migrate format)
+│       │   └── services/        # Business logic (auth, scanner, importer, APIs)
+│       ├── docs/
+│       │   └── MIGRATIONS.md    # Database migration guide
+│       ├── go.mod               # Go module (Go 1.25+)
+│       └── README.md            # Backend documentation
+├── frontend/                    # React frontend
 │   └── react/
 │       ├── src/
-│       │   ├── components/  # UI components
-│       │   ├── pages/       # Page components
-│       │   ├── api/         # API client
-│       │   ├── hooks/       # Custom hooks
-│       │   ├── styles/      # CSS modules
-│       │   ├── types/       # TypeScript types
-│       │   └── App.tsx      # Root component
-│       ├── package.json     # Dependencies
-│       └── README.md        # Frontend docs
-├── samples/                 # Data samples
-│   ├── tmdb/                # TheMovieDB samples
-│   │   ├── movies/          # Movies details
-│   │   └── series/          # Series details
-│   └── tvdb/                # TheTVDB samples
-│   │   ├── episodes/        # Episodes details
-│   │   ├── movies/          # Movies details
-│   │   └── series/          # Series details
-│   ├── fake-movies.sh       # Movies generator script
-│   └── fake-series.sh       # Series generator script
-├── ux-ui/                   # UI/UX design
-│   ├── medialib_v5.html     # Full HTML/CSS mockup
-│   └── prompt.md            # Implementation specs
-├── AGENTS.md                # Chat customization guide
-└── LICENSE                  # GPL v3
+│       │   ├── components/      # UI components (cards, filters, layout, etc.)
+│       │   ├── pages/           # Page components (ListFilms, MovieDetail, etc.)
+│       │   ├── api/             # API client with JWT auth support
+│       │   ├── hooks/           # Custom hooks (useInfiniteList, useAppContext)
+│       │   ├── i18n/            # Internationalization configuration
+│       │   ├── styles/          # CSS modules with design system variables
+│       │   ├── types/           # TypeScript interfaces (auth, user, media)
+│       │   └── App.tsx          # Root component
+│       ├── public/locales/      # i18n language files (en, de, es, fr, it)
+│       ├── package.json         # Node.js dependencies (React 19, Vite, i18next)
+│       └── README.md            # Frontend documentation
+├── samples/                     # Sample data for testing
+│   ├── tmdb/                    # TheMovieDB API samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── tvdb/                    # TheTVDB API samples
+│   │   ├── episodes/            # Episode metadata samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── fake-movies.sh           # Generate fake movie files for testing
+│   ├── fake-series.sh           # Generate fake series files for testing
+│   └── mediainfo-output.json    # Sample mediainfo extraction output
+├── docs/
+│   └── DOCKER.md                # Docker container management guide
+├── ux-ui/                       # UI/UX design and specifications
+│   ├── medialib_v5.html         # Complete HTML/CSS design mockup
+│   └── prompt.md                # Detailed implementation specifications
+├── AGENTS.md                    # AI agent and skill customization guide
+├── docker-compose.yml           # Production Docker Compose configuration
+├── docker-compose.dev.yml       # Development Docker Compose configuration
+├── Dockerfile                   # Multi-stage build (Node + Go + Alpine runtime)
+├── nginx.conf                   # Nginx reverse proxy configuration
+└── LICENSE                      # GPL v3
 ```
 
 
@@ -282,7 +312,7 @@ indexarr/
 If your media files are not correctly detected (no poster, duration, wrong links, etc...), review the files and folders naming with the following recommendations:
 - **Movies**: file must be in a folder named `{movie title} ({year})`
 - **Series**: each series must have a folder named `{series name} ({year})`
-- **Episodes** : file must contain the season and episode number with a standard pattern like `S01E05` or `1x05`
+- **Episodes**: file must contain the season and episode number with a standard pattern like `S01E05` or `1x05`
 
 If the files and folders naming are correct but still have incorrect matches, check whether the title and year are correct on [TheMovieDB](https://www.themoviedb.org/).
 
