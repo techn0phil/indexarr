@@ -577,45 +577,59 @@ Use CSS custom properties for light/dark mode compatibility. Define in `:root`:
 
 ```
 indexarr/
-├── LICENSE                                    # GPL v3
-├── AGENTS.md                                  # This file
-├── README.md                                  # Installation & features
-├── plan.md                                    # Phase-by-phase implementation status
-├── DOCKER.md                                  # Docker management guide
-├── docker-compose.yml                         # Production Docker orchestration
-├── Dockerfile                                 # Multi-stage build (frontend + backend)
-├── nginx.conf                                 # Nginx reverse proxy config
-│
-├── backend/go/                                # Go backend
-│   ├── cmd/server/main.go                     # Entry point
-│   ├── internal/
-│   │   ├── api/                               # HTTP handlers, routes, WebSocket, auth
-│   │   ├── config/                            # Environment configuration
-│   │   ├── models/                            # Data models (Movie, Series, Episode, User, etc.)
-│   │   ├── repository/                        # Database layer (SQLite)
-│   │   │   └── migrations/                    # SQL migrations (golang-migrate format)
-│   │   └── services/                          # Business logic (auth, scanner, importer, TMDB/TVDB)
-│   ├── docs/
-│   │   └── MIGRATIONS.md                      # Database migration guide
-│   ├── go.mod                                 # Module definition (Go 1.25)
-│   └── indexarr.db                            # SQLite database (dev)
-│
-├── frontend/react/                            # React frontend
-│   ├── src/
-│   │   ├── components/                        # UI components (auth, menu, language toggle, etc.)
-│   │   ├── pages/                             # Page components (LoginPage, UsersPage, etc.)
-│   │   ├── api/client.ts                      # API client with auth support
-│   │   ├── hooks/                             # Custom hooks (useInfiniteList, useAppContext)
-│   │   ├── i18n/                              # i18n configuration and language support
-│   │   ├── styles/                            # CSS modules + variables
-│   │   └── types/                             # TypeScript interfaces (auth, user, etc.)
-│   ├── public/locales/                        # i18n language files (en, de, es, fr, it)
-│   ├── package.json                           # Dependencies (includes i18next, react-i18next)
-│   └── vite.config.ts                         # Vite configuration
-│
-└── ux-ui/
-    ├── medialib_v5.html                       # UI mockup
-    └── ...
+├── .github/                     # GitHub resources
+│   ├── agents/                  # Specialized AI agents for development
+│   ├── skills/                  # Custom AI skills (go-testing, react-testing, etc.)
+│   └── workflows/               # GitHub Actions CI/CD
+├── backend/                     # Go backend
+│   └── go/
+│       ├── cmd/server/          # Server entry point
+│       ├── internal/
+│       │   ├── api/             # HTTP handlers, routes, WebSocket, auth
+│       │   ├── config/          # Configuration management
+│       │   ├── models/          # Data models (Movie, Series, Episode, User)
+│       │   ├── repository/      # Database layer (SQLite)
+│       │   │   └── migrations/  # SQL migrations (golang-migrate format)
+│       │   └── services/        # Business logic (auth, scanner, importer, APIs)
+│       ├── docs/
+│       │   └── MIGRATIONS.md    # Database migration guide
+│       ├── go.mod               # Go module (Go 1.25+)
+│       └── README.md            # Backend documentation
+├── frontend/                    # React frontend
+│   └── react/
+│       ├── src/
+│       │   ├── components/      # UI components (cards, filters, layout, etc.)
+│       │   ├── pages/           # Page components (ListFilms, MovieDetail, etc.)
+│       │   ├── api/             # API client with JWT auth support
+│       │   ├── hooks/           # Custom hooks (useInfiniteList, useAppContext)
+│       │   ├── i18n/            # Internationalization configuration
+│       │   ├── styles/          # CSS modules with design system variables
+│       │   ├── types/           # TypeScript interfaces (auth, user, media)
+│       │   └── App.tsx          # Root component
+│       ├── public/locales/      # i18n language files (en, de, es, fr, it)
+│       ├── package.json         # Node.js dependencies (React 19, Vite, i18next)
+│       └── README.md            # Frontend documentation
+├── samples/                     # Sample data for testing
+│   ├── tmdb/                    # TheMovieDB API samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── tvdb/                    # TheTVDB API samples
+│   │   ├── episodes/            # Episode metadata samples
+│   │   ├── movies/              # Movie metadata samples
+│   │   └── series/              # Series metadata samples
+│   ├── fake-movies.sh           # Generate fake movie files for testing
+│   ├── fake-series.sh           # Generate fake series files for testing
+│   └── mediainfo-output.json    # Sample mediainfo extraction output
+├── docs/
+│   └── DOCKER.md                # Docker container management guide
+├── ux-ui/                       # UI/UX design and specifications
+│   └── medialib_v5.html         # Complete HTML/CSS design mockup
+├── AGENTS.md                    # AI agent and skill customization guide
+├── docker-compose.yml           # Production Docker Compose configuration
+├── docker-compose.dev.yml       # Development Docker Compose configuration
+├── Dockerfile                   # Multi-stage build (Node + Go + Alpine runtime)
+├── nginx.conf                   # Nginx reverse proxy configuration
+└── LICENSE                      # GPL v3
 ```
 
 ---
