@@ -169,7 +169,7 @@ build:
 | `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
 | `SONARR_API_KEY` | - | Sonarr API key (optional) |
 | `SONARR_PATH_MAPPING` | - | Path mapping between Sonarr and Indexarr |
-| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | Comma-separated media folder paths |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | **Deprecated** use `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS` instead |
 | `MOVIES_LIBRARY_PATHS` | /data/movies | Comma-separated movies folder paths |
 | `SERIES_LIBRARY_PATHS` | /data/series | Comma-separated series folder paths |
 | `SKIP_FOLDERS` | - | Comma-separated list of folder names to skip during scanning |

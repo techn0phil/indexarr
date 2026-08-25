@@ -17,7 +17,6 @@ services:
       - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/series:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
-      MEDIA_LIBRARY_PATHS: /data/movies,/data/series
       MOVIES_LIBRARY_PATHS: /data/movies
       SERIES_LIBRARY_PATHS: /data/series
 
