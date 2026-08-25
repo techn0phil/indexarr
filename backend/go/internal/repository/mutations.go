@@ -667,10 +667,10 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		// Update series
 		_, err = tx.Exec(`
 			UPDATE series
-			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?, sonarr_id = ?, title_slug = ?
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?, sonarr_id = ?, title_slug = ?, total_season_count = ?, total_episode_count = ?
 			WHERE id = ?
 		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
-			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.ID)
+			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.TotalSeasonCount, series.TotalEpisodeCount, series.ID)
 		if err != nil {
 			return err
 		}

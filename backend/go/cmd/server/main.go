@@ -37,6 +37,11 @@ func main() {
 		logger.Fatal().Err(err).Msg("Failed to seed mock data")
 	}
 
+	// Temporary post-migration repair for series total counts.
+	if err := services.BackfillSeriesTotalsOnStartup(db, cfg); err != nil {
+		logger.Warn().Err(err).Msg("Failed to backfill series total counts")
+	}
+
 	// Initialize WebSocket broadcaster
 	broadcaster := services.NewBroadcaster()
 	go broadcaster.Run()
