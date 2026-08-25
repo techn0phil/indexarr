@@ -57,7 +57,7 @@ describe('ListSeries', () => {
     vi.clearAllMocks();
 
     vi.spyOn(apiClient, 'getSeries').mockImplementation(async (_page, _pageSize, filters) => {
-      const title = filters.search === 'dark' ? 'Dark' : 'Series A';
+      const title = filters?.search === 'dark' ? 'Dark' : 'Series A';
       return {
         success: true,
         data: [

@@ -20,7 +20,7 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-global.IntersectionObserver = class IntersectionObserver {
+globalThis.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   takeRecords() {

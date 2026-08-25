@@ -3,3 +3,4 @@ node_modules
 *.tsbuildinfo
 vite.config.d.ts
 coverage
+dist

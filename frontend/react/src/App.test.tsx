@@ -26,8 +26,7 @@ const appContextState = vi.hoisted(() => ({
 }));
 
 vi.mock('./hooks/useAppContext.tsx', () => {
-  const ReactModule = require('react') as typeof React;
-  const AppContext = ReactModule.createContext(appContextState as any);
+  const AppContext = React.createContext(appContextState as any);
 
   return {
     AppContext,

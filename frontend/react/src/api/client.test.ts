@@ -12,7 +12,7 @@ describe('apiClient', () => {
   });
 
   it('includes credentials in getMovies request with filters', async () => {
-    const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValueOnce({
       json: async () => ({ success: true, data: [], total: 0, page: 1, pageSize: 50 }),
     });
@@ -30,7 +30,7 @@ describe('apiClient', () => {
   });
 
   it('sends login payload as JSON with credentials', async () => {
-    const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValueOnce({
       json: async () => ({ success: true, user: { id: 1, username: 'admin', role: 'admin' } }),
     });
@@ -48,7 +48,7 @@ describe('apiClient', () => {
   });
 
   it('throws from getCurrentUser when response is not ok', async () => {
-    const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValueOnce({
       ok: false,
       json: async () => ({}),
@@ -58,7 +58,7 @@ describe('apiClient', () => {
   });
 
   it('calls scan endpoints with POST', async () => {
-    const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValue({
       json: async () => ({ success: true }),
     });
@@ -77,7 +77,7 @@ describe('apiClient', () => {
   });
 
   it('calls admin user endpoints with proper method and body', async () => {
-    const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValue({
       json: async () => ({ success: true }),
     });
