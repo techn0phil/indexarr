@@ -1,0 +1,36 @@
+name: Backend Tests
+
+on:
+  push:
+    branches:
+      - feature/**
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/go
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go/go.mod
+          cache-dependency-path: backend/go/go.sum
+
+      - name: Run backend tests
+        run: go test -v ./...
