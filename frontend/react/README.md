@@ -57,6 +57,10 @@ frontend/react/
    ```bash
    npm run lint
    ```
+5. Run test:
+   ```bash
+   npm run test:run
+   ```
 
 ## Main Components & Pages
 

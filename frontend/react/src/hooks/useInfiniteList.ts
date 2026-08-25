@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { PaginatedResponse } from '../types';
 
+const EMPTY_FILTERS: Record<string, string> = {};
+
 interface UseInfiniteListOptions<T> {
   fetchFn: (page: number, pageSize: number, filters: Record<string, string>) => Promise<PaginatedResponse<T>>;
   pageSize?: number;
@@ -23,7 +25,7 @@ interface UseInfiniteListReturn<T> {
 export function useInfiniteList<T>({
   fetchFn,
   pageSize = 50,
-  filters = {},
+  filters = EMPTY_FILTERS,
 }: UseInfiniteListOptions<T>): UseInfiniteListReturn<T> {
   const [items, setItems] = useState<T[]>([]);
   const [page, setPage] = useState(1);
