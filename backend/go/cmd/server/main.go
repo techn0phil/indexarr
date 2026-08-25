@@ -107,7 +107,7 @@ func main() {
 	}
 
 	if len(cfg.MediaLibraryPaths) > 0 {
-		logger.Info().Strs("paths", cfg.MediaLibraryPaths).Msg("📂 Library paths configured")
+		logger.Warn().Strs("paths", cfg.MediaLibraryPaths).Msg("⚠️  MEDIA_LIBRARY_PATHS is deprecated, use MOVIES_LIBRARY_PATHS and SERIES_LIBRARY_PATHS instead")
 	}
 
 	// Initialize scheduler with both importers

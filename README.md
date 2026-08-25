@@ -94,7 +94,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 |----------|---------|----------|-------------|
 | `MOVIES_HOST_PATH` | - | Yes | Comma-separated paths to movies folders on the host for volume mount (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
 | `SERIES_HOST_PATH` | - | Yes | Comma-separated paths to series folders on the host for volume mount (e.g., `/series` or `/mnt/nas/tv,/external/tv`) |
-| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest [**Deprecated**: prefer `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS`] |
+| `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest [**Deprecated**: use `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS` instead] |
 | `MOVIES_LIBRARY_PATHS` | /data/movies | No | Comma-separated paths to movies on the guest |
 | `SERIES_LIBRARY_PATHS` | /data/series | No | Comma-separated paths to series on the guest |
 | `SKIP_FOLDERS` | - | No | Comma-separated list of folders to skip during scanning |
