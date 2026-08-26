@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 import { UserMenu } from './UserMenu';
+import { HamburgerMenu } from './HamburgerMenu';
 import styles from '../styles/topbar.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -11,9 +12,11 @@ interface TopbarProps {
   onBack: () => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  isSidebarOpen?: boolean;
+  onHamburgerClick?: () => void;
 }
 
-export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearchChange }: TopbarProps) => {
+export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearchChange, isSidebarOpen = false, onHamburgerClick }: TopbarProps) => {
   const { t } = useTranslation('topbar');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +34,11 @@ export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearc
   }, []);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 20px', height: '56px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+    <div className={styles.topbar}>
+      {onHamburgerClick && (
+        <HamburgerMenu isOpen={isSidebarOpen} onClick={onHamburgerClick} />
+      )}
+
       {showBack && (
         <>
           <button className={styles['back-btn']} onClick={onBack}>

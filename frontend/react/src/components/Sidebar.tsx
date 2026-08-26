@@ -7,9 +7,10 @@ import { apiClient } from '../api/client';
 interface SidebarProps {
   activeNav: 'movies' | 'series' | 'users';
   onNavClick: (page: 'movies' | 'series' | 'users') => void;
+  isDrawerOpen?: boolean;
 }
 
-export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
+export const Sidebar = ({ activeNav, onNavClick, isDrawerOpen = false }: SidebarProps) => {
   const { t } = useTranslation('sidebar');
   const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
@@ -32,7 +33,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
   };
 
   return (
-    <div className={styles.sidebar}>
+    <div className={`${styles.sidebar} ${isDrawerOpen ? styles.open : ''}`}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '0 14px' }}>
         <div className={styles.logo}>
           <div className={styles.glass}></div>

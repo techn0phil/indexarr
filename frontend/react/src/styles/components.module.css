@@ -435,3 +435,62 @@
   gap: 4px;
 }
 
+/* Responsive grid containers for mobile/tablet */
+
+/* Stats grid - responsive columns */
+.stats-grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 0 20px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card grid - responsive auto-fill */
+.card-grid {
+  display: grid;
+  gap: 12px;
+  padding: 0 20px;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* List view - responsive spacing */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 20px;
+}
+
+@media (max-width: 600px) {
+  .card-list {
+    gap: 6px;
+  }
+}
+
