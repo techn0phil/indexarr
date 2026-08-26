@@ -227,15 +227,37 @@ When auth is enabled, tokens are stored in HttpOnly cookies and validated by the
 
 ## Testing
 
-Run tests with:
+Run all backend tests:
 ```bash
 go test ./...
 ```
 
-For verbose output and coverage:
+Run targeted package suites:
 ```bash
-go test -v -cover ./...
+go test ./internal/repository ./internal/services ./internal/api
 ```
+
+Run with race detector:
+```bash
+go test ./... -race
+```
+
+Run with verbose output:
+```bash
+go test -v ./...
+```
+
+Generate coverage report:
+```bash
+go test ./... -coverprofile=coverage.out
+go tool cover -func=coverage.out
+go tool cover -html=coverage.out
+```
+
+Testing notes:
+- Unit tests must be deterministic and should not call real external services or processes.
+- External API behavior should be tested with `httptest` servers and local doubles.
+- Repository and service tests should use migration-aware in-memory SQLite setup helpers.
 
 ### Test Categories
 
