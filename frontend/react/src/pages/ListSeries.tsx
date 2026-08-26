@@ -11,6 +11,7 @@ import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
 import { ScanStatusCard } from '../components/ScanStatusCard';
 import { useTranslation } from 'react-i18next';
+import styles from '../styles/medialist.module.css';
 
 interface ListSeriesProps {
   onSelectSeries: (id: number) => void;
@@ -158,9 +159,9 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   return (
     <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>{t('filter.label')}</span>
+      <div className={styles['filter-section']}>
+        <div className={styles['filter-container']}>
+          <span className={styles['label']}>{t('filter.label')}</span>
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
@@ -224,7 +225,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
+      <div className={styles['stat-card-section']}>
         <StatCard label={t('statCard.series.title')} value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} ${t('statCard.series.completed')}`, `${context?.stats?.totalSeries || 0} ${t('statCard.series.total')}`]} icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.9-.9 1.9-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>

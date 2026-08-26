@@ -256,6 +256,10 @@
   border-color: var(--color-primary-accent);
 }
 
+.filter-chip-icon {
+  display: contents;
+}
+
 .filter-chip-badge {
   background: var(--color-primary-accent);
   color: var(--color-primary-dark);
@@ -434,6 +438,33 @@
   flex-wrap: wrap;
   gap: 4px;
 }
+
+/* Responsive UI */
+@media (max-width: 768px) {
+  .filter-chip-icon {
+    display: none;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+  }
+
+  .stat:last-child {
+    display: none;
+  }
+
+  .stat-watermark {
+    display: none;
+  }
+
+  .stat-sub {
+    display: none;
+  }
+}
+
 
 /* Responsive grid containers for mobile/tablet */
 

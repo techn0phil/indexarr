@@ -11,6 +11,7 @@ import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
 import { ScanStatusCard } from '../components/ScanStatusCard';
 import { useTranslation } from 'react-i18next';
+import styles from '../styles/medialist.module.css';
 
 interface ListFilmsProps {
   onSelectMovie: (id: number) => void;
@@ -156,9 +157,9 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   return (
     <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>{t('filter.label')}</span>
+      <div className={styles['filter-section']}>
+        <div className={styles['filter-container']}>
+          <span className={styles['label']}>{t('filter.label')}</span>
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
@@ -222,7 +223,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
+      <div className={styles['stat-card-section']}>
         <StatCard label={t('statCard.movies.title')} value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} ${t('statCard.movies.available')}`, `${context?.stats?.totalMovies || 0} ${t('statCard.movies.total')}`]} icon={
           <svg viewBox="0 0 24 24">
             <path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" />
