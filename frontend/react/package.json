@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest",
+    "test:ui": "NODE_OPTIONS=--max-old-space-size=8192 vitest --ui",
+    "test:run": "NODE_OPTIONS=--max-old-space-size=8192 vitest run",
+    "test:coverage": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --coverage"
   },
   "dependencies": {
     "i18next": "26.4.0",
@@ -20,11 +24,18 @@
     "react-window": "2.3.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.6",
     "@types/node": "26.3.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
     "@vitejs/plugin-react": "6.1.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/ui": "4.1.11",
+    "jsdom": "30.0.1",
     "typescript": "7.0.2",
-    "vite": "8.2.2"
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
   }
 }
