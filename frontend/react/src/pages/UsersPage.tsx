@@ -241,11 +241,13 @@ export const UsersPage = () => {
                 <span className={styles.username}>{user.username}</span>
               </div>
               <div className={styles.colRole}>
+                <span className={styles.mobileLabel}>{t('table.column.role')}:</span>
                 <span className={`${styles.roleBadge} ${user.role === 'admin' ? styles.roleAdmin : styles.roleGuest}`}>
                   {user.role === 'admin' ? t('role.admin') : t('role.guest')}
                 </span>
               </div>
               <div className={styles.colStatus}>
+                <span className={styles.mobileLabel}>{t('table.column.status')}:</span>
                 <button
                   className={`${styles.statusToggle} ${user.enabled ? styles.enabled : styles.disabled}`}
                   onClick={() => toggleUserEnabled(user)}
@@ -255,7 +257,10 @@ export const UsersPage = () => {
                   {user.enabled ? t('status.enabled') : t('status.disabled')}
                 </button>
               </div>
-              <div className={styles.colDate}>{formatDate(user.createdAt)}</div>
+              <div className={styles.colDate}>
+                <span className={styles.mobileLabel}>{t('table.column.createdAt')}:</span>
+                {formatDate(user.createdAt)}
+              </div>
               <div className={styles.colActions}>
                 <button className={styles.actionButton} onClick={() => openEditModal(user)} title={t('button.edit')}>
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
