@@ -511,17 +511,23 @@
   }
 }
 
-/* List view - responsive spacing */
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 20px;
-}
-
-@media (max-width: 600px) {
+/* List View grid - responsive auto-fill */
+@media (max-width: 900px) {
   .card-list {
-    gap: 6px;
+    align-items: flex-start;
+    gap: 8px 16px;
+  }
+
+  .card-list-content {
+    flex: auto;
+  }
+
+  .card-list-title {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .card-list-meta {
+    gap: 2px 8px;
   }
 }
-
