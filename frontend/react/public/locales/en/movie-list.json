@@ -11,7 +11,7 @@
       "option": {
         "available": "Available",
         "missing": "Missing",
-        "problem": "Problem",
+        "problem": "Issue",
         "complete": "Ended",
         "ongoing": "Ongoing",
         "upcoming": "Upcoming"
@@ -50,7 +50,7 @@
       "total": "total"
     },
     "problem": {
-      "title": "Problems",
+      "title": "Issues",
       "missingMovies": "Missing movies",
       "total": "total"
     },
