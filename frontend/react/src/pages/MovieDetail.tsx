@@ -52,9 +52,9 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   return (
     <div style={{ paddingBottom: '24px' }}>
       {/* Hero */}
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', padding: '24px 24px 20px 24px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+      <div className={comStyles['movie-hero']}>
         {/* Poster */}
-        <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px', overflow: 'hidden' }}>
+        <div className={comStyles['movie-hero-poster']}>
           {movie.poster && movie.poster.startsWith('http') ? (
             <img
               src={movie.poster}
@@ -78,31 +78,17 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
         {/* Info */}
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h1 className={comStyles['movie-hero-title']}>
             {movie.title}
             {typeof movie.rating === 'number' && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                background: 'var(--color-badge-rating)',
-                color: 'var(--color-badge-rating-text)',
-                borderRadius: '99px',
-                fontSize: '12px',
-                fontWeight: 500,
-                padding: '2px 10px 2px 7px',
-                border: 'none',
-                lineHeight: 1,
-                minWidth: '36px',
-                height: '22px',
-              }}>
+              <span className={comStyles['movie-hero-rating']}>
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
                 <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{movie.rating?.toFixed(1)}</span>
               </span>
             )}
 
             {/* Popup contextual menu */}
-            {(authMode === 'none' || user?.role === 'admin') && (<div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+            {(authMode === 'none' || user?.role === 'admin') && (<div className={comStyles['floating-context-menu']}>
               <button
                 className={comStyles['menu-button']}
                 aria-label="Menu"
@@ -163,7 +149,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
               )}
             </div>)}
           </h1>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div className={comStyles['movie-hero-metadata']}>
             <span>{movie.year}</span>
             <span>·</span>
             <span>{Math.floor(movie.duration / 60)}h {movie.duration % 60}min</span>
@@ -176,7 +162,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           </div>
 
           {/* Badges */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
+          <div className={comStyles['badges-container']}>
             {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840x') && (
               <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 4K
@@ -240,7 +226,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           </div>
 
           {/* Synopsis */}
-          <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.6, maxWidth: '560px' }}>
+          <p className={comStyles['movie-hero-synopsis']}>
             {movie.synopsis}
           </p>
 

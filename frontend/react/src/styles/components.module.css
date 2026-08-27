@@ -1,3 +1,196 @@
+.movie-hero {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 24px 24px 20px 24px;
+  background: var(--color-background-primary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.series-hero {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.movie-hero-poster,
+.series-hero-poster {
+  width: 110px;
+  min-width: 110px;
+  height: 160px;
+  background: var(--color-background-secondary);
+  border-radius: 8px;
+  border: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.movie-hero-title,
+.series-hero-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.movie-hero-rating,
+.series-hero-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--color-badge-rating);
+  color: var(--color-badge-rating-text);
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px 2px 7px;
+  border: none;
+  line-height: 1;
+  min-width: 36px;
+  height: 22px;
+}
+
+.movie-hero-metadata,
+.series-hero-metadata {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.movie-hero-synopsis,
+.series-hero-synopsis {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+.floating-context-menu {
+  position: relative;
+  display: inline-block;
+  margin-left: auto;
+}
+
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.episode-card {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-background-primary);
+  transition: border-color 0.12s;
+}
+
+.episode-card-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.episode-card-number {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  min-width: 28px;
+}
+
+.episode-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.episode-card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode-card-duration {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.episode-card-filesize {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  min-width: 55px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.episode-card-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.episode-card-expand-button {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.media-info-property {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 10px;
+}
+
+.media-info-property-name {
+  color: var(--color-text-tertiary);
+}
+
+.media-info-property-value {
+  color: var(--color-text-primary);
+  font-weight: 500;
+  text-align: right;
+  max-width: 55%;
+}
+
+.file-path {
+  grid-column: 1 / -1;
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  padding: 6px 8px;
+  background: var(--color-background-tertiary);
+  border-radius: 4px;
+  border: 0.5px solid var(--color-border-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .movie-card {
   background-color: var(--color-background-primary);
   border: 0.5px solid var(--color-border-tertiary);
@@ -256,6 +449,10 @@
   border-color: var(--color-primary-accent);
 }
 
+.filter-chip-icon {
+  display: contents;
+}
+
 .filter-chip-badge {
   background: var(--color-primary-accent);
   color: var(--color-primary-dark);
@@ -435,3 +632,155 @@
   gap: 4px;
 }
 
+/* Responsive UI */
+@media (max-width: 768px) {
+  .filter-chip-icon {
+    display: none;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+  }
+
+  .stat:last-child,
+  .stat-watermark,
+  .stat-sub {
+    display: none;
+  }
+
+  .movie-hero,
+  .series-hero {
+    display: block;
+  }
+
+  .movie-hero-poster,
+  .series-hero-poster {
+    float: left;
+    margin: 0 1em 1em 0;
+  }
+
+  .movie-hero-metadata,
+  .series-hero-metadata {
+    gap: 2px 10px;
+  }
+
+  .movie-hero-rating,
+  .series-hero-rating,
+  .floating-context-menu {
+    display: none;
+  }
+
+  .movie-hero-synopsis,
+  .series-hero-synopsis {
+    clear: both;
+  }
+
+  .episode-card-header {
+    display: block;
+  }
+
+  .episode-card-number {
+    float: left;
+    margin: 1px 0;
+  }
+
+  .episode-card-info {
+    padding-right: 24px;
+    margin-bottom: 6px;
+  }
+
+  .episode-card-duration,
+  .episode-card-filesize,
+  .episode-card-status {
+    display: none;
+  }
+
+  .episode-card-expand-button {
+    position: absolute;
+    top: calc(50% - 12px);
+    right: 8px;
+  }
+
+  .media-info-property {
+    flex-direction: column;
+  }
+
+  .media-info-property-value {
+    text-align: left;
+    max-width: none;
+  }
+
+  .file-path {
+    display: none;
+  }
+}
+
+
+/* Responsive grid containers for mobile/tablet */
+
+/* Stats grid - responsive columns */
+.stats-grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 0 20px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card grid - responsive auto-fill */
+.card-grid {
+  display: grid;
+  gap: 12px;
+  padding: 0 20px;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* List View grid - responsive auto-fill */
+@media (max-width: 900px) {
+  .card-list {
+    align-items: flex-start;
+    gap: 8px 16px;
+  }
+
+  .card-list-content {
+    flex: auto;
+  }
+
+  .card-list-title {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .card-list-meta {
+    gap: 2px 8px;
+  }
+}

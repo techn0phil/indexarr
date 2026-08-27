@@ -40,6 +40,18 @@
   opacity: 0.6;
 }
 
+@media (max-width: 900px) {
+  .username,
+  .chevron {
+    display: none;
+  }
+
+  .trigger {
+    padding: 6px 6px;
+  }
+}
+
+
 .dropdown {
   position: absolute;
   top: calc(100% + 4px);

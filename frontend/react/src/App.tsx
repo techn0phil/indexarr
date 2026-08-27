@@ -40,6 +40,7 @@ const AuthLoadingSpinner = () => (
 const AppContent = () => {
   const context = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -55,6 +56,19 @@ const AppContent = () => {
     if (page === 'movies') navigate('/movies');
     else if (page === 'series') navigate('/series');
     else if (page === 'users') navigate('/admin/users');
+
+    // Close drawer on mobile when nav item clicked
+    if (window.innerWidth <= 900) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleHamburgerClick = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleBackdropClick = () => {
+    setSidebarOpen(false);
   };
 
   const handleBack = () => {
@@ -68,7 +82,16 @@ const AppContent = () => {
 
   return (
     <div className={layoutStyles.layout}>
-      <Sidebar activeNav={activeNav} onNavClick={handleSidebarNav} />
+      <div
+        className={`${layoutStyles.backdrop} ${sidebarOpen ? layoutStyles.visible : ''}`}
+        onClick={handleBackdropClick}
+      />
+
+      <Sidebar 
+        activeNav={activeNav} 
+        onNavClick={handleSidebarNav}
+        isDrawerOpen={sidebarOpen}
+      />
       <div className={layoutStyles.main}>
         <Topbar 
           showBack={false} 
@@ -76,6 +99,8 @@ const AppContent = () => {
           onBack={handleBack}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          isSidebarOpen={sidebarOpen}
+          onHamburgerClick={handleHamburgerClick}
         />
         <div className={layoutStyles.content}>
           <Routes>

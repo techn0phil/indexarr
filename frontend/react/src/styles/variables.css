@@ -65,6 +65,18 @@
   /* Layout */
   --sidebar-width: 210px;
   --topbar-height: 56px;
+
+  /* Responsive breakpoints */
+  --breakpoint-mobile-max: 767px;
+  --breakpoint-tablet-min: 768px;
+  --breakpoint-tablet-max: 1023px;
+  --breakpoint-desktop-min: 1024px;
+  --breakpoint-sidebar-drawer: 900px;
+
+  /* Sidebar drawer animation */
+  --sidebar-drawer-width: 210px;
+  --sidebar-animation-duration: 0.3s;
+  --overlay-backdrop-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Dark mode via data-theme attribute (manual override) */
