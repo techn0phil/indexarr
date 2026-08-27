@@ -17,6 +17,7 @@ This is the React frontend for Indexarr, a media library management application 
 - Multi-language support (5 languages: English, Deutsch, Español, Français, Italiano)
 - User management interface (admin only)
 - Real-time library statistics and scan progress
+- **Progressive Web App (PWA)** — Install on desktop/mobile, offline support, auto-updating
 
 ## Project Structure
 
@@ -61,6 +62,44 @@ frontend/react/
    ```bash
    npm run test:run
    ```
+
+## Progressive Web App (PWA) Support
+
+Indexarr is a fully-fledged PWA with installation capabilities, offline support, and automatic updates.
+
+### Installation
+
+- **Desktop**: Click install icon (top-right address bar) or wait for install prompt in Chrome/Edge
+- **Android**: Menu (⋮) → "Install app"
+- **iOS**: Share button (↗) → "Add to Home Screen"
+
+### PWA Features
+
+- Auto-registering service worker with automatic updates
+- Pre-caching of static assets (HTML, CSS, JS, images)
+- Runtime caching strategies for API and external metadata (TMDB, TVDB)
+- Offline support with NetworkFirst strategy for API requests
+- Multi-size icons (192x192, 512x512) with maskable variants
+- App store screenshots for installation prompts
+- Safe-area support for notched devices (iOS)
+
+### PWA Development & Testing
+
+For detailed PWA documentation, configuration, and troubleshooting:
+```bash
+# See PWA.md for complete guide
+cat docs/PWA.md
+
+# Regenerate PWA icons (if needed)
+npm run pwa:icons
+```
+
+To verify PWA in DevTools:
+1. Open DevTools (F12) → Application tab
+2. Service Workers section — verify `sw.js` is active
+3. Manifest section — verify `manifest.webmanifest` is loaded
+4. Cache Storage — inspect cached assets and API responses
+5. Run Lighthouse audit (Lighthouse tab → Mobile) to verify PWA score
 
 ## Main Components & Pages
 

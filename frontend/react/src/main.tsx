@@ -5,6 +5,10 @@ import i18next from './i18n/config.ts'
 import App from './App.tsx'
 import './styles/variables.css'
 
+// Register PWA service worker
+import { registerSW } from 'virtual:pwa-register'
+registerSW({ immediate: true })
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <I18nextProvider i18n={i18next}>

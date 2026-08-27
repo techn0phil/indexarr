@@ -2,5 +2,7 @@ node_modules
 .vite
 *.tsbuildinfo
 vite.config.d.ts
+vite.config.js
 coverage
 dist
+dev-dist
