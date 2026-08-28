@@ -2,7 +2,7 @@
 
 **Indexarr** is a media library application inspired by [Sonarr](https://sonarr.tv/) and [Radarr](https://radarr.video/). It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
 
-![Main movie page screenshot](ux-ui/movies.png)
+![Main movie page screenshot](frontend/react/public/screenshot-1280x720.png)
 
 
 ## Table of contents
@@ -27,17 +27,17 @@
 ## Features
 
 - **Centralized movies and series catalog**
-  - **Radarr / Sonarr integrations** — Import from existing Radarr / Sonarr libraries
-  - **Filesystem scanning** — Discover media from local directories
-  - **Blu-ray formats support** — Uncompressed folder and ISO files
+  - Radarr / Sonarr integrations — _Import from existing Radarr / Sonarr libraries_
+  - Filesystem scanning — _Discover media from local directories_
+  - Blu-ray formats support — _Uncompressed folder and ISO files_
 - **Accurate media intelligence**
-  - **Detailed media info detection** — video, audio, and subtitle tracks
-  - **Multi-criteria filtering** — title, year, status, resolution, codec, audio, HDR
-  - **Real-time statistics** — total count, disk space, 4K %, problem counts
+  - Detailed media info detection — _video, audio, and subtitle tracks_
+  - Multi-criteria filtering — _title, year, status, resolution, codec, audio, HDR_
+  - Real-time statistics — _total count, disk space, 4K %, problem counts_
 - **Easy user experience**
-  - **Multi-language support** — English, Français, Español, Italiano, Deutsch
-  - **Responsive UI** — Supports desktop, tablet, and mobile devices
-  - **User authentication** — Builtin authentication with local users
+  - Multi-language support — _English, Français, Español, Italiano, Deutsch_
+  - Responsive UI — _Supports desktop, tablet, and mobile devices_
+  - User authentication — _Builtin authentication with local users_
 
 
 ## Getting started
