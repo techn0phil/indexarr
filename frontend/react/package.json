@@ -11,7 +11,8 @@
     "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest",
     "test:ui": "NODE_OPTIONS=--max-old-space-size=8192 vitest --ui",
     "test:run": "NODE_OPTIONS=--max-old-space-size=8192 vitest run",
-    "test:coverage": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --coverage"
+    "test:coverage": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --coverage",
+    "pwa:icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "i18next": "26.4.0",
@@ -36,6 +37,7 @@
     "jsdom": "30.0.1",
     "typescript": "7.0.2",
     "vite": "8.2.2",
+    "vite-plugin-pwa": "1.3.0",
     "vitest": "4.1.11"
   }
 }
