@@ -3,7 +3,8 @@
     "label": "Filters",
     "button": {
       "apply": "Apply",
-      "clear": "Clear"
+      "clear": "Clear",
+      "clearAll": "Clear all"
     },
     "status": {
       "label": "Status",

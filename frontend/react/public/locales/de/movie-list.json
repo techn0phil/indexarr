@@ -3,7 +3,8 @@
     "label": "Filter",
     "button": {
       "apply": "Anwenden",
-      "clear": "Zurücksetzen"
+      "clear": "Zurücksetzen",
+      "clearAll": "Alles löschen"
     },
     "status": {
       "label": "Status",

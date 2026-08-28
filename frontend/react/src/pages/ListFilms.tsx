@@ -214,7 +214,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
                 marginLeft: '4px',
               }}
             >
-              Effacer tout
+              {t('filter.button.clearAll')}
             </button>
           )}
         </div>

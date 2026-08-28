@@ -3,7 +3,8 @@
     "label": "Filtres",
     "button": {
       "apply": "Appliquer",
-      "clear": "Effacer"
+      "clear": "Effacer",
+      "clearAll": "Tout effacer"
     },
     "status": {
       "label": "Statut",
