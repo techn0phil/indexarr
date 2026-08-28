@@ -20,7 +20,7 @@ export default defineConfig({
       manifest: {
         name: 'Indexarr',
         short_name: 'Indexarr',
-        description: 'Media indexing and management dashboard',
+        description: 'Centralized catalog to track, search, and analyze technical metadata of your movies and series',
         theme_color: '#1D9E75',
         background_color: '#FFFFFF',
         display: 'standalone',

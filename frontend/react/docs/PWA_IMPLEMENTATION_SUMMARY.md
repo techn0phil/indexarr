@@ -19,7 +19,7 @@
 ### ✅ Web App Manifest Configuration
 - [x] Name: "Indexarr"
 - [x] Short Name: "Indexarr"
-- [x] Description: "Media indexing and management dashboard"
+- [x] Description: "Centralized catalog to track, search, and analyze technical metadata of your movies and series"
 - [x] Theme Color: #1D9E75 (brand teal)
 - [x] Background Color: #FFFFFF (light mode default)
 - [x] Display: "standalone" (full-screen app experience)
