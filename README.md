@@ -30,10 +30,10 @@
   - Radarr / Sonarr integrations — _Import from existing Radarr / Sonarr libraries_
   - Filesystem scanning — _Discover media from local directories_
   - Blu-ray formats support — _Uncompressed folder and ISO files_
-- **Accurate media intelligence**
-  - Detailed media info detection — _video, audio, and subtitle tracks_
-  - Multi-criteria filtering — _title, year, status, resolution, codec, audio, HDR_
-  - Real-time statistics — _total count, disk space, 4K %, problem counts_
+- **Accurate media files metadata**
+  - Detailed media info detection — _Video, audio, and subtitle tracks_
+  - Multi-criteria filtering — _Title, year, status, resolution, codec, audio, HDR_
+  - Real-time statistics — _Total count, disk space, 4K %, problem counts_
 - **Easy user experience**
   - Multi-language support — _English, Français, Español, Italiano, Deutsch_
   - Responsive UI — _Supports desktop, tablet, and mobile devices_
