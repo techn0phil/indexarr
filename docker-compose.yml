@@ -8,8 +8,8 @@ services:
     volumes:
       - data:/app/data
       # Optional: Mount as many media library paths as needed (read-only recommended)
-      - ${MOVIES_HOST_PATH:-/host/path/to/movies}:/data/movies:ro
-      - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/series:ro
+      - ${MOVIES_HOST_PATH}:/data/movies:ro
+      - ${SERIES_HOST_PATH}:/data/series:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
       MOVIES_LIBRARY_PATHS: /data/movies
