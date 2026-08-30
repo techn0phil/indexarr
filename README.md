@@ -1,5 +1,11 @@
 # Indexarr
 
+[![Release](https://img.shields.io/github/v/release/techn0phil/indexarr?label=Release&color=%231D9E75)](github.com/techn0phil/indexarr/releases)
+![Go](https://img.shields.io/github/go-mod/go-version/techn0phil/indexarr?filename=backend%2Fgo%2Fgo.mod&color=%2300ADD8)
+![Typescript](https://img.shields.io/github/package-json/dependency-version/techn0phil/indexarr/dev/typescript?filename=frontend%2Freact%2Fpackage.json&label=Typescript&color=%233178C6)
+[![Trivy](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/trivy.yml?logo=github&label=Trivy&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/trivy.yml)
+[![Grype](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/grype.yml?logo=github&label=Grype&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/grype.yml)
+
 **Indexarr** is a media library application inspired by [Sonarr](https://sonarr.tv/) and [Radarr](https://radarr.video/). It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
 
 ![Main movie page screenshot](frontend/react/public/screenshot-1280x720.png)

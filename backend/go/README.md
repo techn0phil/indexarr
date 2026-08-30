@@ -1,6 +1,9 @@
 
 # Indexarr Backend (Go)
 
+![Go](https://img.shields.io/github/go-mod/go-version/techn0phil/indexarr?filename=backend%2Fgo%2Fgo.mod&color=%2300ADD8)
+[![Tests](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/test-backend.yml?logo=github&label=Tests&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/test-backend.yml)
+
 This is the backend for Indexarr, a media library management application. It provides a RESTful API for managing movies, TV series, episodes, and technical metadata.
 
 ## Features

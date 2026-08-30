@@ -1,6 +1,9 @@
 
 # Indexarr Frontend (React)
 
+![Typescript](https://img.shields.io/github/package-json/dependency-version/techn0phil/indexarr/dev/typescript?filename=frontend%2Freact%2Fpackage.json&label=Typescript&color=%233178C6)
+[![Tests](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/test-frontend.yml?logo=github&label=Tests&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/test-frontend.yml)
+
 This is the React frontend for Indexarr, a media library management application inspired by Sonarr and Radarr. It provides a modern, responsive UI for browsing and managing movies and TV series, with advanced filtering, technical metadata, and real-time scan status.
 
 ## Features
