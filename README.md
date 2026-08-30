@@ -101,10 +101,10 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `IGNORE_FILE_PATTERN` | - | No | Regular expression pattern to ignore matching files during scanning |
 | `TMDB_API_KEY` | - | No, but recommended | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
 | `TVDB_API_KEY` | - | No, but recommended | TVDB API key for series metadata ([get here](https://www.thetvdb.com/api-information)) |
-| `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
+| `RADARR_URL` | - | No | Radarr URL |
 | `RADARR_API_KEY` | - | No | Radarr API key for importing movies from Radarr |
 | `RADARR_PATH_MAPPING` | - | No | Used to map Radarr paths to local paths (e.g. `/movies:/data/movies`) |
-| `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
+| `SONARR_URL` | - | No | Sonarr URL |
 | `SONARR_API_KEY` | - | No | Sonarr API key for importing series from Sonarr |
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
 | `DETECTION_LANGUAGE` | en | No | Language code for media detection (e.g., "en", "fr") |

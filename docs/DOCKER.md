@@ -163,10 +163,10 @@ build:
 | `GID` | `1000` | Group ID used to run indexarr |
 | `TMDB_API_KEY` | - | TMDB API key (required) |
 | `TVDB_API_KEY` | - | TVDB API key (required) |
-| `RADARR_URL` | http://radarr:7878 | Radarr URL (optional) |
+| `RADARR_URL` | - | Radarr URL (optional) |
 | `RADARR_API_KEY` | - | Radarr API key (optional) |
 | `RADARR_PATH_MAPPING` | - | Path mapping between Radarr and Indexarr |
-| `SONARR_URL` | http://sonarr:8989 | Sonarr URL (optional) |
+| `SONARR_URL` | - | Sonarr URL (optional) |
 | `SONARR_API_KEY` | - | Sonarr API key (optional) |
 | `SONARR_PATH_MAPPING` | - | Path mapping between Sonarr and Indexarr |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | **Deprecated** use `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS` instead |
