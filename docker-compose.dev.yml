@@ -54,6 +54,13 @@ services:
       # Timezone (optional, adjust to your location)
       TZ: ${TZ:-UTC}
 
+      # Authentication configuration
+      AUTH_MODE: ${AUTH_MODE:-none}
+      AUTH_ADMIN_USERNAME: ${AUTH_ADMIN_USERNAME:-admin}
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD:-admin}
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-}
+      AUTH_SESSION_MAX_AGE: ${AUTH_SESSION_MAX_AGE:-168}
+
 
 volumes:
   data:
