@@ -1,0 +1,17 @@
+{
+  "title": "Accedi",
+  "fields": {
+    "username": "Nome utente",
+    "password": "Password"
+  },
+  "buttons": {
+    "submit": "Accedi"
+  },
+  "errors": {
+    "invalidRequestBody": "Corpo della richiesta non valido",
+    "invalidCredentials": "Credenziali non valide",
+    "userDisabled": "Account disattivato",
+    "failedToGenerateToken": "Impossibile generare il token di autenticazione",
+    "notAuthenticated": "Utente non autenticato"
+  }
+}

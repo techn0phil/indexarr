@@ -72,6 +72,25 @@
     "allFieldsRequired": "Todos los campos son obligatorios",
     "passwordRequired": "La contraseña es obligatoria",
     "clickToEnable": "Haga clic para habilitar la cuenta",
-    "clickToDisable": "Haga clic para deshabilitar la cuenta"
+    "clickToDisable": "Haga clic para deshabilitar la cuenta",
+    "notAuthenticated": "Usuario no autenticado",
+    "adminAccessRequired": "Se requiere acceso de administrador",
+    "userRepositoryNotAvailable": "El repositorio de usuarios no está disponible",
+    "failedToFetchUsers": "Error al obtener los usuarios",
+    "invalidRequestBody": "Cuerpo de la solicitud no válido",
+    "usernameAndPasswordRequired": "Se requieren nombre de usuario y contraseña",
+    "invalidRole": "Rol no válido",
+    "failedToHashPassword": "Error al cifrar la contraseña",
+    "userAlreadyExists": "El usuario ya existe",
+    "failedToCreateUser": "Error al crear el usuario",
+    "invalidUserID": "ID de usuario no válido",
+    "userNotFound": "Usuario no encontrado",
+    "failedToUpdateUser": "Error al actualizar el usuario",
+    "cannotDeleteSelf": "No puede eliminar su propia cuenta",
+    "failedToDeleteUser": "Error al eliminar el usuario",
+    "userDeleted": "Usuario eliminado con éxito",
+    "newPasswordRequired": "Se requiere una nueva contraseña",
+    "failedToUpdatePassword": "Error al actualizar la contraseña",
+    "passwordUpdated": "Contraseña actualizada con éxito"
   }
 }

@@ -72,6 +72,25 @@
     "allFieldsRequired": "Alle Felder sind Pflichtfelder",
     "passwordRequired": "Passwort ist erforderlich",
     "clickToEnable": "Klicken, um das Konto zu aktivieren",
-    "clickToDisable": "Klicken, um das Konto zu deaktivieren"
+    "clickToDisable": "Klicken, um das Konto zu deaktivieren",
+    "notAuthenticated": "Benutzer nicht authentifiziert",
+    "adminAccessRequired": "Administratorzugriff erforderlich",
+    "userRepositoryNotAvailable": "Benutzer-Repository ist nicht verfügbar",
+    "failedToFetchUsers": "Benutzer konnten nicht abgerufen werden",
+    "invalidRequestBody": "Ungültiger Anforderungstext",
+    "usernameAndPasswordRequired": "Benutzername und Passwort sind erforderlich",
+    "invalidRole": "Ungültige Rolle",
+    "failedToHashPassword": "Passwort konnte nicht gehasht werden",
+    "userAlreadyExists": "Benutzer existiert bereits",
+    "failedToCreateUser": "Benutzer konnte nicht erstellt werden",
+    "invalidUserID": "Ungültige Benutzer-ID",
+    "userNotFound": "Benutzer nicht gefunden",
+    "failedToUpdateUser": "Benutzer konnte nicht aktualisiert werden",
+    "cannotDeleteSelf": "Sie können Ihr eigenes Konto nicht löschen",
+    "failedToDeleteUser": "Benutzer konnte nicht gelöscht werden",
+    "userDeleted": "Benutzer erfolgreich gelöscht",
+    "newPasswordRequired": "Neues Passwort ist erforderlich",
+    "failedToUpdatePassword": "Passwort konnte nicht aktualisiert werden",
+    "passwordUpdated": "Passwort erfolgreich aktualisiert"
   }
 }
