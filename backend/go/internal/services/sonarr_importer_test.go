@@ -9,6 +9,8 @@ import (
 	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
+
+	"github.com/rs/zerolog"
 )
 
 func TestSonarrImporterMapHelpers(t *testing.T) {
@@ -85,6 +87,9 @@ func TestSonarrImporterMapHelpers(t *testing.T) {
 }
 
 func TestSonarrImporterImportUsesCacheProcessesEpisodesAndRemovesStale(t *testing.T) {
+	logger := zerolog.Nop()
+	config.GlobalLogger = &logger
+
 	db := setupServicesTestDBWithMigrations(t)
 
 	staleSeries := &models.Series{
@@ -127,7 +132,7 @@ func TestSonarrImporterImportUsesCacheProcessesEpisodesAndRemovesStale(t *testin
 					"added":"2025-06-01T12:00:00Z",
 					"lastAired":"2025-01-01T00:00:00Z",
 					"statistics":{"episodeFileCount":1,"episodeCount":2,"totalEpisodeCount":3,"sizeOnDisk":12345},
-					"seasons":[{"seasonNumber":1,"statistics":{"totalEpisodeCount":1}}]
+					"seasons":[{"seasonNumber":0,"statistics":{"totalEpisodeCount":1}}]
 				}
 			]`)
 		case "/api/v3/episode":
