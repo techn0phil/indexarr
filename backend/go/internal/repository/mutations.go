@@ -488,7 +488,7 @@ func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
 		_, err := db.Exec(`
 			UPDATE series SET
 				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?),
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'available'),
 				missing_episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'missing'),
 				file_size = (SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE series_id = ?)
 			WHERE id = ?
@@ -626,10 +626,26 @@ func DeleteEpisodeByPath(db *sql.DB, pathPattern string) error {
 	})
 }
 
+// DeleteEpisodeBySeriesAndSeasonNumber deletes episodes by series ID and season number
+func DeleteEpisodeBySeriesAndSeasonNumber(db *sql.DB, seriesID int64, seasonNum int) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM episodes WHERE series_id = ? AND season_num = ?`, seriesID, seasonNum)
+		return err
+	})
+}
+
 // DeleteSeries deletes a series by ID (cascade constraints handle episodes, seasons, cast, and tracks)
 func DeleteSeries(db *sql.DB, seriesID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`DELETE FROM series WHERE id = ?`, seriesID)
+		return err
+	})
+}
+
+// DeleteSeasonBySeriesAndSeasonNumber deletes a season by series ID and season number
+func DeleteSeasonBySeriesAndSeasonNumber(db *sql.DB, seriesID int64, seasonNum int) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM seasons WHERE series_id = ? AND number = ?`, seriesID, seasonNum)
 		return err
 	})
 }

@@ -22,7 +22,10 @@ func TestGetOrCreateSeasonAndUpdateSeriesCounts(t *testing.T) {
 	if _, err := db.Exec("INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned) VALUES (?, 1, 1, 'S1E1', 45, 'available', 1024, '/counted/s01e01.mkv', '2026-01-01', '2026-01-01')", seriesID); err != nil {
 		t.Fatalf("failed to insert available episode: %v", err)
 	}
-	if _, err := db.Exec("INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned) VALUES (?, 1, 2, 'S1E2', 45, 'missing', 0, '', '2026-01-01', '2026-01-01')", seriesID); err != nil {
+	if _, err := db.Exec("INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned) VALUES (?, 1, 2, 'S1E2', 45, 'available', 1024, '/counted/s01e02.mkv', '2026-01-01', '2026-01-01')", seriesID); err != nil {
+		t.Fatalf("failed to insert available episode: %v", err)
+	}
+	if _, err := db.Exec("INSERT INTO episodes (series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned) VALUES (?, 1, 3, 'S1E3', 45, 'missing', 0, '', '2026-01-01', '2026-01-01')", seriesID); err != nil {
 		t.Fatalf("failed to insert missing episode: %v", err)
 	}
 
@@ -35,7 +38,7 @@ func TestGetOrCreateSeasonAndUpdateSeriesCounts(t *testing.T) {
 	if err := db.QueryRow("SELECT season_count, episode_count, missing_episode_count, file_size FROM series WHERE id = ?", seriesID).Scan(&seasonCount, &episodeCount, &missingCount, &fileSize); err != nil {
 		t.Fatalf("failed to read updated series counts: %v", err)
 	}
-	if seasonCount != 1 || episodeCount != 2 || missingCount != 1 || fileSize != 1024 {
+	if seasonCount != 1 || episodeCount != 2 || missingCount != 1 || fileSize != 2048 {
 		t.Fatalf("unexpected series aggregate values: seasons=%d episodes=%d missing=%d fileSize=%d", seasonCount, episodeCount, missingCount, fileSize)
 	}
 }
