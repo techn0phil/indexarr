@@ -146,7 +146,7 @@ See `.env.example` for all options.
 - SQLite database: `indexarr.db` (created in `backend/go/`)
 - Schema migrations managed with [golang-migrate](https://github.com/golang-migrate/migrate)
 - Migration scripts in `internal/repository/migrations/`
-- See [MIGRATIONS.md](MIGRATIONS.md) for migration workflow
+- See [MIGRATIONS.md](docs/MIGRATIONS.md) for migration workflow
 
 ## API Endpoints
 
@@ -204,7 +204,6 @@ When auth is enabled, tokens are stored in HttpOnly cookies and validated by the
 - **Connection Pool**: Limited connection pool prevents database contention
 - **Long Transactions**: Avoid long-running transactions; they can trigger "database is locked" errors
 - **Batch Updates**: Scan status updates are batched rather than per-file to reduce contention
-- For detailed analysis, see `/memories/repo/database-locking-analysis.md`
 
 ### Import Architecture
 - **Nil Service Checks**: Importers can be `nil` if not configured (e.g., no Radarr URL). Always check `if movieImporter != nil` before calling methods.

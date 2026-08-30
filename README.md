@@ -246,7 +246,7 @@ Indexarr runs as a non-root user inside the container for security. By default, 
 
 ### Extra files
 
-Extra files such as **Behind the scenes**, **interviews**, **trailers**, etc... will likely be incorrectly matched. To avoid that, you can exclude some folders from scanning by setting the `SKIP_FOLDERS` environment variable:
+Extra files such as **behind the scenes**, **interviews**, **trailers**, etc... will likely be incorrectly matched. To avoid that, you can exclude some folders from scanning by setting the `SKIP_FOLDERS` environment variable:
 
 ```yaml
 environment:
