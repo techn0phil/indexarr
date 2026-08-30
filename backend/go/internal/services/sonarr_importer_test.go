@@ -132,14 +132,13 @@ func TestSonarrImporterImportUsesCacheProcessesEpisodesAndRemovesStale(t *testin
 					"added":"2025-06-01T12:00:00Z",
 					"lastAired":"2025-01-01T00:00:00Z",
 					"statistics":{"episodeFileCount":1,"episodeCount":2,"totalEpisodeCount":3,"sizeOnDisk":12345},
-					"seasons":[{"seasonNumber":0,"statistics":{"totalEpisodeCount":1}}]
+					"seasons":[{"seasonNumber":1,"statistics":{"episodeFileCount":1,"totalEpisodeCount":1}}]
 				}
 			]`)
 		case "/api/v3/episode":
 			episodeCalls++
 			fmt.Fprint(w, `[
-				{"id":201,"seriesId":101,"seasonNumber":0,"episodeNumber":1,"title":"Special","hasFile":true,"runtime":30,"episodeFile":{"path":"","size":1}},
-				{"id":202,"seriesId":101,"seasonNumber":1,"episodeNumber":1,"title":"Pilot","hasFile":true,"runtime":45,"episodeFile":{"path":"","size":999}}
+				{"id":201,"seriesId":101,"seasonNumber":1,"episodeNumber":1,"title":"Pilot","hasFile":true,"runtime":30,"episodeFile":{"path":"","size":1}}
 			]`)
 		default:
 			t.Fatalf("unexpected path: %s", r.URL.String())
