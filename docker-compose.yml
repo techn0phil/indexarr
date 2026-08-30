@@ -12,8 +12,8 @@ services:
       - ${SERIES_HOST_PATH}:/data/series:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
-      MOVIES_LIBRARY_PATHS: /data/movies
-      SERIES_LIBRARY_PATHS: /data/series
+      MOVIES_LIBRARY_PATHS: ${MOVIES_LIBRARY_PATHS:-/data/movies}
+      SERIES_LIBRARY_PATHS: ${SERIES_LIBRARY_PATHS:-/data/series}
 
       # Comma-separated list of folder names to skip during scanning (optional)
       SKIP_FOLDERS: ${SKIP_FOLDERS:-}
