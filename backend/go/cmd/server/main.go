@@ -33,9 +33,9 @@ func main() {
 	defer db.Close()
 
 	// Seed database with mock data (only if empty)
-	if err := repository.SeedMockData(db); err != nil {
-		logger.Fatal().Err(err).Msg("Failed to seed mock data")
-	}
+	// if err := repository.SeedMockData(db); err != nil {
+	// 	logger.Fatal().Err(err).Msg("Failed to seed mock data")
+	// }
 
 	// Temporary post-migration repair for series total counts.
 	if err := services.BackfillSeriesTotalsOnStartup(db, cfg); err != nil {
