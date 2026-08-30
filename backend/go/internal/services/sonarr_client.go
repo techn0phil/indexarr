@@ -29,28 +29,27 @@ func NewSonarrClient(baseURL, apiKey string) *SonarrClient {
 
 // SonarrSeries represents a TV series from Sonarr API
 type SonarrSeries struct {
-	ID          int            `json:"id"`
-	Title       string         `json:"title"`
-	TitleSlug   string         `json:"titleSlug"`
-	Year        int            `json:"year"`
-	Overview    string         `json:"overview"`
-	Status      string         `json:"status"` // continuing, ended
-	SeasonCount int            `json:"seasonCount"`
-	Path        string         `json:"path"`
-	Genres      []string       `json:"genres"`
-	Ratings     SonarrRatings  `json:"ratings"`
-	Images      []SonarrImage  `json:"images"`
-	TmdbId      int            `json:"tmdbId"`
-	TvdbId      int            `json:"tvdbId"`
-	TvRageId    int            `json:"tvRageId"`
-	TvMazeId    int            `json:"tvMazeId"`
-	ImdbId      string         `json:"imdbId"`
-	Added       string         `json:"added"`   // ISO 8601 timestamp
-	Runtime     int            `json:"runtime"` // minutes per episode
-	Statistics  SonarrStats    `json:"statistics"`
-	Seasons     []SonarrSeason `json:"seasons"`
-	FirstAired  string         `json:"firstAired"` // YYYY-MM-DDTHH:MM:SSZ
-	LastAired   string         `json:"lastAired"`  // YYYY-MM-DDTHH:MM:SSZ
+	ID         int            `json:"id"`
+	Title      string         `json:"title"`
+	TitleSlug  string         `json:"titleSlug"`
+	Year       int            `json:"year"`
+	Overview   string         `json:"overview"`
+	Status     string         `json:"status"` // continuing, ended
+	Path       string         `json:"path"`
+	Genres     []string       `json:"genres"`
+	Ratings    SonarrRatings  `json:"ratings"`
+	Images     []SonarrImage  `json:"images"`
+	TmdbId     int            `json:"tmdbId"`
+	TvdbId     int            `json:"tvdbId"`
+	TvRageId   int            `json:"tvRageId"`
+	TvMazeId   int            `json:"tvMazeId"`
+	ImdbId     string         `json:"imdbId"`
+	Added      string         `json:"added"`   // ISO 8601 timestamp
+	Runtime    int            `json:"runtime"` // minutes per episode
+	Statistics SonarrStats    `json:"statistics"`
+	Seasons    []SonarrSeason `json:"seasons"`
+	FirstAired string         `json:"firstAired"` // YYYY-MM-DDTHH:MM:SSZ
+	LastAired  string         `json:"lastAired"`  // YYYY-MM-DDTHH:MM:SSZ
 }
 
 // SonarrSeason represents a season within a series
@@ -60,8 +59,9 @@ type SonarrSeason struct {
 	Statistics   SonarrStats `json:"statistics"`
 }
 
-// SonarrStats contains episode statistics
+// SonarrStats contains series or season statistics
 type SonarrStats struct {
+	SeasonCount       int     `json:"seasonCount"`
 	EpisodeFileCount  int     `json:"episodeFileCount"`
 	EpisodeCount      int     `json:"episodeCount"`
 	TotalEpisodeCount int     `json:"totalEpisodeCount"`

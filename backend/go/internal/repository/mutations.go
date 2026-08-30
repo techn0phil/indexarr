@@ -488,7 +488,7 @@ func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
 		_, err := db.Exec(`
 			UPDATE series SET
 				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?),
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'available'),
 				missing_episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'missing'),
 				file_size = (SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE series_id = ?)
 			WHERE id = ?

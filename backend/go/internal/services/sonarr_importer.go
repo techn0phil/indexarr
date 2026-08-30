@@ -169,7 +169,11 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	// Count total episodes with files for progress tracking
 	totalEpisodesWithFiles := 0
 	for _, ss := range sonarrSeriesList {
-		totalEpisodesWithFiles += ss.Statistics.EpisodeFileCount
+		for _, se := range ss.Seasons {
+			if se.SeasonNumber != 0 {
+				totalEpisodesWithFiles += se.Statistics.EpisodeFileCount
+			}
+		}
 	}
 
 	result.FilesFound = totalEpisodesWithFiles
@@ -406,10 +410,10 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 		Title:             ss.Title,
 		Slug:              slugify(ss.Title),
 		YearStart:         ss.Year,
-		SeasonCount:       ss.SeasonCount,
-		EpisodeCount:      ss.Statistics.EpisodeCount,
-		TotalSeasonCount:  ss.SeasonCount,
-		TotalEpisodeCount: ss.Statistics.TotalEpisodeCount - ss.Seasons[0].Statistics.TotalEpisodeCount,
+		SeasonCount:       ss.Statistics.SeasonCount,
+		EpisodeCount:      ss.Statistics.EpisodeFileCount,
+		TotalSeasonCount:  ss.Statistics.SeasonCount,
+		TotalEpisodeCount: ss.Statistics.TotalEpisodeCount,
 		Synopsis:          ss.Overview,
 		Status:            si.mapSeriesStatus(ss.Status),
 		FileSize:          ss.Statistics.SizeOnDisk,
@@ -419,6 +423,10 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 		SonarrID:          int64(ss.ID),
 		TitleSlug:         ss.TitleSlug,
 		DateAdded:         ss.Added,
+	}
+
+	if ss.Seasons[0].SeasonNumber == 0 {
+		series.TotalEpisodeCount -= ss.Seasons[0].Statistics.TotalEpisodeCount
 	}
 
 	if series.TMDBId == 0 {
