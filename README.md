@@ -16,7 +16,7 @@
   - [Prerequisites](#prerequisites-1)
   - [Backend setup](#backend-setup)
   - [Frontend setup](#frontend-setup)
-  - [Building Docker image locally](#building-docker-image-locally)
+  - [Run Docker image locally](#run-docker-image-locally)
 - [Common issues](#common-issues)
   - [Incorrect matching](#incorrect-matching)
   - [Media permissions](#media-permissions)
