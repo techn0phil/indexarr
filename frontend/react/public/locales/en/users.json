@@ -72,6 +72,25 @@
     "allFieldsRequired": "All fields are required",
     "passwordRequired": "Password is required",
     "clickToEnable": "Click to enable account",
-    "clickToDisable": "Click to disable account"
+    "clickToDisable": "Click to disable account",
+    "notAuthenticated": "User not authenticated",
+    "adminAccessRequired": "Administrator access required",
+    "userRepositoryNotAvailable": "User repository is not available",
+    "failedToFetchUsers": "Failed to fetch users",
+    "invalidRequestBody": "Invalid request body",
+    "usernameAndPasswordRequired": "Username and password are required",
+    "invalidRole": "Invalid role",
+    "failedToHashPassword": "Failed to hash password",
+    "userAlreadyExists": "User already exists",
+    "failedToCreateUser": "Failed to create user",
+    "invalidUserID": "Invalid user ID",
+    "userNotFound": "User not found",
+    "failedToUpdateUser": "Failed to update user",
+    "cannotDeleteSelf": "You cannot delete your own account",
+    "failedToDeleteUser": "Failed to delete user",
+    "userDeleted": "User successfully deleted",
+    "newPasswordRequired": "New password is required",
+    "failedToUpdatePassword": "Failed to update password",
+    "passwordUpdated": "Password successfully updated"
   }
 }

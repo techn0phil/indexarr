@@ -1,0 +1,17 @@
+{
+  "title": "Login",
+  "fields": {
+    "username": "Username",
+    "password": "Password"
+  },
+  "buttons": {
+    "submit": "Log In"
+  },
+  "errors": {
+    "invalidRequestBody": "Invalid request body",
+    "invalidCredentials": "Invalid credentials",
+    "userDisabled": "Account disabled",
+    "failedToGenerateToken": "Failed to generate authentication token",
+    "notAuthenticated": "User not authenticated"
+  }
+}

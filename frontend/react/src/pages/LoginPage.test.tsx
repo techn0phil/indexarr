@@ -23,9 +23,9 @@ describe('LoginPage', () => {
   it('renders login form fields and submit button', () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText("Nom d'utilisateur")).toBeInTheDocument();
-    expect(screen.getByLabelText('Mot de passe')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Se connecter' })).toBeInTheDocument();
+    expect(screen.getByLabelText("fields.username")).toBeInTheDocument();
+    expect(screen.getByLabelText('fields.password')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'buttons.submit' })).toBeInTheDocument();
   });
 
   it('submits credentials via context login function', async () => {
@@ -34,9 +34,9 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await user.type(screen.getByLabelText("Nom d'utilisateur"), 'admin');
-    await user.type(screen.getByLabelText('Mot de passe'), 'secret');
-    await user.click(screen.getByRole('button', { name: 'Se connecter' }));
+    await user.type(screen.getByLabelText("fields.username"), 'admin');
+    await user.type(screen.getByLabelText('fields.password'), 'secret');
+    await user.click(screen.getByRole('button', { name: 'buttons.submit' }));
 
     await waitFor(() => {
       expect(loginMock).toHaveBeenCalledWith('admin', 'secret');
@@ -45,21 +45,21 @@ describe('LoginPage', () => {
 
   it('shows backend error on failed login', async () => {
     const user = userEvent.setup();
-    loginMock.mockResolvedValueOnce({ success: false, error: 'Invalid credentials' });
+    loginMock.mockResolvedValueOnce({ success: false, error: 'invalidCredentials' });
 
     render(<LoginPage />);
 
-    await user.type(screen.getByLabelText("Nom d'utilisateur"), 'admin');
-    await user.type(screen.getByLabelText('Mot de passe'), 'wrong');
-    await user.click(screen.getByRole('button', { name: 'Se connecter' }));
+    await user.type(screen.getByLabelText("fields.username"), 'admin');
+    await user.type(screen.getByLabelText('fields.password'), 'wrong');
+    await user.click(screen.getByRole('button', { name: 'buttons.submit' }));
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    expect(await screen.findByText('errors.invalidCredentials')).toBeInTheDocument();
   });
 
   it('disables submit button when fields are empty', () => {
     render(<LoginPage />);
 
-    const submit = screen.getByRole('button', { name: 'Se connecter' });
+    const submit = screen.getByRole('button', { name: 'buttons.submit' });
     expect(submit).toBeDisabled();
   });
 });

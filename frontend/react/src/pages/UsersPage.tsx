@@ -213,7 +213,7 @@ export const UsersPage = () => {
         </button>
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className={styles.error}>{t(`message.${error}`)}</div>}
 
       {users.length === 0 ? (
         <div className={styles.empty}>
@@ -325,7 +325,7 @@ export const UsersPage = () => {
               </select>
             </div>
             
-            {formError && <div className={styles.formError}>{formError}</div>}
+            {formError && <div className={styles.formError}>{t(`message.${formError}`)}</div>}
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowCreateModal(false)} disabled={formLoading}>
@@ -379,7 +379,7 @@ export const UsersPage = () => {
               </label>
             </div>
             
-            {formError && <div className={styles.formError}>{formError}</div>}
+            {formError && <div className={styles.formError}>{t(`message.${formError}`)}</div>}
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowEditModal(false)} disabled={formLoading}>
@@ -406,7 +406,7 @@ export const UsersPage = () => {
               </Trans>
             </p>
             
-            {formError && <div className={styles.formError}>{formError}</div>}
+            {formError && <div className={styles.formError}>{t(`message.${formError}`)}</div>}
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowDeleteModal(false)} disabled={formLoading}>
@@ -444,7 +444,7 @@ export const UsersPage = () => {
               />
             </div>
             
-            {formError && <div className={styles.formError}>{formError}</div>}
+            {formError && <div className={styles.formError}>{t(`message.${formError}`)}</div>}
             
             <div className={styles.modalActions}>
               <button className={styles.cancelButton} onClick={() => setShowPasswordModal(false)} disabled={formLoading}>
