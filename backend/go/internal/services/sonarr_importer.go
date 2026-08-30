@@ -343,6 +343,15 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		}
 	}
 
+	// Delete episodes from season 0 (specials) and season 0.
+	if err := repository.DeleteEpisodeBySeriesAndSeasonNumber(si.db, seriesID, 0); err != nil {
+		config.GlobalLogger.Error().Err(err).Str("title", ss.Title).Msg("Failed to delete specials for series")
+	}
+
+	if err := repository.DeleteSeasonBySeriesAndSeasonNumber(si.db, seriesID, 0); err != nil {
+		config.GlobalLogger.Error().Err(err).Str("title", ss.Title).Msg("Failed to delete season 0 for series")
+	}
+
 	// Update series counts
 	if err := repository.UpdateSeriesCounts(si.db, seriesID); err != nil {
 		config.GlobalLogger.Error().Err(err).Msg("Failed to update series counts")
