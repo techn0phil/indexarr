@@ -22,8 +22,8 @@ export const Sidebar = ({ activeNav, onNavClick, isDrawerOpen = false }: Sidebar
       const result = await apiClient.purgeDatabase();
       if (result.success) {
         setShowPurgeConfirm(false);
-        // Reload the page to refresh the UI
-        window.location.reload();
+        // Redirect to home page after purge
+        window.location.href = '/';
       }
     } catch (error) {
       console.error('Purge failed:', error);

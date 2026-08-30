@@ -9,6 +9,8 @@ import (
 	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
+
+	"github.com/rs/zerolog"
 )
 
 func TestRadarrImporterMapHelpers(t *testing.T) {
@@ -60,6 +62,9 @@ func TestRadarrImporterMapHelpers(t *testing.T) {
 }
 
 func TestRadarrImporterImportUsesCacheAndRemovesStale(t *testing.T) {
+	logger := zerolog.Nop()
+	config.GlobalLogger = &logger
+
 	db := setupServicesTestDBWithMigrations(t)
 
 	stale := &models.Movie{
