@@ -233,10 +233,6 @@ Indexarr runs as a non-root user inside the container for security. By default, 
 
 4. **Verify permissions are working:**
    ```bash
-   # Check if app is running as correct user
-   docker exec indexarr id
-   # Should show: uid=1041(appuser) gid=65541(media-center)
-   
    # Check if media files are readable
    docker exec indexarr ls -la /data/movies/
    # Should show files, not permission denied errors
