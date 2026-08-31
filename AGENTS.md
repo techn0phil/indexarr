@@ -14,7 +14,7 @@
 - **Implementation Plan**: [plan.md](plan.md) — Detailed phase-by-phase implementation status
 - **Docker Guide**: [DOCKER.md](DOCKER.md) — Container management, common commands
 - **Design System**: [Design System](#design-system) — Colors, CSS variables, badges
-- **UI Mockups**: [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html) — Complete design reference
+- **UI Mockups**: [docs/prototype/medialib_v5.html](docs/prototype/medialib_v5.html) — Complete design reference
 - **Backend Docs**: [backend/go/README.md](backend/go/README.md)
 - **Frontend Docs**: [frontend/react/README.md](frontend/react/README.md)
 - **Database Issues**: [/memories/repo/database-locking-analysis.md](/memories/repo/database-locking-analysis.md) — SQLite locking gotchas
@@ -768,8 +768,7 @@ npm run format
 
 For detailed UI/UX specifications, design mockups, and full implementation guidance, see:
 
-- **HTML/CSS Mockup** (complete design with all pages): [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html)
-- **Implementation Prompt** (detailed feature specs): [ux-ui/prompt.md](ux-ui/prompt.md)
+- **HTML/CSS Mockup** (complete design with all pages): [docs/prototype/medialib_v5.html](docs/prototype/medialib_v5.html)
 
 ---
 
@@ -799,7 +798,7 @@ For detailed UI/UX specifications, design mockups, and full implementation guida
 
 - **Repository Memory**: [/memories/repo/](/memories/repo/) — Critical gotchas and lessons learned
 - **Implementation Plan**: [plan.md](plan.md) — Phase status and completion tracking
-- **Design Mockups**: [ux-ui/medialib_v4_detail_pages.html](ux-ui/medialib_v4_detail_pages.html) — Complete UI reference
+- **Design Mockups**: [docs/prototype/medialib_v5.html](docs/prototype/medialib_v5.html) — Complete UI reference
 
 ---
 

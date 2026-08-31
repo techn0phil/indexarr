@@ -1,8 +1,14 @@
 # Indexarr
 
+[![Release](https://img.shields.io/github/v/release/techn0phil/indexarr?label=Release&color=%231D9E75)](github.com/techn0phil/indexarr/releases)
+![Go](https://img.shields.io/github/go-mod/go-version/techn0phil/indexarr?filename=backend%2Fgo%2Fgo.mod&color=%2300ADD8)
+![Typescript](https://img.shields.io/github/package-json/dependency-version/techn0phil/indexarr/dev/typescript?filename=frontend%2Freact%2Fpackage.json&label=Typescript&color=%233178C6)
+[![Trivy](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/trivy.yml?logo=github&label=Trivy&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/trivy.yml)
+[![Grype](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/grype.yml?logo=github&label=Grype&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/grype.yml)
+
 **Indexarr** is a media library application inspired by [Sonarr](https://sonarr.tv/) and [Radarr](https://radarr.video/). It provides a centralized catalog for movies and series with detailed tracking of media file properties, library statistics, and advanced filtering capabilities.
 
-![Main movie page screenshot](ux-ui/movies.png)
+![Main movie page screenshot](frontend/react/public/screenshot-1280x720.png)
 
 
 ## Table of contents
@@ -16,7 +22,7 @@
   - [Prerequisites](#prerequisites-1)
   - [Backend setup](#backend-setup)
   - [Frontend setup](#frontend-setup)
-  - [Building Docker image locally](#building-docker-image-locally)
+  - [Run Docker image locally](#run-docker-image-locally)
 - [Common issues](#common-issues)
   - [Incorrect matching](#incorrect-matching)
   - [Media permissions](#media-permissions)
@@ -27,17 +33,17 @@
 ## Features
 
 - **Centralized movies and series catalog**
-  - **Radarr / Sonarr integrations** — Import from existing Radarr / Sonarr libraries
-  - **Filesystem scanning** — Discover media from local directories
-  - **Blu-ray formats support** — Uncompressed folder and ISO files
-- **Accurate media intelligence**
-  - **Detailed media info detection** — video, audio, and subtitle tracks
-  - **Multi-criteria filtering** — title, year, status, resolution, codec, audio, HDR
-  - **Real-time statistics** — total count, disk space, 4K %, problem counts
+  - Radarr / Sonarr integrations — _Import from existing Radarr / Sonarr libraries_
+  - Filesystem scanning — _Discover media from local directories_
+  - Blu-ray formats support — _Uncompressed folder and ISO files_
+- **Accurate media files metadata**
+  - Detailed media info detection — _Video, audio, and subtitle tracks_
+  - Multi-criteria filtering — _Title, year, status, resolution, codec, audio, HDR_
+  - Real-time statistics — _Total count, disk space, 4K %, problem counts_
 - **Easy user experience**
-  - **Multi-language support** — English, Français, Español, Italiano, Deutsch
-  - **Responsive UI** — Supports desktop, tablet, and mobile devices
-  - **User authentication** — Builtin authentication with local users
+  - Multi-language support — _English, Français, Español, Italiano, Deutsch_
+  - Responsive UI — _Supports desktop, tablet, and mobile devices_
+  - User authentication — _Builtin authentication with local users_
 
 
 ## Getting started
@@ -92,8 +98,8 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `MOVIES_HOST_PATH` | - | Yes | Comma-separated paths to movies folders on the host for volume mount (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
-| `SERIES_HOST_PATH` | - | Yes | Comma-separated paths to series folders on the host for volume mount (e.g., `/series` or `/mnt/nas/tv,/external/tv`) |
+| `MOVIES_HOST_PATH` | - | Yes | Path to movies folder on the host for volume mount (e.g. `/mnt/video/movies`) |
+| `SERIES_HOST_PATH` | - | Yes | Path to series folder on the host for volume mount (e.g., `/mnt/video/series`) |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/series | No | Comma-separated paths to media on the guest [**Deprecated**: use `MOVIES_LIBRARY_PATHS` and `SERIES_LIBRARY_PATHS` instead] |
 | `MOVIES_LIBRARY_PATHS` | /data/movies | No | Comma-separated paths to movies on the guest |
 | `SERIES_LIBRARY_PATHS` | /data/series | No | Comma-separated paths to series on the guest |
@@ -101,10 +107,10 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `IGNORE_FILE_PATTERN` | - | No | Regular expression pattern to ignore matching files during scanning |
 | `TMDB_API_KEY` | - | No, but recommended | TMDB API key for movie metadata ([get here](https://www.themoviedb.org/settings/api)) |
 | `TVDB_API_KEY` | - | No, but recommended | TVDB API key for series metadata ([get here](https://www.thetvdb.com/api-information)) |
-| `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
+| `RADARR_URL` | - | No | Radarr URL |
 | `RADARR_API_KEY` | - | No | Radarr API key for importing movies from Radarr |
 | `RADARR_PATH_MAPPING` | - | No | Used to map Radarr paths to local paths (e.g. `/movies:/data/movies`) |
-| `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
+| `SONARR_URL` | - | No | Sonarr URL |
 | `SONARR_API_KEY` | - | No | Sonarr API key for importing series from Sonarr |
 | `SONARR_PATH_MAPPING` | - | No | Used to map Sonarr paths to local paths (e.g. `/series:/data/series`) |
 | `DETECTION_LANGUAGE` | en | No | Language code for media detection (e.g., "en", "fr") |
@@ -233,10 +239,6 @@ Indexarr runs as a non-root user inside the container for security. By default, 
 
 4. **Verify permissions are working:**
    ```bash
-   # Check if app is running as correct user
-   docker exec indexarr id
-   # Should show: uid=1041(appuser) gid=65541(media-center)
-   
    # Check if media files are readable
    docker exec indexarr ls -la /data/movies/
    # Should show files, not permission denied errors
@@ -250,7 +252,7 @@ Indexarr runs as a non-root user inside the container for security. By default, 
 
 ### Extra files
 
-Extra files such as **Behind the scenes**, **interviews**, **trailers**, etc... will likely be incorrectly matched. To avoid that, you can exclude some folders from scanning by setting the `SKIP_FOLDERS` environment variable:
+Extra files such as **behind the scenes**, **interviews**, **trailers**, etc... will likely be incorrectly matched. To avoid that, you can exclude some folders from scanning by setting the `SKIP_FOLDERS` environment variable:
 
 ```yaml
 environment:

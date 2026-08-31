@@ -1,6 +1,9 @@
 
 # Indexarr Frontend (React)
 
+![Typescript](https://img.shields.io/github/package-json/dependency-version/techn0phil/indexarr/dev/typescript?filename=frontend%2Freact%2Fpackage.json&label=Typescript&color=%233178C6)
+[![Tests](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/test-frontend.yml?logo=github&label=Tests&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/test-frontend.yml)
+
 This is the React frontend for Indexarr, a media library management application inspired by Sonarr and Radarr. It provides a modern, responsive UI for browsing and managing movies and TV series, with advanced filtering, technical metadata, and real-time scan status.
 
 ## Features
@@ -17,7 +20,7 @@ This is the React frontend for Indexarr, a media library management application 
 - Multi-language support (5 languages: English, Deutsch, Español, Français, Italiano)
 - User management interface (admin only)
 - Real-time library statistics and scan progress
-- **Progressive Web App (PWA)** — Install on desktop/mobile, offline support, auto-updating
+- Progressive Web App (PWA) — Install on desktop/mobile, offline support, auto-updating
 
 ## Project Structure
 
@@ -85,11 +88,8 @@ Indexarr is a fully-fledged PWA with installation capabilities, offline support,
 
 ### PWA Development & Testing
 
-For detailed PWA documentation, configuration, and troubleshooting:
+For detailed PWA documentation, configuration, and troubleshooting, see [PWA.md](docs/PWA.md).
 ```bash
-# See PWA.md for complete guide
-cat docs/PWA.md
-
 # Regenerate PWA icons (if needed)
 npm run pwa:icons
 ```
@@ -140,7 +140,7 @@ To verify PWA in DevTools:
 
 - All colors, spacing, and typography use CSS variables (see `src/styles/variables.css`)
 - Light/dark mode supported via CSS variables and `ThemeToggle`
-- UI/UX specs and mockups: `../../ux-ui/medialib_v5.html`, `../../ux-ui/prompt.md`
+- UI/UX specs and mockups: [medialib_v5.html](../../docs/prototype/medialib_v5.html)
 - Consistent border radius, spacing, and badge colors for technical metadata
 
 ## Conventions
