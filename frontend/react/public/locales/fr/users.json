@@ -72,6 +72,25 @@
     "allFieldsRequired": "Tous les champs sont obligatoires",
     "passwordRequired": "Le mot de passe est obligatoire",
     "clickToEnable": "Cliquez pour activer le compte",
-    "clickToDisable": "Cliquez pour désactiver le compte"
+    "clickToDisable": "Cliquez pour désactiver le compte",
+    "notAuthenticated": "Utilisateur non authentifié",
+    "adminAccessRequired": "Accès administrateur requis",
+    "userRepositoryNotAvailable": "Le dépôt d'utilisateurs n'est pas disponible",
+    "failedToFetchUsers": "Échec de la récupération des utilisateurs",
+    "invalidRequestBody": "Corps de la requête invalide",
+    "usernameAndPasswordRequired": "Le nom d'utilisateur et le mot de passe sont requis",
+    "invalidRole": "Rôle invalide",
+    "failedToHashPassword": "Échec du hachage du mot de passe",
+    "userAlreadyExists": "L'utilisateur existe déjà",
+    "failedToCreateUser": "Échec de la création de l'utilisateur",
+    "invalidUserID": "ID utilisateur invalide",
+    "userNotFound": "Utilisateur non trouvé",
+    "failedToUpdateUser": "Échec de la mise à jour de l'utilisateur",
+    "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte",
+    "failedToDeleteUser": "Échec de la suppression de l'utilisateur",
+    "userDeleted": "Utilisateur supprimé avec succès",
+    "newPasswordRequired": "Le nouveau mot de passe est requis",
+    "failedToUpdatePassword": "Échec de la mise à jour du mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour avec succès"
   }
 }

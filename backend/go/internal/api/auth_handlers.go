@@ -30,9 +30,10 @@ type UserResponse struct {
 
 // LoginResponse represents the login response
 type LoginResponse struct {
-	Success bool          `json:"success"`
-	User    *UserResponse `json:"user,omitempty"`
-	Error   string        `json:"error,omitempty"`
+	Success     bool          `json:"success"`
+	User        *UserResponse `json:"user,omitempty"`
+	Error       string        `json:"error,omitempty"`
+	Description string        `json:"description,omitempty"`
 }
 
 // AuthConfigResponse represents the auth configuration response
@@ -63,8 +64,9 @@ func HandleLogin(authService *services.AuthService) http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(LoginResponse{
-				Success: false,
-				Error:   "Invalid request body",
+				Success:     false,
+				Error:       "invalidRequestBody",
+				Description: "Invalid request body",
 			})
 			return
 		}
@@ -73,13 +75,16 @@ func HandleLogin(authService *services.AuthService) http.HandlerFunc {
 		user, err := authService.ValidateCredentials(req.Username, req.Password)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			errorMsg := "Identifiants invalides"
+			errorMsg := "invalidCredentials"
+			descriptionMsg := "Invalid credentials"
 			if errors.Is(err, services.ErrUserDisabled) {
-				errorMsg = "Compte désactivé"
+				errorMsg = "userDisabled"
+				descriptionMsg = "User account is disabled"
 			}
 			json.NewEncoder(w).Encode(LoginResponse{
-				Success: false,
-				Error:   errorMsg,
+				Success:     false,
+				Error:       errorMsg,
+				Description: descriptionMsg,
 			})
 			return
 		}
@@ -89,8 +94,9 @@ func HandleLogin(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(LoginResponse{
-				Success: false,
-				Error:   "Failed to generate token",
+				Success:     false,
+				Error:       "failedToGenerateToken",
+				Description: "Failed to generate token",
 			})
 			return
 		}
@@ -158,8 +164,9 @@ func HandleMe(authService *services.AuthService) http.HandlerFunc {
 		if claims == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(LoginResponse{
-				Success: false,
-				Error:   "Not authenticated",
+				Success:     false,
+				Error:       "notAuthenticated",
+				Description: "User is not authenticated",
 			})
 			return
 		}
@@ -298,8 +305,9 @@ func requireAdmin(w http.ResponseWriter, r *http.Request) *services.UserClaims {
 	if claims == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": false,
-			"error":   "Not authenticated",
+			"success":     false,
+			"error":       "notAuthenticated",
+			"description": "User is not authenticated",
 		})
 		return nil
 	}
@@ -307,8 +315,9 @@ func requireAdmin(w http.ResponseWriter, r *http.Request) *services.UserClaims {
 	if claims.Role != "admin" {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": false,
-			"error":   "Admin access required",
+			"success":     false,
+			"error":       "adminAccessRequired",
+			"description": "Admin access required",
 		})
 		return nil
 	}
@@ -329,8 +338,9 @@ func HandleListUsers(authService *services.AuthService) http.HandlerFunc {
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -339,8 +349,9 @@ func HandleListUsers(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to list users",
+				"success":     false,
+				"error":       "failedToFetchUsers",
+				"description": "Failed to retrieve users from the database",
 			})
 			return
 		}
@@ -375,8 +386,9 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid request body",
+				"success":     false,
+				"error":       "invalidRequestBody",
+				"description": "Invalid request body",
 			})
 			return
 		}
@@ -385,8 +397,9 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 		if req.Username == "" || req.Password == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Nom d'utilisateur et mot de passe requis",
+				"success":     false,
+				"error":       "usernameAndPasswordRequired",
+				"description": "Username and password are required",
 			})
 			return
 		}
@@ -398,8 +411,9 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 		if req.Role != "admin" && req.Role != "guest" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Rôle invalide (admin ou guest)",
+				"success":     false,
+				"error":       "invalidRole",
+				"description": "Invalid role",
 			})
 			return
 		}
@@ -408,8 +422,9 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -419,8 +434,9 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to hash password",
+				"success":     false,
+				"error":       "failedToHashPassword",
+				"description": "Failed to hash password",
 			})
 			return
 		}
@@ -431,15 +447,17 @@ func HandleCreateUser(authService *services.AuthService) http.HandlerFunc {
 			if errors.Is(err, repository.ErrUserAlreadyExists) {
 				w.WriteHeader(http.StatusConflict)
 				json.NewEncoder(w).Encode(map[string]interface{}{
-					"success": false,
-					"error":   "Ce nom d'utilisateur existe déjà",
+					"success":     false,
+					"error":       "userAlreadyExists",
+					"description": "This username already exists",
 				})
 				return
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to create user",
+				"success":     false,
+				"error":       "failedToCreateUser",
+				"description": "Failed to create user",
 			})
 			return
 		}
@@ -466,8 +484,9 @@ func HandleUpdateUser(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid user ID",
+				"success":     false,
+				"error":       "invalidUserID",
+				"description": "Invalid user ID",
 			})
 			return
 		}
@@ -476,8 +495,9 @@ func HandleUpdateUser(authService *services.AuthService) http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid request body",
+				"success":     false,
+				"error":       "invalidRequestBody",
+				"description": "Invalid request body",
 			})
 			return
 		}
@@ -485,8 +505,9 @@ func HandleUpdateUser(authService *services.AuthService) http.HandlerFunc {
 		if req.Role != "" && req.Role != "admin" && req.Role != "guest" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Rôle invalide (admin ou guest)",
+				"success":     false,
+				"error":       "invalidRole",
+				"description": "Invalid role",
 			})
 			return
 		}
@@ -495,8 +516,9 @@ func HandleUpdateUser(authService *services.AuthService) http.HandlerFunc {
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -506,23 +528,26 @@ func HandleUpdateUser(authService *services.AuthService) http.HandlerFunc {
 			if errors.Is(err, repository.ErrUserNotFound) {
 				w.WriteHeader(http.StatusNotFound)
 				json.NewEncoder(w).Encode(map[string]interface{}{
-					"success": false,
-					"error":   "Utilisateur non trouvé",
+					"success":     false,
+					"error":       "userNotFound",
+					"description": "User not found",
 				})
 				return
 			}
 			if errors.Is(err, repository.ErrUserAlreadyExists) {
 				w.WriteHeader(http.StatusConflict)
 				json.NewEncoder(w).Encode(map[string]interface{}{
-					"success": false,
-					"error":   "Ce nom d'utilisateur existe déjà",
+					"success":     false,
+					"error":       "userAlreadyExists",
+					"description": "This username already exists",
 				})
 				return
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to update user",
+				"success":     false,
+				"error":       "failedToUpdateUser",
+				"description": "Failed to update user",
 			})
 			return
 		}
@@ -550,8 +575,9 @@ func HandleDeleteUser(authService *services.AuthService) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid user ID",
+				"success":     false,
+				"error":       "invalidUserID",
+				"description": "Invalid user ID",
 			})
 			return
 		}
@@ -560,8 +586,9 @@ func HandleDeleteUser(authService *services.AuthService) http.HandlerFunc {
 		if id == claims.UserID {
 			w.WriteHeader(http.StatusForbidden)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Vous ne pouvez pas supprimer votre propre compte",
+				"success":     false,
+				"error":       "cannotDeleteSelf",
+				"description": "You cannot delete your own account",
 			})
 			return
 		}
@@ -570,8 +597,9 @@ func HandleDeleteUser(authService *services.AuthService) http.HandlerFunc {
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -580,22 +608,25 @@ func HandleDeleteUser(authService *services.AuthService) http.HandlerFunc {
 			if errors.Is(err, repository.ErrUserNotFound) {
 				w.WriteHeader(http.StatusNotFound)
 				json.NewEncoder(w).Encode(map[string]interface{}{
-					"success": false,
-					"error":   "Utilisateur non trouvé",
+					"success":     false,
+					"error":       "userNotFound",
+					"description": "User not found",
 				})
 				return
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to delete user",
+				"success":     false,
+				"error":       "failedToDeleteUser",
+				"description": "Failed to delete user",
 			})
 			return
 		}
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": true,
-			"message": "Utilisateur supprimé",
+			"success":     true,
+			"message":     "userDeleted",
+			"description": "User deleted successfully",
 		})
 	}
 }
@@ -615,8 +646,9 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid user ID",
+				"success":     false,
+				"error":       "invalidUserID",
+				"description": "Invalid user ID",
 			})
 			return
 		}
@@ -625,8 +657,9 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Invalid request body",
+				"success":     false,
+				"error":       "invalidRequestBody",
+				"description": "Invalid request body",
 			})
 			return
 		}
@@ -634,8 +667,9 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		if req.NewPassword == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Le nouveau mot de passe est requis",
+				"success":     false,
+				"error":       "newPasswordRequired",
+				"description": "New password is required",
 			})
 			return
 		}
@@ -644,8 +678,9 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		if userRepo == nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "User repository not available",
+				"success":     false,
+				"error":       "userRepositoryNotAvailable",
+				"description": "User repository not available",
 			})
 			return
 		}
@@ -655,8 +690,9 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to hash password",
+				"success":     false,
+				"error":       "failedToHashPassword",
+				"description": "Failed to hash password",
 			})
 			return
 		}
@@ -665,22 +701,25 @@ func HandleAdminSetPassword(authService *services.AuthService) http.HandlerFunc 
 			if errors.Is(err, repository.ErrUserNotFound) {
 				w.WriteHeader(http.StatusNotFound)
 				json.NewEncoder(w).Encode(map[string]interface{}{
-					"success": false,
-					"error":   "Utilisateur non trouvé",
+					"success":     false,
+					"error":       "userNotFound",
+					"description": "User not found",
 				})
 				return
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"error":   "Failed to update password",
+				"success":     false,
+				"error":       "failedToUpdatePassword",
+				"description": "Failed to update password",
 			})
 			return
 		}
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": true,
-			"message": "Mot de passe modifié",
+			"success":     true,
+			"message":     "passwordUpdated",
+			"description": "Password updated successfully",
 		})
 	}
 }

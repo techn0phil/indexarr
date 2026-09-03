@@ -2,8 +2,11 @@ import { useState, FormEvent } from 'react';
 import { useAppContext } from '../hooks/useAppContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import styles from '../styles/login.module.css';
+import { LanguageToggle } from '../components/LanguageToggle';
+import { useTranslation } from 'react-i18next';
 
 export const LoginPage = () => {
+  const { t } = useTranslation('login');
   const { login } = useAppContext();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +21,7 @@ export const LoginPage = () => {
     const result = await login(username, password);
     
     if (!result.success) {
-      setError(result.error || 'Identifiants invalides');
+      setError(`errors.${result.error}` || 'errors.invalidCredentials');
     }
     
     setLoading(false);
@@ -43,15 +46,16 @@ export const LoginPage = () => {
           </div>
           <div className={styles.themeToggle}>
             <ThemeToggle />
+            <LanguageToggle />
           </div>
         </div>
 
-        <h1 className={styles.title}>Connexion</h1>
+        <h1 className={styles.title}>{t('title')}</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
             <label htmlFor="username" className={styles.label}>
-              Nom d'utilisateur
+              {t('fields.username')}
             </label>
             <input
               type="text"
@@ -68,7 +72,7 @@ export const LoginPage = () => {
 
           <div className={styles.field}>
             <label htmlFor="password" className={styles.label}>
-              Mot de passe
+              {t('fields.password')}
             </label>
             <input
               type="password"
@@ -88,7 +92,7 @@ export const LoginPage = () => {
                 <circle cx="8" cy="8" r="6" />
                 <path d="M8 5v3M8 10v1" />
               </svg>
-              {error}
+              {t(error)}
             </div>
           )}
 
@@ -100,7 +104,7 @@ export const LoginPage = () => {
             {loading ? (
               <span className={styles.spinner}></span>
             ) : (
-              'Se connecter'
+              t('buttons.submit')
             )}
           </button>
         </form>

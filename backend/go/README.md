@@ -1,6 +1,9 @@
 
 # Indexarr Backend (Go)
 
+![Go](https://img.shields.io/github/go-mod/go-version/techn0phil/indexarr?filename=backend%2Fgo%2Fgo.mod&color=%2300ADD8)
+[![Tests](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/test-backend.yml?logo=github&label=Tests&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/test-backend.yml)
+
 This is the backend for Indexarr, a media library management application. It provides a RESTful API for managing movies, TV series, episodes, and technical metadata.
 
 ## Features
@@ -146,7 +149,7 @@ See `.env.example` for all options.
 - SQLite database: `indexarr.db` (created in `backend/go/`)
 - Schema migrations managed with [golang-migrate](https://github.com/golang-migrate/migrate)
 - Migration scripts in `internal/repository/migrations/`
-- See [MIGRATIONS.md](MIGRATIONS.md) for migration workflow
+- See [MIGRATIONS.md](docs/MIGRATIONS.md) for migration workflow
 
 ## API Endpoints
 
@@ -204,7 +207,6 @@ When auth is enabled, tokens are stored in HttpOnly cookies and validated by the
 - **Connection Pool**: Limited connection pool prevents database contention
 - **Long Transactions**: Avoid long-running transactions; they can trigger "database is locked" errors
 - **Batch Updates**: Scan status updates are batched rather than per-file to reduce contention
-- For detailed analysis, see `/memories/repo/database-locking-analysis.md`
 
 ### Import Architecture
 - **Nil Service Checks**: Importers can be `nil` if not configured (e.g., no Radarr URL). Always check `if movieImporter != nil` before calling methods.

@@ -13,8 +13,8 @@ services:
     volumes:
       - data:/app/data
       # Optional: Mount as many media library paths as needed (read-only recommended)
-      - ${MOVIES_HOST_PATH:-/host/path/to/movies}:/data/movies:ro
-      - ${SERIES_HOST_PATH:-/host/path/to/series}:/data/series:ro
+      - ${MOVIES_HOST_PATH}:/data/movies:ro
+      - ${SERIES_HOST_PATH}:/data/series:ro
     environment:
       # Media library paths (optional: comma-separated, adjust as needed)
       MOVIES_LIBRARY_PATHS: /data/movies
@@ -53,6 +53,13 @@ services:
 
       # Timezone (optional, adjust to your location)
       TZ: ${TZ:-UTC}
+
+      # Authentication configuration
+      AUTH_MODE: ${AUTH_MODE:-none}
+      AUTH_ADMIN_USERNAME: ${AUTH_ADMIN_USERNAME:-admin}
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD:-admin}
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-}
+      AUTH_SESSION_MAX_AGE: ${AUTH_SESSION_MAX_AGE:-168}
 
 
 volumes:
