@@ -10,7 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/rs/zerolog v1.35.1
-	golang.org/x/sys v0.47.0
+	golang.org/x/sys v0.48.0
 )
 
 require (
@@ -20,4 +20,4 @@ require (
 
 require github.com/golang-jwt/jwt/v5 v5.3.1
 
-require golang.org/x/crypto v0.56.0
+require golang.org/x/crypto v0.57.0
