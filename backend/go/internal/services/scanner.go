@@ -1340,6 +1340,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result
 		existingEpisode.Status = "available"
 		existingEpisode.FileSize = episode.FileSize
 		existingEpisode.FilePath = filePath
+		existingEpisode.MediaInfo = episode.MediaInfo
 
 		if err := repository.UpdateEpisode(s.db, existingEpisode); err != nil {
 			return fmt.Errorf("failed to update episode: %w", err)

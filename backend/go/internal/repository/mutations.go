@@ -385,12 +385,71 @@ func GetEpisodeBySeriesSeasonEpisode(db *sql.DB, seriesID int64, seasonNum, epis
 // UpdateEpisode updates an existing episode
 func UpdateEpisode(db *sql.DB, episode *models.Episode) error {
 	return retryOnLock(func() error {
-		_, err := db.Exec(`
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		// Update episode
+		_, err = tx.Exec(`
 			UPDATE episodes
 			SET title = ?, duration = ?, status = ?, file_size = ?, file_path = ?, last_scanned = ?
 			WHERE id = ?
 		`, episode.Title, episode.Duration, episode.Status, episode.FileSize, episode.FilePath, time.Now().Format(time.RFC3339), episode.ID)
-		return err
+
+		if err != nil {
+			return err
+		}
+
+		// Delete existing media info (simpler than diffing)
+		_, err = tx.Exec(`DELETE FROM video_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM audio_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM subtitle_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+
+		// Re-insert media info
+		if episode.MediaInfo != nil {
+			for _, vt := range episode.MediaInfo.VideoTracks {
+				_, err := tx.Exec(`
+					INSERT INTO video_tracks (episode_id, codec, resolution, fps, bitrate, hdr, color_space)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				`, episode.ID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, at := range episode.MediaInfo.AudioTracks {
+				_, err := tx.Exec(`
+					INSERT INTO audio_tracks (episode_id, codec, channels, language, sample_rate, bitrate)
+					VALUES (?, ?, ?, ?, ?, ?)
+				`, episode.ID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, st := range episode.MediaInfo.SubtitleTracks {
+				_, err := tx.Exec(`
+					INSERT INTO subtitle_tracks (episode_id, language, format)
+					VALUES (?, ?, ?)
+				`, episode.ID, st.Language, st.Format)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return tx.Commit()
 	})
 }
 
