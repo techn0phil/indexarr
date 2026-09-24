@@ -39,7 +39,7 @@ jobs:
     - name: Check out the code
       uses: actions/checkout@v7
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+      run: docker build --no-cache . --file Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
     - name: Run the Anchore Grype scan action
       uses: anchore/scan-action@v7
       id: scan
