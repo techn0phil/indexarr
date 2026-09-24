@@ -14,6 +14,8 @@ func TestExtractorParseHelpers(t *testing.T) {
 			{name: "avc", in: "AVC", want: "H.264"},
 			{name: "hevc", in: "HEVC", want: "H.265"},
 			{name: "av1", in: "AV1", want: "AV1"},
+			{name: "mpeg video", in: "MPEG Video", want: "MPEG"},
+			{name: "mpeg-4 visual", in: "MPEG-4 Visual", want: "MPEG-4"},
 			{name: "passthrough", in: "ProRes", want: "ProRes"},
 		}
 

@@ -191,6 +191,8 @@ func (e *Extractor) parseVideoCodec(track MediainfoTrack) string {
 		return "VP9"
 	case "AV1":
 		return "AV1"
+	case "MPEG VIDEO":
+		return "MPEG"
 	case "MPEG-4 VISUAL":
 		return "MPEG-4"
 	default:
