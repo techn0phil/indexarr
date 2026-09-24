@@ -60,7 +60,7 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
   };
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Jamais';
+    if (!dateStr) return t('statCard.scan.label.never');
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -69,9 +69,9 @@ export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffMins < 1) return t('statCard.scan.label.now');
-    if (diffMins < 60) return t('statCard.scan.label.ago', { time: `${diffMins} min` });
-    if (diffHours < 24) return t('statCard.scan.label.ago', { time: `${diffHours}h` });
-    return t('statCard.scan.label.ago', { time: `${diffDays}j` });
+    if (diffMins < 60) return t('statCard.scan.label.ago', { time: `${diffMins} ${t('statCard.scan.label.timeUnit.minute')}` });
+    if (diffHours < 24) return t('statCard.scan.label.ago', { time: `${diffHours}${t('statCard.scan.label.timeUnit.hour')}` });
+    return t('statCard.scan.label.ago', { time: `${diffDays}${t('statCard.scan.label.timeUnit.day')}` });
   };
 
   const getProgress = () => {

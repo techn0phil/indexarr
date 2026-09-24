@@ -70,7 +70,12 @@
         "now": "Gerade eben",
         "ago": "Vor {{time}}",
         "files": "Dateien",
-        "import_stopped_by_user": "Scan vom Benutzer abgebrochen"
+        "import_stopped_by_user": "Scan vom Benutzer abgebrochen",
+        "timeUnit": {
+          "minute": "Min",
+          "hour": " Std",
+          "day": "T"
+        }
       },
       "button": {
         "start": "Scan starten",

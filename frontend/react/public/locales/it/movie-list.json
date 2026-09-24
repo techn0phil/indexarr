@@ -70,7 +70,12 @@
         "now": "Adesso",
         "ago": "{{time}} fa",
         "files": "file",
-        "import_stopped_by_user": "Scansione interrotta dall'utente"
+        "import_stopped_by_user": "Scansione interrotta dall'utente",
+        "timeUnit": {
+          "minute": "min",
+          "hour": "h",
+          "day": "g"
+        }
       },
       "button": {
         "start": "Avvia scansione",

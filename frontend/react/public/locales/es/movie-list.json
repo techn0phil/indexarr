@@ -70,7 +70,12 @@
         "now": "Hace un momento",
         "ago": "Hace {{time}}",
         "files": "archivos",
-        "import_stopped_by_user": "Escaneo detenido por el usuario"
+        "import_stopped_by_user": "Escaneo detenido por el usuario",
+        "timeUnit": {
+          "minute": "min",
+          "hour": "h",
+          "day": "d"
+        }
       },
       "button": {
         "start": "Iniciar escaneo",
