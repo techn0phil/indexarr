@@ -70,7 +70,12 @@
         "now": "À l'instant",
         "ago": "Il y a {{time}}",
         "files": "fichiers",
-        "import_stopped_by_user": "Scan arrêté par l'utilisateur"
+        "import_stopped_by_user": "Scan arrêté par l'utilisateur",
+        "timeUnit": {
+          "minute": "min",
+          "hour": "h",
+          "day": "j"
+        }
       },
       "button": {
         "start": "Lancer un scan",

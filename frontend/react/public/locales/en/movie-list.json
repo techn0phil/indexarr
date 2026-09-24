@@ -70,7 +70,12 @@
         "now": "Just now",
         "ago": "{{time}} ago",
         "files": "files",
-        "import_stopped_by_user": "Scan stopped by user"
+        "import_stopped_by_user": "Scan stopped by user",
+        "timeUnit": {
+          "minute": "min",
+          "hour": "h",
+          "day": "d"
+        }
       },
       "button": {
         "start": "Start scan",
