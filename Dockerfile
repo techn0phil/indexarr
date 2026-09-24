@@ -5,6 +5,9 @@ FROM node:26.10.0-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
+# Update and upgrade Alpine packages to ensure the latest security patches are applied
+RUN apk update && apk upgrade --no-cache
+
 # Copy package files for dependency caching
 COPY frontend/react/package*.json ./
 RUN npm ci
@@ -23,7 +26,10 @@ FROM golang:1.27.1-alpine AS backend-builder
 WORKDIR /build/backend
 
 # Install build dependencies
-RUN apk add --no-cache gcc musl-dev sqlite-dev
+RUN apk update && apk upgrade --no-cache && apk add --no-cache \
+    gcc \
+    musl-dev \
+    sqlite-dev
 
 # Copy go.mod and go.sum for dependency caching
 COPY backend/go/go.mod backend/go/go.sum ./
