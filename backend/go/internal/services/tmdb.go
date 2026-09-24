@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -143,6 +144,10 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 		return nil, fmt.Errorf("TMDB API key not configured")
 	}
 
+	if title == "" {
+		return nil, fmt.Errorf("title cannot be empty")
+	}
+
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("query", title)
@@ -181,6 +186,17 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 	// Retry without year filter
 	if year > 0 && result.TotalResults == 0 {
 		return c.SearchMovie(title, 0)
+	}
+
+	if result.TotalResults == 0 || result.Results[0].ReleaseDate == "" {
+		// Retry search by removing the last word from the title (for cases where the title might have extra descriptors)
+		strippedTitle := regexp.MustCompile(`\s?\S+$`).ReplaceAllString(title, "")
+
+		if strippedTitle == "" {
+			return nil, fmt.Errorf("Cannot find movie")
+		}
+
+		return c.SearchMovie(strippedTitle, 0)
 	}
 
 	// Log number of results found

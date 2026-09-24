@@ -122,6 +122,10 @@ func ParseFilename(filename string) *ParsedFilename {
 func extractTitle(filename string, isSeries bool) string {
 	title := strings.TrimSuffix(filename, filepath.Ext(filename))
 
+	if IsBlurayFolder(filename) {
+		title = filepath.Dir(filename)
+	}
+
 	yearCleanupPatterns := []*regexp.Regexp{
 		regexp.MustCompile(`\((\d{4})\).*`),       // (2024)
 		regexp.MustCompile(`[._-](\d{4})[._-].*`), // .2024., -2024-, _2024_

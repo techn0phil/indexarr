@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -941,9 +942,13 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 		}
 	}
 
-	// If it's a Bluray folder, extracts file path and size from the source
+	// Handle extraction of media info and size from Bluray folder
 	if isBluray {
-		mediaFilePath = filepath.Join(filePath, "STREAM", mediaInfo.VideoTracks[0].Source)
+		// Sometimes source field contains value like '00049.m2ts / 00049.m2ts'.
+		// Parse the source to extract the filename using regular expression.
+		regex := regexp.MustCompile(`\d{5}\.m2ts`)
+		parsedSource := regex.FindString(mediaInfo.VideoTracks[0].Source)
+		mediaFilePath = filepath.Join(filePath, "STREAM", parsedSource)
 
 		// Check if movie already exists by file path
 		exists, err := repository.MovieExistsByFilePath(s.db, mediaFilePath)
@@ -955,10 +960,20 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *
 			return nil
 		}
 
-		_, fileSize, _, err = s.extractor.Extract(mediaFilePath)
+		mediaInfo, _, _, err = s.extractor.Extract(mediaFilePath)
 		if err != nil {
 			config.GlobalLogger.Warn().Err(err).Str("path", mediaFilePath).Msg("Mediainfo extraction failed for media file in Bluray folder")
-			fileSize = 0
+			mediaInfo = &models.MediaInfo{
+				VideoTracks:    []models.VideoTrack{},
+				AudioTracks:    []models.AudioTrack{},
+				SubtitleTracks: []models.SubtitleTrack{},
+			}
+		}
+
+		// Read the size of the Bluray folder
+		fileSize, err = s.getFolderSize(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to get size of Bluray folder: %w", err)
 		}
 	}
 
@@ -1027,6 +1042,23 @@ func (s *Scanner) FindMoviePlaylistInBlurayFolder(blurayFolderPath string) (stri
 	}
 
 	return longestPlaylist, nil
+}
+
+func (s *Scanner) getFolderSize(folderPath string) (int64, error) {
+	var size int64
+	err := filepath.Walk(folderPath, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	return size, nil
 }
 
 func slugify(title string) string {
