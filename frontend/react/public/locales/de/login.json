@@ -1,0 +1,17 @@
+{
+  "title": "Anmeldung",
+  "fields": {
+    "username": "Benutzername",
+    "password": "Passwort"
+  },
+  "buttons": {
+    "submit": "Anmelden"
+  },
+  "errors": {
+    "invalidRequestBody": "Ungültiger Anforderungsinhalt",
+    "invalidCredentials": "Ungültige Anmeldedaten",
+    "userDisabled": "Konto deaktiviert",
+    "failedToGenerateToken": "Authentifizierungstoken konnte nicht erzeugt werden",
+    "notAuthenticated": "Benutzer nicht authentifiziert"
+  }
+}

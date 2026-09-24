@@ -1,0 +1,96 @@
+{
+  "label": {
+    "title": "Gestione utenti",
+    "noUsers": "Nessun utente creato",
+    "createFirstUser": "Crea il tuo primo utente per iniziare"
+  },
+  "button": {
+    "add": "Nuovo utente",
+    "edit": "Modifica",
+    "changePassword": "Cambia password",
+    "deleting": "Eliminazione...",
+    "delete": "Elimina",
+    "cancel": "Annulla",
+    "creating": "Creazione...",
+    "create": "Crea",
+    "saving": "Salvataggio...",
+    "save": "Salva"
+  },
+  "table": {
+    "column": {
+      "username": "Nome utente",
+      "role": "Ruolo",
+      "status": "Stato",
+      "createdAt": "Creato il",
+      "actions": "Azioni"
+    }
+  },
+  "role": {
+    "admin": "Amministratore",
+    "guest": "Ospite"
+  },
+  "status": {
+    "enabled": "Abilitato",
+    "disabled": "Disabilitato"
+  },
+  "popup": {
+    "new": {
+      "title": "Nuovo utente",
+      "input": {
+        "username": "Nome utente",
+        "password": "Password",
+        "role": "Ruolo"
+      }
+    },
+    "edit": {
+      "title": "Modifica utente",
+      "input": {
+        "username": "Nome utente",
+        "role": "Ruolo",
+        "enabledAccount": "Account abilitato"
+      }
+    },
+    "changePassword": {
+      "title": "Cambia password",
+      "description": "Imposta una nuova password per <b>{{username}}</b>",
+      "input": {
+        "newPassword": "Nuova password"
+      }
+    },
+    "delete": {
+      "title": "Elimina utente",
+      "description": "Sei sicuro di voler eliminare l'utente <b>{{username}}</b>? Questa azione è irreversibile."
+    }
+  },
+  "message": {
+    "loading": "Caricamento...",
+    "loadingError": "Errore durante il caricamento degli utenti",
+    "serverConnectionError": "Errore di connessione al server",
+    "creationError": "Errore durante la creazione dell'utente",
+    "updateError": "Errore durante l'aggiornamento dell'utente",
+    "deletionError": "Errore durante l'eliminazione dell'utente",
+    "allFieldsRequired": "Tutti i campi sono obbligatori",
+    "passwordRequired": "La password è obbligatoria",
+    "clickToEnable": "Clicca per abilitare l'account",
+    "clickToDisable": "Clicca per disabilitare l'account",
+    "notAuthenticated": "Utente non autenticato",
+    "adminAccessRequired": "Accesso amministratore richiesto",
+    "userRepositoryNotAvailable": "Il repository degli utenti non è disponibile",
+    "failedToFetchUsers": "Impossibile recuperare gli utenti",
+    "invalidRequestBody": "Corpo della richiesta non valido",
+    "usernameAndPasswordRequired": "Nome utente e password sono richiesti",
+    "invalidRole": "Ruolo non valido",
+    "failedToHashPassword": "Impossibile eseguire l'hashing della password",
+    "userAlreadyExists": "L'utente esiste già",
+    "failedToCreateUser": "Impossibile creare l'utente",
+    "invalidUserID": "ID utente non valido",
+    "userNotFound": "Utente non trovato",
+    "failedToUpdateUser": "Impossibile aggiornare l'utente",
+    "cannotDeleteSelf": "Non puoi eliminare il tuo account",
+    "failedToDeleteUser": "Impossibile eliminare l'utente",
+    "userDeleted": "Utente eliminato con successo",
+    "newPasswordRequired": "È richiesta la nuova password",
+    "failedToUpdatePassword": "Impossibile aggiornare la password",
+    "passwordUpdated": "Password aggiornata con successo"
+  }
+}

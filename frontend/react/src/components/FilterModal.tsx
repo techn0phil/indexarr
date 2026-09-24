@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/modal.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -8,9 +9,11 @@ interface FilterModalProps {
   title: string;
   options: { value: string; label: string }[];
   selectedValues: string[];
+  translationPrefix?: string;
 }
 
-export const FilterModal = ({ isOpen, onClose, onApply, title, options, selectedValues }: FilterModalProps) => {
+export const FilterModal = ({ isOpen, onClose, onApply, title, options, selectedValues, translationPrefix = '' }: FilterModalProps) => {
+  const { t } = useTranslation('movie-list');
   const [tempSelected, setTempSelected] = useState<string[]>(selectedValues);
 
   useEffect(() => {
@@ -50,17 +53,17 @@ export const FilterModal = ({ isOpen, onClose, onApply, title, options, selected
                 onChange={() => toggleOption(option.value)}
                 className={styles.checkbox}
               />
-              <span className={styles.label}>{option.label}</span>
+              <span className={styles.label}>{translationPrefix ? t(`${translationPrefix}${option.label}`) : option.label}</span>
             </label>
           ))}
         </div>
 
         <div className={styles.footer}>
           <button className={styles.clearBtn} onClick={handleClear}>
-            Effacer
+            {t('filter.button.clear')}
           </button>
           <button className={styles.applyBtn} onClick={handleApply}>
-            Appliquer
+            {t('filter.button.apply')}
           </button>
         </div>
       </div>

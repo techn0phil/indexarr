@@ -1,0 +1,107 @@
+{
+  "message": {
+    "loading": "Loading...",
+    "seriesNotFound": "Series not found",
+    "none": "None"
+  },
+  "button": {
+    "refresh": "Refresh"
+  },
+  "label": {
+    "season_one": "{{count}} season",
+    "season_other": "{{count}} seasons",
+    "episode_one": "{{count}} episode",
+    "episode_other": "{{count}} episodes",
+    "available_one": "{{count}} available",
+    "available_other": "{{count}} available",
+    "missing_one": "{{count}} missing",
+    "missing_other": "{{count}} missing"
+  },
+  "status": {
+    "complete": "Complete",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "missing": "Missing"
+  },
+  "section": {
+    "season": "Season {{number}}"
+  },
+  "metadata": {
+    "video": {
+      "title": "Video",
+      "codec": "Codec",
+      "resolution": "Resolution",
+      "hdr": "HDR",
+      "bitrate": "Bitrate",
+      "frameRate": "Frame rate",
+      "colorSpace": "Color space"
+    },
+    "audio": {
+      "title": "Audio {{track}}",
+      "codec": "Codec",
+      "channels": "Channels",
+      "sampleRate": "Sample rate",
+      "bitrate": "Bitrate",
+      "language": "Language"
+    },
+    "subtitle": {
+      "title": "Subtitles {{track}}",
+      "language": "Language",
+      "format": "Format",
+      "forced": "Forced"
+    }
+  },
+  "value": {
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No",
+    "language": {
+      "en": "English",
+      "en-US": "English (United States)",
+      "en-GB": "English (United Kingdom)",
+      "fr": "French",
+      "fr-FR": "French (France)",
+      "fr-CA": "French (Canada)",
+      "es": "Spanish",
+      "de": "German",
+      "it": "Italian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "zh": "Chinese",
+      "pt": "Portuguese",
+      "pt-PT": "Portuguese (Portugal)",
+      "pt-BR": "Portuguese (Brazil)",
+      "ru": "Russian",
+      "ar": "Arabic",
+      "th": "Thai",
+      "tr": "Turkish",
+      "pl": "Polish",
+      "uk": "Ukrainian",
+      "ro": "Romanian",
+      "nl": "Dutch",
+      "el": "Greek",
+      "sv": "Swedish",
+      "fi": "Finnish",
+      "no": "Norwegian",
+      "da": "Danish",
+      "cs": "Czech",
+      "sk": "Slovak",
+      "hu": "Hungarian",
+      "bg": "Bulgarian",
+      "sr": "Serbian",
+      "hr": "Croatian",
+      "sl": "Slovenian",
+      "lt": "Lithuanian",
+      "lv": "Latvian",
+      "et": "Estonian",
+      "mt": "Maltese",
+      "ga": "Irish",
+      "cy": "Welsh",
+      "is": "Icelandic",
+      "sq": "Albanian",
+      "mk": "Macedonian",
+      "bs": "Bosnian",
+      "af": "Afrikaans"
+    }
+  }
+}

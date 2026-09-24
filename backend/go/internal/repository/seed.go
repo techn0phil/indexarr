@@ -379,7 +379,7 @@ func getMockSeries() []models.Series {
 		// 	Genres:       "Drame, Histoire",
 		// 	Rating:       8.5,
 		// 	Popularity:   156.4,
-		// 	Status:       "partial",
+		// 	Status:       "upcoming",
 		// 	FileSize:     98000000000,
 		// 	DateAdded:    now,
 		// 	TVDBId:       407855,

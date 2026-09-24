@@ -1,5 +1,6 @@
 import { Movie } from '../types';
 import comStyles from '../styles/components.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface MovieCardListProps {
   movie: Movie;
@@ -7,6 +8,7 @@ interface MovieCardListProps {
 }
 
 export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
+  const { t } = useTranslation('movie-list');
   const initials = movie.title
     .split(' ')
     .map((word) => word[0])
@@ -23,12 +25,8 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           <img
             src={movie.poster}
             alt={movie.title}
-            width="100%"
-            height="100%"
-            style={{ objectFit: 'contain' }}
             className={comStyles['card-list-poster-img']}
           />
-          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
       ) : (
         <div className={comStyles['card-list-poster']}>
@@ -38,7 +36,6 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           <div className={comStyles['card-list-poster-title']}>
             {movie.title}
           </div>
-          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
       )}
 
@@ -75,7 +72,7 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           <span>{movie.genres}</span>
           <span>·</span>
           <span style={{ color: statusColor, fontWeight: 500 }}>
-            {movie.status === 'available' ? 'Disponible' : movie.status === 'missing' ? 'Manquant' : 'Problème'}
+            {movie.status === 'available' ? t('filter.status.option.available') : movie.status === 'missing' ? t('filter.status.option.missing') : t('filter.status.option.problem')}
           </span>
         </div>
         <div className={comStyles['card-list-badges']}>
@@ -89,7 +86,7 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && <span className={comStyles['badge-atmos']}>Atmos</span>}
           {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && <span className={comStyles['badge-dts']}>DTS</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks?.[0]?.codec}</span>}
-          {movie.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
+          {movie.status === 'missing' && <span className={comStyles['badge-missing']}>{t('filter.status.option.missing')}</span>}
         </div>
       </div>
 

@@ -1,0 +1,107 @@
+{
+  "message": {
+    "loading": "Caricamento...",
+    "seriesNotFound": "Serie non trovata",
+    "none": "Nessuno"
+  },
+  "button": {
+    "refresh": "Aggiorna"
+  },
+  "label": {
+    "season_one": "{{count}} stagione",
+    "season_other": "{{count}} stagioni",
+    "episode_one": "{{count}} episodio",
+    "episode_other": "{{count}} episodi",
+    "available_one": "{{count}} disponibile",
+    "available_other": "{{count}} disponibili",
+    "missing_one": "{{count}} mancante",
+    "missing_other": "{{count}} mancanti"
+  },
+  "status": {
+    "complete": "Completa",
+    "ongoing": "In corso",
+    "upcoming": "In arrivo",
+    "missing": "Mancante"
+  },
+  "section": {
+    "season": "Stagione {{number}}"
+  },
+  "metadata": {
+    "video": {
+      "title": "Video",
+      "codec": "Codec",
+      "resolution": "Risoluzione",
+      "hdr": "HDR",
+      "bitrate": "Bitrate",
+      "frameRate": "Frequenza fotogrammi",
+      "colorSpace": "Spazio colore"
+    },
+    "audio": {
+      "title": "Audio {{track}}",
+      "codec": "Codec",
+      "channels": "Canali",
+      "sampleRate": "Frequenza di campionamento",
+      "bitrate": "Bitrate",
+      "language": "Lingua"
+    },
+    "subtitle": {
+      "title": "Sottotitoli {{track}}",
+      "language": "Lingua",
+      "format": "Formato",
+      "forced": "Forzato"
+    }
+  },
+  "value": {
+    "unknown": "Sconosciuto",
+    "yes": "Sì",
+    "no": "No",
+    "language": {
+      "en": "Inglese",
+      "en-US": "Inglese (Stati Uniti)",
+      "en-GB": "Inglese (Regno Unito)",
+      "fr": "Francese",
+      "fr-FR": "Francese (Francia)",
+      "fr-CA": "Francese (Canada)",
+      "es": "Spagnolo",
+      "de": "Tedesco",
+      "it": "Italiano",
+      "ja": "Giapponese",
+      "ko": "Coreano",
+      "zh": "Cinese",
+      "pt": "Portoghese",
+      "pt-PT": "Portoghese (Portogallo)",
+      "pt-BR": "Portoghese (Brasile)",
+      "ru": "Russo",
+      "ar": "Arabo",
+      "th": "Thailandese",
+      "tr": "Turco",
+      "pl": "Polacco",
+      "uk": "Ucraino",
+      "ro": "Rumeno",
+      "nl": "Olandese",
+      "el": "Greco",
+      "sv": "Svedese",
+      "fi": "Finlandese",
+      "no": "Norvegese",
+      "da": "Danese",
+      "cs": "Ceco",
+      "sk": "Slovacco",
+      "hu": "Ungherese",
+      "bg": "Bulgaro",
+      "sr": "Serbo",
+      "hr": "Croato",
+      "sl": "Sloveno",
+      "lt": "Lituano",
+      "lv": "Lettone",
+      "et": "Estone",
+      "mt": "Maltese",
+      "ga": "Irlandese",
+      "cy": "Gallese",
+      "is": "Islandese",
+      "sq": "Albanese",
+      "mk": "Macedone",
+      "bs": "Bosniaco",
+      "af": "Afrikaans"
+    }
+  }
+}

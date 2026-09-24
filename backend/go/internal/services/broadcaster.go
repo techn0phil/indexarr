@@ -2,8 +2,9 @@ package services
 
 import (
 	"encoding/json"
-	"log"
 	"sync"
+
+	"indexarr/internal/config"
 
 	"github.com/gorilla/websocket"
 )
@@ -71,14 +72,14 @@ func (b *Broadcaster) Run() {
 			b.mu.Lock()
 			b.clients[client] = true
 			b.mu.Unlock()
-			log.Printf("WebSocket client connected (total: %d)", len(b.clients))
+			config.GlobalLogger.Trace().Int("total", len(b.clients)).Msg("WebSocket client connected")
 
 		case client := <-b.unregister:
 			b.mu.Lock()
 			if _, ok := b.clients[client]; ok {
 				delete(b.clients, client)
 				close(client.send)
-				log.Printf("WebSocket client disconnected (total: %d)", len(b.clients))
+				config.GlobalLogger.Trace().Int("total", len(b.clients)).Msg("WebSocket client disconnected")
 			}
 			b.mu.Unlock()
 
@@ -161,7 +162,7 @@ func (b *Broadcaster) BroadcastScanStopped() {
 func (b *Broadcaster) broadcastMessage(msg WSMessage) {
 	data, err := json.Marshal(msg)
 	if err != nil {
-		log.Printf("Failed to marshal WebSocket message: %v", err)
+		config.GlobalLogger.Warn().Err(err).Msg("Failed to marshal WebSocket message")
 		return
 	}
 	b.broadcast <- data

@@ -2,6 +2,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 0 20px;
+  height: 56px;
+  background: var(--color-background-primary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
 }
 
 .back-btn {
@@ -87,6 +91,43 @@
   color: var(--color-text-primary);
   outline: none;
   transition: all 0.15s ease;
+}
+
+/* Hamburger button */
+.hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-right: 12px;
+  color: var(--color-text-primary);
+}
+
+/* Mobile responsive search */
+@media (max-width: 900px) {
+  .hamburger {
+    display: block;
+  }
+
+  .topbar {
+    gap: 4px;
+    padding: 0 10px;
+  }
+
+  .search-container {
+    margin-right: 0;
+    flex: 1;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0 12px 0 38px;
+  }
+
+  .shortcut {
+    display: none;
+  }
 }
 
 .search-input:focus {

@@ -1,8 +1,8 @@
 import { createContext, useState, useEffect, useContext, ReactNode, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
-import { StatsResponse, ScanStatus } from '../types';
-
-export type Page = 'list-films' | 'list-series' | 'list-recents' | 'detail-movie' | 'detail-series';
+import { StatsResponse, ScanStatus, AuthMode, User } from '../types';
+import { SUPPORTED_LANGUAGES } from '../i18n/config';
 
 interface AppConfig {
   radarrUrl?: string;
@@ -14,19 +14,31 @@ interface WSMessage {
   filesFound?: number;
   filesProcessed?: number;
   startedAt?: string;
+  completedAt?: string;
   error?: string;
   moviesAdded?: number;
   episodesAdded?: number;
 }
 
 interface AppContextType {
-  currentPage: Page;
-  selectedId: number | null;
-  goToPage: (page: Page, id?: number) => void;
-  goBack: () => void;
-  history: Page[];
+  // Auth state
+  authMode: AuthMode;
+  user: User | null;
+  isAuthenticated: boolean;
+  authLoading: boolean;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  
+  // Theme state
   isDark: boolean;
   toggleTheme: () => void;
+  
+  // Locale state
+  locale: string;
+  availableLanguages: string[];
+  setLocale: (lang: string) => void;
+  
+  // App data state
   config: AppConfig | null;
   configLoading: boolean;
   stats: StatsResponse | null;
@@ -44,9 +56,13 @@ interface AppContextProviderProps {
 }
 
 export const AppContextProvider = ({ children }: AppContextProviderProps) => {
-  const [currentPage, setCurrentPage] = useState<Page>('list-films');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [history, setHistory] = useState<Page[]>(['list-films']);
+  // Auth state
+  const [authMode, setAuthMode] = useState<AuthMode>('none');
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  
+  // App data state
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -60,6 +76,21 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const unmountedRef = useRef(false);
+
+  // Locale state - read from localStorage or use i18next current language
+  const { i18n } = useTranslation();
+  const [locale, setLocaleState] = useState(() => {
+    const saved = localStorage.getItem('locale-preference');
+    return saved || i18n.language;
+  });
+
+  const setLocale = useCallback((lang: string) => {
+    if (SUPPORTED_LANGUAGES.includes(lang)) {
+      setLocaleState(lang);
+      i18n.changeLanguage(lang);
+      localStorage.setItem('locale-preference', lang);
+    }
+  }, [i18n]);
 
   // WebSocket URL generator
   const getWebSocketUrl = useCallback(() => {
@@ -77,7 +108,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         filesFound: msg.filesFound || prevStatus?.filesFound || 0,
         filesProcessed: msg.filesProcessed || prevStatus?.filesProcessed || 0,
         startedAt: msg.startedAt || prevStatus?.startedAt,
-        completedAt: prevStatus?.completedAt,
+        completedAt: msg.completedAt || prevStatus?.completedAt,
         errorMessage: msg.error || prevStatus?.errorMessage,
       };
 
@@ -95,16 +126,18 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
           break;
         case 'scan_complete':
           newStatus.status = 'completed';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_error':
           newStatus.status = 'error';
           newStatus.errorMessage = msg.error;
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_stopped':
           newStatus.status = 'stopped';
-          newStatus.completedAt = new Date().toISOString();
+          newStatus.errorMessage = msg.error;
+          newStatus.completedAt = msg.completedAt || new Date().toISOString();
           break;
         case 'scan_idle':
           newStatus.status = msg.filesProcessed ? 'completed' : 'idle';
@@ -161,8 +194,8 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         setWsConnected(false);
         wsRef.current = null;
 
-        // Reconnect with exponential backoff if not unmounted
-        if (!unmountedRef.current) {
+        // Reconnect with exponential backoff if not unmounted and authenticated
+        if (!unmountedRef.current && isAuthenticated) {
           setWsReconnecting(true);
           reconnectAttemptsRef.current++;
           const backoffTime = Math.min(
@@ -179,14 +212,70 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     } catch (error) {
       console.error('Failed to create WebSocket:', error);
     }
-  }, [getWebSocketUrl, updateStatusFromMessage]);
+  }, [getWebSocketUrl, updateStatusFromMessage, isAuthenticated]);
 
-  // Initialize WebSocket connection
+  // Initialize auth on mount - fetch auth config first (public endpoint)
   useEffect(() => {
-    console.log('[WS] Initializing connection...');
+    const initAuth = async () => {
+      try {
+        const authConfig = await apiClient.getAuthConfig();
+        setAuthMode(authConfig.authMode);
+        
+        if (authConfig.authMode === 'none') {
+          // No auth required, mark as authenticated
+          setIsAuthenticated(true);
+          setAuthLoading(false);
+        } else if (authConfig.authMode === 'simple') {
+          // Check if we have a valid session
+          try {
+            const response = await apiClient.getCurrentUser();
+            if (response.success && response.user) {
+              setUser(response.user);
+              setIsAuthenticated(true);
+            }
+          } catch {
+            // Not authenticated, will show login
+            setIsAuthenticated(false);
+          }
+          setAuthLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch auth config:', error);
+        // Fallback to no auth mode
+        setAuthMode('none');
+        setIsAuthenticated(true);
+        setAuthLoading(false);
+      }
+    };
 
+    initAuth();
+  }, []);
+
+  // Load protected data when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Connect to WebSocket
+    console.log('[WS] Initializing connection...');
     unmountedRef.current = false;
     connect();
+
+    // Fetch config
+    const fetchConfig = async () => {
+      try {
+        const data = await apiClient.getConfig();
+        setConfig(data);
+      } catch (error) {
+        console.error('Failed to fetch config:', error);
+        setConfig({ radarrUrl: '', sonarrUrl: '' });
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+    fetchConfig();
+
+    // Fetch stats
+    refreshStats();
 
     return () => {
       console.log('[WS] Cleanup: Closing connection');
@@ -199,27 +288,10 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         wsRef.current = null;
       }
     };
-  }, [connect]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, connect]);
 
-  // Fetch config on mount
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const data = await apiClient.getConfig();
-        setConfig(data);
-      } catch (error) {
-        console.error('Failed to fetch config:', error);
-        // Fallback to default config
-        setConfig({ radarrUrl: '', sonarrUrl: '' });
-      } finally {
-        setConfigLoading(false);
-      }
-    };
-
-    fetchConfig();
-  }, []);
-
-  // Fetch stats on mount
+  // Fetch stats helper
   const refreshStats = async () => {
     setStatsLoading(true);
     try {
@@ -232,10 +304,6 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
       setStatsLoading(false);
     }
   };
-
-  useEffect(() => {
-    refreshStats();
-  }, []);
 
   // Initialize theme from localStorage or system preference
   const [isDark, setIsDark] = useState(() => {
@@ -268,28 +336,62 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const goToPage = (page: Page, id?: number) => {
-    setCurrentPage(page);
-    if (id) setSelectedId(id);
-    setHistory([...history, page]);
-  };
-
-  const goBack = () => {
-    if (history.length > 1) {
-      const newHistory = history.slice(0, -1);
-      setHistory(newHistory);
-      setCurrentPage(newHistory[newHistory.length - 1]);
-    }
-  };
-
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
     localStorage.setItem('theme-preference', newTheme ? 'dark' : 'light');
   };
 
+  // Auth functions
+  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await apiClient.login(username, password);
+      if (response.success && response.user) {
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+      return { success: false, error: response.error || 'Identifiants invalides' };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Erreur de connexion' };
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      // Reset app state
+      setConfig(null);
+      setConfigLoading(true);
+      setStats(null);
+      setStatsLoading(true);
+      setScanStatus(null);
+      // Close WebSocket
+      if (wsRef.current) {
+        wsRef.current.close(1000, 'User logged out');
+        wsRef.current = null;
+      }
+      setWsConnected(false);
+    }
+  };
+
   return (
-    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme, config, configLoading, stats, statsLoading, refreshStats, scanStatus, wsConnected, wsReconnecting }}>
+    <AppContext.Provider value={{ 
+      // Auth
+      authMode, user, isAuthenticated, authLoading, login, logout,
+      // Theme
+      isDark, toggleTheme,
+      // Locale
+      locale, availableLanguages: SUPPORTED_LANGUAGES, setLocale,
+      // App data
+      config, configLoading, stats, statsLoading, refreshStats, scanStatus, wsConnected, wsReconnecting 
+    }}>
       {children}
     </AppContext.Provider>
   );

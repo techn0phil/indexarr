@@ -1,0 +1,69 @@
+{
+  "filter": {
+    "label": "Filter",
+    "button": {
+      "apply": "Anwenden",
+      "clear": "Löschen",
+      "clearAll": "Alles löschen"
+    },
+    "status": {
+      "label": "Status",
+      "title": "Nach Status filtern",
+      "option": {
+        "complete": "Abgeschlossen",
+        "ongoing": "Laufend",
+        "upcoming": "Demnächst"
+      }
+    },
+    "resolution": {
+      "label": "Auflösung",
+      "title": "Nach Auflösung filtern"
+    },
+    "codec": {
+      "label": "Codec",
+      "title": "Nach Codec filtern"
+    },
+    "audio": {
+      "label": "Audio",
+      "title": "Nach Audio filtern"
+    },
+    "hdr": {
+      "label": "HDR",
+      "title": "Nach HDR filtern"
+    }
+  },
+  "statCard": {
+    "series": {
+      "title": "Serien",
+      "completed": "vollständig",
+      "total": "gesamt"
+    },
+    "episodes": {
+      "title": "Episoden",
+      "available": "verfügbar",
+      "total": "gesamt"
+    },
+    "storage": {
+      "title": "Speicher",
+      "diskOccupation": "Speicherbelegung",
+      "total": "gesamt"
+    },
+    "problem": {
+      "title": "Probleme",
+      "missingEpisodes": "Fehlende Episoden",
+      "total": "gesamt"
+    }
+  },
+  "label": {
+    "loading": "Wird geladen...",
+    "noResults": "Keine Serie gefunden",
+    "completed": "Vollständig",
+    "partial": "Teilweise",
+    "missing": "Fehlt",
+    "season_one": "{{count}} Staffel",
+    "season_other": "{{count}} Staffeln",
+    "episode_one": "{{count}} Episode",
+    "episode_other": "{{count}} Episoden",
+    "ended": "Beendet"
+  }
+}

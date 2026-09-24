@@ -191,8 +191,8 @@ SQLite has restricted ALTER TABLE capabilities:
 ```bash
 cd backend/go/internal/repository/migrations
 ls -1 *.up.sql | tail -1
-# Output: 000007_add_sonarr_fields.up.sql
-# Next migration: 000008_your_description.up.sql
+# Output: 000011_i18n.up.sql
+# Next migration: 000012_your_description.up.sql
 ```
 
 ### Step 2: Apply Forward Migration
@@ -257,14 +257,15 @@ After creating migration files:
 - [ ] Re-apply forward migration tested
 - [ ] No data loss during up/down cycle
 - [ ] Related Go models updated if needed (`internal/models/`)
-- [ ] Repository queries updated if columns/tables changed
+- [ ] Repository queries and repository methods updated if schema changed (`internal/repository/queries.go`, `internal/repository/mutations.go`)
+- [ ] Handler tests updated if API response structure changed (`internal/api/handlers.go`)
 - [ ] MIGRATIONS.md updated with notes if complex migration
 
 ## Example: Complete Migration
 
 **Scenario**: Add `radarr_id` column to movies table for Radarr integration.
 
-**000008_add_radarr_id_to_movies.up.sql**:
+**000012_add_radarr_id_to_movies.up.sql**:
 ```sql
 -- Add Radarr integration field to movies table
 ALTER TABLE movies ADD COLUMN radarr_id INTEGER;
@@ -273,7 +274,7 @@ ALTER TABLE movies ADD COLUMN radarr_id INTEGER;
 CREATE INDEX idx_movies_radarr_id ON movies(radarr_id);
 ```
 
-**000008_add_radarr_id_to_movies.down.sql**:
+**000012_add_radarr_id_to_movies.down.sql**:
 ```sql
 -- Remove Radarr integration field from movies table
 
@@ -298,7 +299,8 @@ CREATE TABLE movies_new (
   last_scanned TEXT,
   tmdb_id INTEGER,
   imdb_id TEXT,
-  poster TEXT
+  poster TEXT,
+  language_code TEXT
   -- radarr_id OMITTED
 );
 
@@ -306,7 +308,7 @@ CREATE TABLE movies_new (
 INSERT INTO movies_new 
 SELECT id, title, year, duration, synopsis, genres, rating, popularity, 
        status, file_size, file_path, container, date_added, last_scanned, 
-       tmdb_id, imdb_id, poster 
+       tmdb_id, imdb_id, poster, language_code 
 FROM movies;
 
 -- Replace old table
@@ -326,7 +328,7 @@ ALTER TABLE movies_new RENAME TO movies;
 
 ## Related Files
 
-- **Migration Guide**: [backend/go/MIGRATIONS.md](../../backend/go/MIGRATIONS.md)
+- **Migration Guide**: [backend/go/MIGRATIONS.md](../../backend/go/docs/MIGRATIONS.md)
 - **Schema Definition**: [backend/go/internal/repository/schema.sql](../../backend/go/internal/repository/schema.sql)
 - **Database Init**: [backend/go/internal/repository/db.go](../../backend/go/internal/repository/db.go)
 - **Data Models**: [backend/go/internal/models/](../../backend/go/internal/models/)

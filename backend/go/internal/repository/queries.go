@@ -280,7 +280,7 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		orderBy = "file_size DESC, id DESC"
 	}
 
-	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE %s ORDER BY %s LIMIT ? OFFSET ?`, where, orderBy)
+	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug, total_season_count, total_episode_count FROM series WHERE %s ORDER BY %s LIMIT ? OFFSET ?`, where, orderBy)
 	rows, err := db.Query(query, filters.PageSize, offset)
 	if err != nil {
 		return nil, 0, err
@@ -293,7 +293,7 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 		var poster sql.NullString
 		var sonarrID sql.NullInt64
 		var titleSlug sql.NullString
-		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug)
+		err := rows.Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.MissingEpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug, &s.TotalSeasonCount, &s.TotalEpisodeCount)
 		if poster.Valid {
 			s.Poster = &poster.String
 		} else {
@@ -320,7 +320,7 @@ func GetSeriesByID(db *sql.DB, id int64) (*models.Series, error) {
 	var poster sql.NullString
 	var sonarrID sql.NullInt64
 	var titleSlug sql.NullString
-	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug)
+	err := db.QueryRow(`SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug, total_season_count, total_episode_count FROM series WHERE id=?`, id).Scan(&s.ID, &s.Title, &s.YearStart, &s.YearEnd, &s.SeasonCount, &s.EpisodeCount, &s.MissingEpisodeCount, &s.Synopsis, &s.Genres, &s.Rating, &s.Popularity, &s.Status, &s.FileSize, &s.DateAdded, &s.TMDBId, &s.TVDBId, &s.IMDbId, &poster, &s.Slug, &sonarrID, &titleSlug, &s.TotalSeasonCount, &s.TotalEpisodeCount)
 	if poster.Valid {
 		s.Poster = &poster.String
 	} else {
@@ -502,21 +502,27 @@ func GetStats(db *sql.DB) (*models.StatsResponse, error) {
 	db.QueryRow("SELECT COUNT(*) FROM series").Scan(&stats.TotalSeries)
 
 	// Total episodes
-	db.QueryRow("SELECT COUNT(*) FROM episodes").Scan(&stats.TotalEpisodes)
+	db.QueryRow("SELECT COALESCE(SUM(total_episode_count), 0) FROM series").Scan(&stats.TotalEpisodes)
 
 	// Available/missing counts
 	db.QueryRow("SELECT COUNT(*) FROM movies WHERE status='available'").Scan(&stats.AvailMovies)
 	db.QueryRow("SELECT COUNT(*) FROM movies WHERE status='missing'").Scan(&stats.MissingMovies)
 	db.QueryRow("SELECT COUNT(*) FROM episodes WHERE status='available'").Scan(&stats.AvailEpisodes)
-	db.QueryRow("SELECT COUNT(*) FROM episodes WHERE status='missing'").Scan(&stats.MissingEpisodes)
 
 	// Problems count (missing files)
+	stats.MissingEpisodes = stats.TotalEpisodes - stats.AvailEpisodes
 	stats.ProblemsCount = stats.MissingMovies + stats.MissingEpisodes
 
 	// Disk space in GB
-	var totalBytes int64
-	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available' UNION ALL SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&totalBytes)
-	stats.DiskSpaceGB = float64(totalBytes) / (1024 * 1024 * 1024)
+	var movieBytes int64
+	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available'").Scan(&movieBytes)
+
+	var seriesBytes int64
+	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&seriesBytes)
+
+	stats.MoviesDiskSpaceGB = float64(movieBytes) / (1024 * 1024 * 1024)
+	stats.SeriesDiskSpaceGB = float64(seriesBytes) / (1024 * 1024 * 1024)
+	stats.DiskSpaceGB = stats.MoviesDiskSpaceGB + stats.SeriesDiskSpaceGB
 
 	// 4K count
 	query := `

@@ -14,8 +14,8 @@ export const FilterChip = ({ icon = <></>, label, active, count, onClick }: Filt
       className={`${styles['filter-chip']} ${active ? styles['filter-chip-active'] : ''}`}
       onClick={onClick}
     >
-      {icon}
-      {label}
+      <span className={styles['filter-chip-icon']}>{icon}</span>
+      <span className={styles['filter-chip-label']}>{label}</span>
       {count !== undefined && count > 0 && (
         <span className={styles['filter-chip-badge']}>{count}</span>
       )}

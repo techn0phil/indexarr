@@ -10,6 +10,8 @@ import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
 import { ScanStatusCard } from '../components/ScanStatusCard';
+import { useTranslation } from 'react-i18next';
+import styles from '../styles/medialist.module.css';
 
 interface ListFilmsProps {
   onSelectMovie: (id: number) => void;
@@ -21,9 +23,9 @@ type ViewType = 'grid' | 'list';
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
-    { value: 'available', label: 'Disponible' },
-    { value: 'missing', label: 'Manquant' },
-    { value: 'problem', label: 'Problème' },
+    { value: 'available', label: 'available' },
+    { value: 'missing', label: 'missing' },
+    { value: 'problem', label: 'problem' },
   ],
   resolution: [
     { value: '3840', label: '4K - Ultra HD (3840 x 2160)' },
@@ -59,6 +61,7 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
 };
 
 export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) => {
+  const { t } = useTranslation('movie-list');
   const [activeFilters, setActiveFilters] = useState<Record<FilterType, string[]>>({
     status: [],
     resolution: [],
@@ -154,13 +157,13 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   return (
     <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
+      <div className={styles['filter-section']}>
+        <div className={styles['filter-container']}>
+          <span className={styles['label']}>{t('filter.label')}</span>
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
-            label="Statut"
+            label={t('filter.status.label')}
             active={activeFilters.status.length > 0}
             count={activeFilters.status.length}
             onClick={() => setModalFilter('status')}
@@ -168,7 +171,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
-            label="Résolution"
+            label={t('filter.resolution.label')}
             active={activeFilters.resolution.length > 0}
             count={activeFilters.resolution.length}
             onClick={() => setModalFilter('resolution')}
@@ -176,7 +179,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
-            label="Codec"
+            label={t('filter.codec.label')}
             active={activeFilters.codec.length > 0}
             count={activeFilters.codec.length}
             onClick={() => setModalFilter('codec')}
@@ -184,7 +187,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
-            label="Audio"
+            label={t('filter.audio.label')}
             active={activeFilters.audio.length > 0}
             count={activeFilters.audio.length}
             onClick={() => setModalFilter('audio')}
@@ -192,7 +195,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
           
           <FilterChip
             icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="2.5"/><line x1="6" y1="1" x2="6" y2="3"/><line x1="6" y1="9" x2="6" y2="11"/><line x1="1" y1="6" x2="3" y2="6"/><line x1="9" y1="6" x2="11" y2="6"/><line x1="3.5" y1="3.5" x2="2.2" y2="2.2"/><line x1="8.5" y1="3.5" x2="9.8" y2="2.2"/><line x1="3.5" y1="8.5" x2="2.2" y2="9.8"/><line x1="8.5" y1="8.5" x2="9.8" y2="9.8"/></svg>}
-            label="HDR"
+            label={t('filter.hdr.label')}
             active={activeFilters.hdr.length > 0}
             count={activeFilters.hdr.length}
             onClick={() => setModalFilter('hdr')}
@@ -211,7 +214,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
                 marginLeft: '4px',
               }}
             >
-              Effacer tout
+              {t('filter.button.clearAll')}
             </button>
           )}
         </div>
@@ -220,22 +223,58 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
-        <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
-        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['films manquants', `${context?.stats?.missingMovies || 0} total`]} />
+      <div className={styles['stat-card-section']}>
+        <StatCard label={t('statCard.movies.title')} value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} ${t('statCard.movies.available')}`, `${context?.stats?.totalMovies || 0} ${t('statCard.movies.total')}`]} icon={
+          <svg viewBox="0 0 24 24">
+            <path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" />
+          </svg>
+        } />
+        <StatCard label={t('statCard.4k.title')} value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} ${t('statCard.4k.total')} (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <defs>
+              <mask id="cutout-4k">
+                {/* White background means keep/show */}
+                <rect width="24" height="18" rx="4" y="4" fill="white" />
+                {/* Black shapes mean cut out / transparent */}
+                <text
+                  x="12"
+                  y="13.5"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  font-family="system-ui, -apple-system, sans-serif"
+                  font-size="12px"
+                  font-weight="900"
+                  fill="black"
+                >
+                  4K
+                </text>
+              </mask>
+            </defs>
+            {/* The main box with the mask applied so 4K cuts through it */}
+            <rect width="24" height="24" rx="4" mask="url(#cutout-4k)" />
+          </svg>
+        } />
+        <StatCard label={t('statCard.storage.title')} value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[t('statCard.storage.diskOccupation'), `${context?.stats?.moviesDiskSpaceGB?.toFixed(1) || 0} Go ${t('statCard.storage.total')}`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5H5V5h14v3zm0 5H5v-3h14v3zm0 5H5v-3h14v3zM7 6h2v2H7V6zm0 5h2v2H7v-2zm0 5h2v2H7v-2z"/>
+          </svg>
+        } />
+        <StatCard label={t('statCard.problem.title')} value={loadedStats.missing} subLabels={[t('statCard.problem.missingMovies'), `${context?.stats?.missingMovies || 0} ${t('statCard.problem.total')}`]} icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        } />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
       {/* Grid or List */}
       {isInitialLoading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Chargement...
+          {t('label.loading')}
         </div>
       ) : !movies || movies.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-          Aucun film trouvé
+          {t('label.noResults')}
         </div>
       ) : view === 'grid' ? (
         <>
@@ -249,7 +288,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
@@ -267,7 +306,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
               <div ref={sentinelRef} style={{ height: '1px' }} />
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-                  Chargement...
+                  {t('label.loading')}
                 </div>
               )}
             </>
@@ -281,9 +320,10 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
           isOpen={true}
           onClose={() => setModalFilter(null)}
           onApply={(values) => handleFilterApply(modalFilter, values)}
-          title={`Filtrer par ${modalFilter === 'status' ? 'statut' : modalFilter === 'resolution' ? 'résolution' : modalFilter === 'codec' ? 'codec' : modalFilter === 'audio' ? 'audio' : 'HDR'}`}
+          title={t(`filter.${modalFilter}.title`)}
           options={FILTER_OPTIONS[modalFilter]}
           selectedValues={activeFilters[modalFilter]}
+          translationPrefix={modalFilter === 'status' ? 'filter.status.option.' : ''}
         />
       )}
     </div>

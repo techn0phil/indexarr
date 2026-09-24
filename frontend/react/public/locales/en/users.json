@@ -1,0 +1,96 @@
+{
+  "label": {
+    "title": "User management",
+    "noUsers": "No users created",
+    "createFirstUser": "Create your first user to get started"
+  },
+  "button": {
+    "add": "New user",
+    "edit": "Edit",
+    "changePassword": "Change password",
+    "deleting": "Deleting...",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "creating": "Creating...",
+    "create": "Create",
+    "saving": "Saving...",
+    "save": "Save"
+  },
+  "table": {
+    "column": {
+      "username": "Username",
+      "role": "Role",
+      "status": "Status",
+      "createdAt": "Created on",
+      "actions": "Actions"
+    }
+  },
+  "role": {
+    "admin": "Administrator",
+    "guest": "Guest"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "popup": {
+    "new": {
+      "title": "New user",
+      "input": {
+        "username": "Username",
+        "password": "Password",
+        "role": "Role"
+      }
+    },
+    "edit": {
+      "title": "Edit user",
+      "input": {
+        "username": "Username",
+        "role": "Role",
+        "enabledAccount": "Account enabled"
+      }
+    },
+    "changePassword": {
+      "title": "Change password",
+      "description": "Set a new password for <b>{{username}}</b>",
+      "input": {
+        "newPassword": "New password"
+      }
+    },
+    "delete": {
+      "title": "Delete user",
+      "description": "Are you sure you want to delete the user <b>{{username}}</b>? This action cannot be undone."
+    }
+  },
+  "message": {
+    "loading": "Loading...",
+    "loadingError": "Error loading users",
+    "serverConnectionError": "Server connection error",
+    "creationError": "Error creating user",
+    "updateError": "Error updating user",
+    "deletionError": "Error deleting user",
+    "allFieldsRequired": "All fields are required",
+    "passwordRequired": "Password is required",
+    "clickToEnable": "Click to enable account",
+    "clickToDisable": "Click to disable account",
+    "notAuthenticated": "User not authenticated",
+    "adminAccessRequired": "Administrator access required",
+    "userRepositoryNotAvailable": "User repository is not available",
+    "failedToFetchUsers": "Failed to fetch users",
+    "invalidRequestBody": "Invalid request body",
+    "usernameAndPasswordRequired": "Username and password are required",
+    "invalidRole": "Invalid role",
+    "failedToHashPassword": "Failed to hash password",
+    "userAlreadyExists": "User already exists",
+    "failedToCreateUser": "Failed to create user",
+    "invalidUserID": "Invalid user ID",
+    "userNotFound": "User not found",
+    "failedToUpdateUser": "Failed to update user",
+    "cannotDeleteSelf": "You cannot delete your own account",
+    "failedToDeleteUser": "Failed to delete user",
+    "userDeleted": "User successfully deleted",
+    "newPasswordRequired": "New password is required",
+    "failedToUpdatePassword": "Failed to update password",
+    "passwordUpdated": "Password successfully updated"
+  }
+}

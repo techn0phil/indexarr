@@ -1,0 +1,17 @@
+{
+  "label": {
+    "title": "Kürzlich hinzugefügt",
+    "section": {
+      "movies": "Filme",
+      "series": "Serien"
+    }
+  },
+  "message": {
+    "moviesInitialLoading": "Neueste Filme werden geladen...",
+    "seriesInitialLoading": "Neueste Serien werden geladen...",
+    "moviesLoading": "Filme werden aktualisiert...",
+    "seriesLoading": "Serien werden aktualisiert...",
+    "noMovies": "Kein Film hinzugefügt",
+    "noSeries": "Keine Serie hinzugefügt"
+  }
+}

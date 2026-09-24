@@ -27,6 +27,8 @@ type StatsResponse struct {
 	TotalSeries     int64   `json:"totalSeries"`
 	TotalEpisodes   int64   `json:"totalEpisodes"`
 	DiskSpaceGB     float64 `json:"diskSpaceGB"`
+	MoviesDiskSpaceGB float64 `json:"moviesDiskSpaceGB"`
+	SeriesDiskSpaceGB float64 `json:"seriesDiskSpaceGB"`
 	FourKCount      int64   `json:"fourKCount"`
 	FourKPercent    float64 `json:"fourKPercent"`
 	ProblemsCount   int64   `json:"problemsCount"`

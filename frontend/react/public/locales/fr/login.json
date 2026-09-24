@@ -1,0 +1,17 @@
+{
+  "title": "Connexion",
+  "fields": {
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe"
+  },
+  "buttons": {
+    "submit": "Se connecter"
+  },
+  "errors": {
+    "invalidRequestBody": "Corps de la requête invalide",
+    "invalidCredentials": "Identifiants invalides",
+    "userDisabled": "Compte désactivé",
+    "failedToGenerateToken": "Échec de la génération du jeton d'authentification",
+    "notAuthenticated": "Utilisateur non authentifié"
+  }
+}

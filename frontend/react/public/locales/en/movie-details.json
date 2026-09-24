@@ -1,0 +1,100 @@
+{
+  "message": {
+    "loading": "Loading...",
+    "movieNotFound": "Movie not found"
+  },
+  "button": {
+    "refresh": "Refresh"
+  },
+  "status": {
+    "available": "Available",
+    "missing": "Missing"
+  },
+  "section": {
+    "cast": "Cast",
+    "metadata": "Metadata"
+  },
+  "metadata": {
+    "file": {
+      "title": "File",
+      "path": "Path",
+      "size": "Size"
+    },
+    "video": {
+      "title": "Video — Track {{track}}",
+      "codec": "Codec",
+      "resolution": "Resolution",
+      "hdr": "HDR",
+      "bitrate": "Bitrate",
+      "fps": "FPS",
+      "colorSpace": "Color space"
+    },
+    "audio": {
+      "title": "Audio — Track {{track}}",
+      "codec": "Codec",
+      "channels": "Channels",
+      "language": "Language",
+      "bitrate": "Bitrate",
+      "sampleRate": "Sample rate"
+    },
+    "subtitle": {
+      "title": "Subtitles — Track {{track}}",
+      "format": "Format",
+      "language": "Language",
+      "forced": "Forced"
+    }
+  },
+  "value": {
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No",
+    "language": {
+      "en": "English",
+      "en-US": "English (United States)",
+      "en-GB": "English (United Kingdom)",
+      "fr": "French",
+      "fr-FR": "French (France)",
+      "fr-CA": "French (Canada)",
+      "es": "Spanish",
+      "de": "German",
+      "it": "Italian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "zh": "Chinese",
+      "pt": "Portuguese",
+      "pt-PT": "Portuguese (Portugal)",
+      "pt-BR": "Portuguese (Brazil)",
+      "ru": "Russian",
+      "ar": "Arabic",
+      "th": "Thai",
+      "tr": "Turkish",
+      "pl": "Polish",
+      "uk": "Ukrainian",
+      "ro": "Romanian",
+      "nl": "Dutch",
+      "el": "Greek",
+      "sv": "Swedish",
+      "fi": "Finnish",
+      "no": "Norwegian",
+      "da": "Danish",
+      "cs": "Czech",
+      "sk": "Slovak",
+      "hu": "Hungarian",
+      "bg": "Bulgarian",
+      "sr": "Serbian",
+      "hr": "Croatian",
+      "sl": "Slovenian",
+      "lt": "Lithuanian",
+      "lv": "Latvian",
+      "et": "Estonian",
+      "mt": "Maltese",
+      "ga": "Irish",
+      "cy": "Welsh",
+      "is": "Icelandic",
+      "sq": "Albanian",
+      "mk": "Macedonian",
+      "bs": "Bosnian",
+      "af": "Afrikaans"
+    }
+  }
+}

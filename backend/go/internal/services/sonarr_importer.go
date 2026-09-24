@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -72,7 +71,7 @@ func (si *SonarrImporter) Stop() {
 
 // GetPendingFileCount returns the total number of episode files, caching the API response
 func (si *SonarrImporter) GetPendingFileCount() (int, error) {
-	log.Println("Fetching episode count from Sonarr...")
+	config.GlobalLogger.Info().Msg("Fetching episode count from Sonarr")
 	sonarrSeriesList, err := si.client.GetSeries()
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch series from Sonarr: %w", err)
@@ -87,7 +86,7 @@ func (si *SonarrImporter) GetPendingFileCount() (int, error) {
 	}
 	si.mu.Unlock()
 
-	log.Printf("Found %d series with %d episode files in Sonarr", len(sonarrSeriesList), totalEpisodes)
+	config.GlobalLogger.Info().Int("series", len(sonarrSeriesList)).Int("episodes", totalEpisodes).Msg("Found series with episode files in Sonarr")
 	return totalEpisodes, nil
 }
 
@@ -103,7 +102,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	si.stopChan = make(chan struct{})
 	si.mu.Unlock()
 
-	log.Println("Starting Sonarr import")
+	config.GlobalLogger.Info().Msg("Starting Sonarr import")
 	start := time.Now()
 
 	defer func() {
@@ -139,7 +138,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	}
 	if !suppressBroadcasts {
 		if err := repository.UpdateScanStatus(si.db, status); err != nil {
-			log.Printf("Failed to update scan status: %v", err)
+			config.GlobalLogger.Warn().Err(err).Msg("Failed to update scan status")
 		}
 	}
 
@@ -151,7 +150,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 
 	if sonarrSeriesList == nil {
 		// Fetch all series from Sonarr
-		log.Println("Fetching series from Sonarr...")
+		config.GlobalLogger.Debug().Msg("Fetching series from Sonarr")
 		var err error
 		sonarrSeriesList, err = si.client.GetSeries()
 		if err != nil {
@@ -162,19 +161,23 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 			}
 			return nil, fmt.Errorf("failed to fetch series from Sonarr: %w", err)
 		}
-		log.Printf("Found %d series in Sonarr", len(sonarrSeriesList))
+		config.GlobalLogger.Info().Int("count", len(sonarrSeriesList)).Msg("Found series in Sonarr")
 	} else {
-		log.Printf("Using cached series: %d series", len(sonarrSeriesList))
+		config.GlobalLogger.Debug().Int("count", len(sonarrSeriesList)).Msg("Using cached series")
 	}
 
 	// Count total episodes with files for progress tracking
 	totalEpisodesWithFiles := 0
 	for _, ss := range sonarrSeriesList {
-		totalEpisodesWithFiles += ss.Statistics.EpisodeFileCount
+		for _, se := range ss.Seasons {
+			if se.SeasonNumber != 0 {
+				totalEpisodesWithFiles += se.Statistics.EpisodeFileCount
+			}
+		}
 	}
 
 	result.FilesFound = totalEpisodesWithFiles
-	log.Printf("Found %d series with %d episode files in Sonarr", len(sonarrSeriesList), totalEpisodesWithFiles)
+	config.GlobalLogger.Info().Int("series", len(sonarrSeriesList)).Int("episodes", totalEpisodesWithFiles).Msg("Found series with episode files in Sonarr")
 
 	// Update status with count
 	status.FilesFound = totalEpisodesWithFiles
@@ -197,7 +200,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 			if !suppressBroadcasts {
 				status.Status = "stopped"
 				status.CompletedAt = time.Now().Format(time.RFC3339)
-				status.ErrorMessage = "Import stopped by user"
+				status.ErrorMessage = "import_stopped_by_user"
 				repository.UpdateScanStatus(si.db, status)
 				if si.broadcaster != nil {
 					si.broadcaster.BroadcastScanStopped()
@@ -208,7 +211,7 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 		}
 
 		if err := si.processSonarrSeries(&ss, result, status); err != nil {
-			log.Printf("Error processing series '%s': %v", ss.Title, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", ss.Title).Msg("Error processing series")
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: %v", ss.Title, err))
 		} else {
 			seenSonarrIds[int64(ss.ID)] = true
@@ -233,10 +236,10 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	// Full sync: Remove series that are no longer in Sonarr
 	deletedCount, err := si.removeStaleSeries(seenSonarrIds)
 	if err != nil {
-		log.Printf("Warning: Failed to remove stale series: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to remove stale series")
 		result.Errors = append(result.Errors, fmt.Sprintf("Failed to remove stale series: %v", err))
 	} else if deletedCount > 0 {
-		log.Printf("Removed %d series no longer in Sonarr", deletedCount)
+		config.GlobalLogger.Info().Int("count", deletedCount).Msg("Removed series no longer in Sonarr")
 	}
 
 	// Update status to completed (only if not suppressed)
@@ -256,18 +259,23 @@ func (si *SonarrImporter) Import(ctx *models.ProgressContext) (*models.ScanResul
 	}
 
 	duration := time.Since(start)
-	log.Printf("Sonarr import completed in %v - %d episodes processed, %d added, %d series removed, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.EpisodesAdded, deletedCount, len(result.Errors))
+	config.GlobalLogger.Info().
+		Dur("duration", duration).
+		Int("count", result.FilesProcessed).
+		Int("added", result.EpisodesAdded).
+		Int("removed", deletedCount).
+		Int("errors", len(result.Errors)).
+		Msg("Sonarr import completed")
 
 	// Print the top 100 errors if there are any
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
 		for i, err := range result.Errors {
 			if i >= 100 {
-				log.Printf("  - ... %d more lines", len(result.Errors)-100)
+				config.GlobalLogger.Warn().Int("count", len(result.Errors)-100).Msg("... and more")
 				break
 			}
-			log.Printf("  - %s", err)
+			config.GlobalLogger.Warn().Str("error", err).Msg("Import error")
 		}
 	}
 
@@ -293,7 +301,7 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		if err := repository.UpdateSeries(si.db, series); err != nil {
 			return fmt.Errorf("failed to update series: %w", err)
 		}
-		log.Printf("Updated series: %s (%d)", series.Title, series.YearStart)
+		config.GlobalLogger.Info().Str("title", series.Title).Int("year", series.YearStart).Msg("Updated series")
 	} else {
 		// Insert new series
 		id, err := repository.InsertSeries(si.db, series)
@@ -301,7 +309,7 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 			return fmt.Errorf("failed to insert series: %w", err)
 		}
 		seriesID = id
-		log.Printf("Added series: %s (%d)", series.Title, series.YearStart)
+		config.GlobalLogger.Info().Str("title", series.Title).Int("year", series.YearStart).Msg("Added series")
 	}
 
 	// Fetch episodes from Sonarr
@@ -319,8 +327,13 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		default:
 		}
 
+		// Skip season 0 (specials)
+		if se.SeasonNumber == 0 {
+			continue
+		}
+
 		if err := si.processSonarrEpisode(seriesID, &se, result); err != nil {
-			log.Printf("Error processing episode S%02dE%02d of '%s': %v", se.SeasonNumber, se.EpisodeNumber, ss.Title, err)
+			config.GlobalLogger.Warn().Err(err).Int("season", se.SeasonNumber).Int("episode", se.EpisodeNumber).Str("title", ss.Title).Msg("Error processing episode")
 			result.Errors = append(result.Errors, fmt.Sprintf("%s S%02dE%02d: %v", ss.Title, se.SeasonNumber, se.EpisodeNumber, err))
 		}
 
@@ -330,9 +343,18 @@ func (si *SonarrImporter) processSonarrSeries(ss *SonarrSeries, result *models.S
 		}
 	}
 
+	// Delete episodes from season 0 (specials) and season 0.
+	if err := repository.DeleteEpisodeBySeriesAndSeasonNumber(si.db, seriesID, 0); err != nil {
+		config.GlobalLogger.Error().Err(err).Str("title", ss.Title).Msg("Failed to delete specials for series")
+	}
+
+	if err := repository.DeleteSeasonBySeriesAndSeasonNumber(si.db, seriesID, 0); err != nil {
+		config.GlobalLogger.Error().Err(err).Str("title", ss.Title).Msg("Failed to delete season 0 for series")
+	}
+
 	// Update series counts
 	if err := repository.UpdateSeriesCounts(si.db, seriesID); err != nil {
-		log.Printf("Failed to update series counts: %v", err)
+		config.GlobalLogger.Error().Err(err).Msg("Failed to update series counts")
 	}
 
 	return nil
@@ -354,7 +376,7 @@ func (si *SonarrImporter) processSonarrEpisode(seriesID int64, se *SonarrEpisode
 		localPath := si.mapPath(se.EpisodeFile.Path)
 		mediaInfo, fileSize, duration, err := si.extractor.Extract(localPath)
 		if err != nil {
-			log.Printf("Mediainfo extraction failed for %s S%02dE%02d: %v", se.Title, se.SeasonNumber, se.EpisodeNumber, err)
+			config.GlobalLogger.Warn().Err(err).Str("title", se.Title).Int("season", se.SeasonNumber).Int("episode", se.EpisodeNumber).Msg("Mediainfo extraction failed")
 			// Continue with Sonarr's file size
 			episode.FileSize = se.EpisodeFile.Size
 		} else {
@@ -394,20 +416,30 @@ func (si *SonarrImporter) processSonarrEpisode(seriesID int64, se *SonarrEpisode
 // mapSonarrSeries converts a SonarrSeries to our internal Series model
 func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 	series := &models.Series{
-		Title:        ss.Title,
-		Slug:         slugify(ss.Title),
-		YearStart:    ss.Year,
-		SeasonCount:  ss.SeasonCount,
-		EpisodeCount: ss.Statistics.EpisodeCount,
-		Synopsis:     ss.Overview,
-		Status:       si.mapSeriesStatus(ss.Status),
-		FileSize:     ss.Statistics.SizeOnDisk,
-		TMDBId:       int64(ss.TmdbId),
-		TVDBId:       int64(ss.TvdbId),
-		IMDbId:       ss.ImdbId,
-		SonarrID:     int64(ss.ID),
-		TitleSlug:    ss.TitleSlug,
-		DateAdded:    ss.Added,
+		Title:             ss.Title,
+		Slug:              slugify(ss.Title),
+		YearStart:         ss.Year,
+		SeasonCount:       ss.Statistics.SeasonCount,
+		EpisodeCount:      ss.Statistics.EpisodeFileCount,
+		TotalSeasonCount:  ss.Statistics.SeasonCount,
+		TotalEpisodeCount: ss.Statistics.TotalEpisodeCount,
+		Synopsis:          ss.Overview,
+		Status:            si.mapSeriesStatus(ss.Status),
+		FileSize:          ss.Statistics.SizeOnDisk,
+		TMDBId:            int64(ss.TmdbId),
+		TVDBId:            int64(ss.TvdbId),
+		IMDbId:            ss.ImdbId,
+		SonarrID:          int64(ss.ID),
+		TitleSlug:         ss.TitleSlug,
+		DateAdded:         ss.Added,
+	}
+
+	if ss.Seasons[0].SeasonNumber == 0 {
+		series.TotalEpisodeCount -= ss.Seasons[0].Statistics.TotalEpisodeCount
+	}
+
+	if series.TMDBId == 0 {
+		series.TMDBId = -1 * int64(ss.TvdbId) // Fallback to negative TVDB ID to avoid potential conflicts with real TMDB IDs
 	}
 
 	// Genres (join array)
@@ -429,6 +461,16 @@ func (si *SonarrImporter) mapSonarrSeries(ss *SonarrSeries) *models.Series {
 	// Use Sonarr's added date, fallback to now
 	if series.DateAdded == "" {
 		series.DateAdded = time.Now().Format(time.RFC3339)
+	}
+
+	if ss.LastAired != "" {
+		lastAired, err := time.Parse(time.RFC3339, ss.LastAired)
+		if err != nil {
+			config.GlobalLogger.Warn().Err(err).Str("title", ss.Title).Msg("Failed to parse last aired date")
+		} else {
+			yearEnd := lastAired.Year()
+			series.YearEnd = yearEnd
+		}
 	}
 
 	return series
@@ -471,6 +513,8 @@ func (si *SonarrImporter) mapSeriesStatus(sonarrStatus string) string {
 		return "ongoing"
 	case "ended":
 		return "complete"
+	case "upcoming":
+		return "upcoming"
 	default:
 		return "ongoing"
 	}
@@ -510,7 +554,7 @@ func (si *SonarrImporter) removeStaleSeries(seenSonarrIds map[int64]bool) (int, 
 		if !seenSonarrIds[sonarrId] {
 			// Series is in our DB but not in Sonarr - delete it
 			if err := repository.DeleteSeriesBySonarrID(si.db, sonarrId); err != nil {
-				log.Printf("Failed to delete series with Sonarr ID %d: %v", sonarrId, err)
+				config.GlobalLogger.Error().Err(err).Int64("sonarrID", sonarrId).Msg("Failed to delete series")
 			} else {
 				deletedCount++
 			}
@@ -522,7 +566,7 @@ func (si *SonarrImporter) removeStaleSeries(seenSonarrIds map[int64]bool) (int, 
 
 // ImportSeries imports/refreshes a single series by its database ID
 func (si *SonarrImporter) ImportSeries(seriesID int64) (*models.ScanResult, error) {
-	log.Printf("Starting single series refresh for ID: %d", seriesID)
+	config.GlobalLogger.Info().Int64("id", seriesID).Msg("Starting single series refresh")
 	start := time.Now()
 
 	result := &models.ScanResult{
@@ -553,7 +597,7 @@ func (si *SonarrImporter) ImportSeries(seriesID int64) (*models.ScanResult, erro
 	}
 	if sonarrSeries == nil {
 		// Series no longer in Sonarr - delete it
-		log.Printf("Series no longer in Sonarr, deleting: %s", series.Title)
+		config.GlobalLogger.Info().Str("title", series.Title).Msg("Series no longer in Sonarr, deleting")
 		if err := repository.DeleteSeries(si.db, seriesID); err != nil {
 			return nil, fmt.Errorf("failed to delete series: %w", err)
 		}
@@ -571,7 +615,7 @@ func (si *SonarrImporter) ImportSeries(seriesID int64) (*models.ScanResult, erro
 	}
 
 	duration := time.Since(start)
-	log.Printf("Series refresh completed in %d ms", duration.Milliseconds())
+	config.GlobalLogger.Info().Dur("duration", duration).Msg("Series refresh completed")
 
 	return result, nil
 }

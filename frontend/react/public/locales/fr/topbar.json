@@ -1,0 +1,53 @@
+{
+  "input": {
+    "filter": {
+      "placeholder": "Filtrer par titre ou par année…"
+    }
+  },
+  "button": {
+    "back": "Retour",
+    "clear": "Effacer",
+    "toggleTheme": "Basculer le mode sombre",
+    "lightModeSwitch": "Passer au mode clair",
+    "darkModeSwitch": "Passer au mode sombre"
+  },
+  "role": {
+    "admin": "Administrateur",
+    "guest": "Invité"
+  },
+  "usermenu": {
+    "updatePassword": "Modifier le mot de passe",
+    "logout": "Se déconnecter"
+  },
+  "popup": {
+    "updatePassword": {
+      "title": "Modifier le mot de passe",
+      "input": {
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "confirmPassword": "Confirmer le nouveau mot de passe"
+      },
+      "button": {
+        "cancel": "Annuler",
+        "updating": "Modification...",
+        "update": "Modifier"
+      },
+      "message": {
+        "requiredFields": "Tous les champs sont obligatoires",
+        "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 4 caractères",
+        "wrongPassword": "Le mot de passe actuel est incorrect",
+        "passwordUpdated": "Le mot de passe a été mis à jour",
+        "connectionError": "Erreur de connexion au serveur",
+        "updatePasswordFailed": "Le changement de mot de passe a échoué",
+        "notAuthenticated": "Non authentifié",
+        "adminPasswordManagedViaEnv": "Le mot de passe de l'administrateur principal est géré via les variables d'environnement",
+        "invalidRequestBody": "Requête invalide",
+        "passwordsRequired": "Les mots de passe sont requis",
+        "userRepositoryNotAvailable": "Le dépôt d'utilisateurs n'est pas disponible",
+        "userNotFound": "Utilisateur non trouvé",
+        "hashingPasswordFailed": "Échec du hachage du mot de passe"
+      }
+    }
+  }
+}

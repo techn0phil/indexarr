@@ -27,11 +27,14 @@ export interface Series {
   yearEnd: number;
   seasonCount: number;
   episodeCount: number;
+  missingEpisodeCount: number;
+  totalSeasonCount: number;
+  totalEpisodeCount: number;
   synopsis: string;
   genres: string;
   rating: number;
   popularity: number;
-  status: 'complete' | 'ongoing' | 'partial';
+  status: 'complete' | 'ongoing' | 'upcoming';
   fileSize: number;
   dateAdded: string;
   tmdbId: number;
@@ -130,6 +133,8 @@ export interface StatsResponse {
   totalSeries: number;
   totalEpisodes: number;
   diskSpaceGB: number;
+  moviesDiskSpaceGB: number;
+  seriesDiskSpaceGB: number;
   fourKCount: number;
   fourKPercent: number;
   problemsCount: number;
@@ -153,4 +158,67 @@ export interface ScanStatus {
 export interface ScanResponse {
   success: boolean;
   message: string;
+}
+
+// Authentication types
+export type AuthMode = 'none' | 'simple' | 'oidc';
+
+export interface AuthConfig {
+  authMode: AuthMode;
+}
+
+export interface User {
+  id?: number;
+  username: string;
+  role: 'admin' | 'guest';
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  user?: User;
+  error?: string;
+}
+
+// User management types
+export interface UserDetails {
+  id: number;
+  username: string;
+  role: 'admin' | 'guest';
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  role: 'admin' | 'guest';
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  role?: 'admin' | 'guest';
+  enabled?: boolean;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  data?: UserDetails[];
+  error?: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  data?: UserDetails;
+  error?: string;
 }

@@ -1,5 +1,6 @@
 import { Series } from '../types';
 import comStyles from '../styles/components.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface SeriesCardListProps {
   series: Series;
@@ -7,6 +8,7 @@ interface SeriesCardListProps {
 }
 
 export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
+  const { t } = useTranslation('series-list');
   const initials = series.title
     .split(' ')
     .map((word) => word[0])
@@ -14,7 +16,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
     .toUpperCase()
     .slice(0, 2);
 
-  const statusColor = series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
+  const completenessColor = series.episodeCount === series.totalEpisodeCount ? '#1D9E75' : series.episodeCount > 0 ? '#EF9F27' : '#E24B4A';
 
   return (
     <div className={comStyles['card-list']} onClick={onClick}>
@@ -23,15 +25,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           <img
             src={series.poster}
             alt={series.title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              background: 'var(--color-background-secondary)',
-              borderRadius: 0,
-              display: 'block',
-              objectPosition: 'center',
-            }}
+            className={comStyles['card-list-poster-img']}
           />
         ) : (
           <>
@@ -43,7 +37,6 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
             </div>
           </>
         )}
-        <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
       </div>
 
       <div className={comStyles['card-list-content']}>
@@ -74,12 +67,12 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
         <div className={comStyles['card-list-meta']}>
           <span>{series.yearStart}{series.yearEnd ? `-${series.yearEnd}` : '+'}</span>
           <span>·</span>
-          <span>{series.seasonCount} saison{series.seasonCount > 1 ? 's' : ''}</span>
+          <span>{t('label.season', { count: series.seasonCount })}</span>
           <span>·</span>
-          <span>{series.episodeCount} épisodes</span>
+          <span>{t('label.episode', { count: series.episodeCount })}</span>
           <span>·</span>
-          <span style={{ color: statusColor, fontWeight: 500 }}>
-            {series.status === 'complete' ? 'Complète' : series.status === 'ongoing' ? 'En cours' : 'Partielle'}
+          <span style={{ color: completenessColor, fontWeight: 500 }}>
+            {series.episodeCount === series.totalEpisodeCount ? t('label.completed') : series.episodeCount > 0 ? t('label.partial') : t('label.missing')}
           </span>
         </div>
         <div className={comStyles['card-list-meta']}>
@@ -95,7 +88,7 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
             <span className={comStyles['badge-hdr']}>HDR10+</span>
           )}
-          {series.status === 'partial' && (
+          {series.episodeCount < series.totalEpisodeCount && (
             <span className={comStyles['badge-codec']}>
               {series.seasons?.[0]?.episodes?.length ?? 0} ep. manq.
             </span>

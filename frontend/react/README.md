@@ -1,6 +1,9 @@
 
 # Indexarr Frontend (React)
 
+![Typescript](https://img.shields.io/github/package-json/dependency-version/techn0phil/indexarr/dev/typescript?filename=frontend%2Freact%2Fpackage.json&label=Typescript&color=%233178C6)
+[![Tests](https://img.shields.io/github/actions/workflow/status/techn0phil/indexarr/test-frontend.yml?logo=github&label=Tests&labelColor=%23323940)](https://github.com/techn0phil/indexarr/actions/workflows/test-frontend.yml)
+
 This is the React frontend for Indexarr, a media library management application inspired by Sonarr and Radarr. It provides a modern, responsive UI for browsing and managing movies and TV series, with advanced filtering, technical metadata, and real-time scan status.
 
 ## Features
@@ -13,6 +16,11 @@ This is the React frontend for Indexarr, a media library management application 
 - Responsive sidebar and topbar navigation
 - Real-time scan status with WebSocket updates
 - Dark mode via CSS variables
+- User authentication and login (JWT-based)
+- Multi-language support (5 languages: English, Deutsch, Español, Français, Italiano)
+- User management interface (admin only)
+- Real-time library statistics and scan progress
+- Progressive Web App (PWA) — Install on desktop/mobile, offline support, auto-updating
 
 ## Project Structure
 
@@ -20,12 +28,15 @@ This is the React frontend for Indexarr, a media library management application 
 frontend/react/
 ├── src/
 │   ├── components/   # UI components (MovieCard, Sidebar, StatCard, etc.)
-│   ├── pages/        # Page components (ListFilms, ListSeries, MovieDetail, SeriesDetail)
+│   ├── pages/        # Page components (ListFilms, ListSeries, MovieDetail, SeriesDetail, LoginPage, UsersPage)
 │   ├── api/          # API client functions (REST endpoints)
 │   ├── hooks/        # Custom React hooks (useAppContext, useInfiniteList)
+│   ├── i18n/         # i18n configuration (multi-language support)
 │   ├── styles/       # CSS modules and variables (dark mode, layout)
-│   ├── types/        # TypeScript interfaces (Movie, Series, MediaInfo, etc.)
+│   ├── types/        # TypeScript interfaces (Movie, Series, MediaInfo, User, Auth, etc.)
 │   └── App.tsx       # Root component
+├── public/
+│   └── locales/      # i18n language files (en, de, es, fr, it)
 ├── package.json      # Dependencies and scripts
 ├── tsconfig.json     # TypeScript config
 ├── vite.config.ts    # Vite config (API proxy)
@@ -50,31 +61,86 @@ frontend/react/
    ```bash
    npm run lint
    ```
+5. Run test:
+   ```bash
+   npm run test:run
+   ```
+
+## Progressive Web App (PWA) Support
+
+Indexarr is a fully-fledged PWA with installation capabilities, offline support, and automatic updates.
+
+### Installation
+
+- **Desktop**: Click install icon (top-right address bar) or wait for install prompt in Chrome/Edge
+- **Android**: Menu (⋮) → "Install app"
+- **iOS**: Share button (↗) → "Add to Home Screen"
+
+### PWA Features
+
+- Auto-registering service worker with automatic updates
+- Pre-caching of static assets (HTML, CSS, JS, images)
+- Runtime caching strategies for API and external metadata (TMDB, TVDB)
+- Offline support with NetworkFirst strategy for API requests
+- Multi-size icons (192x192, 512x512) with maskable variants
+- App store screenshots for installation prompts
+- Safe-area support for notched devices (iOS)
+
+### PWA Development & Testing
+
+For detailed PWA documentation, configuration, and troubleshooting, see [PWA.md](docs/PWA.md).
+```bash
+# Regenerate PWA icons (if needed)
+npm run pwa:icons
+```
+
+To verify PWA in DevTools:
+1. Open DevTools (F12) → Application tab
+2. Service Workers section — verify `sw.js` is active
+3. Manifest section — verify `manifest.webmanifest` is loaded
+4. Cache Storage — inspect cached assets and API responses
+5. Run Lighthouse audit (Lighthouse tab → Mobile) to verify PWA score
 
 ## Main Components & Pages
 
-- **MovieCard, SeriesCard**: Display movie/series poster, title, status, and technical badges
+**Media Browsing**:
+- **MovieCard, SeriesCard**: Display poster, title, status, and technical badges
 - **MovieCardList, SeriesCardList**: Grid/list layouts for media items
-- **ListFilms, ListSeries**: Main pages for browsing movies/series with filters, stats, and infinite scroll
+- **ListFilms, ListSeries**: Main pages with filters, stats, and infinite scroll
 - **MovieDetail, SeriesDetail**: Detail pages with hero section, cast, mediainfo, and refresh actions
 - **FilterChip, FilterModal**: Multi-select filter chips and modal dialogs
 - **StatCard**: Library statistics (totals, disk usage, 4K %)
 - **ScanStatusCard**: Real-time scan progress (WebSocket)
-- **Sidebar, Topbar**: Navigation and search
-- **ThemeToggle, ViewToggle**: Dark mode and grid/list toggle
+
+**Navigation & UI**:
+- **Sidebar, Topbar**: Fixed navigation with active state and badge counts
+- **SearchBar**: Global search input
+- **UserMenu**: User profile and logout menu
+
+**Authentication & Settings**:
+- **LoginPage**: User login with JWT-based authentication
+- **UsersPage**: User management interface (admin only, simple auth mode)
+
+**Theming & Localization**:
+- **ThemeToggle**: Dark/light mode toggle with CSS variables
+- **LanguageToggle**: Multi-language switcher (en, de, es, fr, it)
+- **ViewToggle**: Grid/list layout switcher
 
 ## API & Data
 
 - All API calls are defined in `src/api/client.ts` and use `/api` endpoints (proxied to backend)
-- TypeScript interfaces for all entities in `src/types/index.ts`
+- TypeScript interfaces for all entities in `src/types/` (Movie, Series, MediaInfo, User, Auth, etc.)
 - Infinite scroll and filtering handled by `useInfiniteList` hook
-- App-wide state (theme, navigation, stats, scan status) managed by `useAppContext` hook
+- App-wide state (theme, navigation, auth, stats, scan status) managed by `useAppContext` hook
+- Multi-language support via `useTranslation()` hook (i18next integration)
+- Language preference persisted in localStorage
+- JWT-based authentication with HttpOnly cookie persistence
 
 ## Design System
 
 - All colors, spacing, and typography use CSS variables (see `src/styles/variables.css`)
 - Light/dark mode supported via CSS variables and `ThemeToggle`
-- UI/UX specs and mockups: `../../ux-ui/medialib_v5.html`, `../../ux-ui/prompt.md`
+- UI/UX specs and mockups: [medialib_v5.html](../../docs/prototype/medialib_v5.html)
 - Consistent border radius, spacing, and badge colors for technical metadata
 
 ## Conventions
@@ -89,6 +155,10 @@ frontend/react/
 
 - Uses React 19, Vite, and TypeScript
 - Linting via ESLint (`npm run lint`)
+- Internationalization via i18next (`useTranslation()` hook, 5 languages)
+- Authentication state managed via `useAppContext` (JWT + HttpOnly cookies)
+- View preferences (grid/list, theme, language) persisted in localStorage
+- Real-time updates via WebSocket (exponential backoff reconnection)
 - No test suite yet (`npm test` is a placeholder)
 - For backend/API details, see main project README
 

@@ -5,6 +5,7 @@ import { useInfiniteList } from '../hooks/useInfiniteList';
 import { MovieCard } from '../components/MovieCard';
 import { SeriesCard } from '../components/SeriesCard';
 import styles from '../styles/recents.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface RecentsProps {
   onSelectMovie: (id: number) => void;
@@ -12,6 +13,7 @@ interface RecentsProps {
 }
 
 export const Recents = ({ onSelectMovie, onSelectSeries }: RecentsProps) => {
+  const { t } = useTranslation('latest');
   const movieFilters = useMemo(() => ({ sort: 'added' }), []);
   const seriesFilters = useMemo(() => ({ sort: 'added' }), []);
 
@@ -40,17 +42,17 @@ export const Recents = ({ onSelectMovie, onSelectSeries }: RecentsProps) => {
   return (
     <div className={styles.page}>
       <div className={styles.topbar}>
-        <span className={styles.title}>Ajoutés récemment</span>
+        <span className={styles.title}>{t('label.title')}</span>
       </div>
 
       <section className={styles.section}>
-        <div className={styles.sectionHeader}>Films</div>
+        <div className={styles.sectionHeader}>{t('label.section.movies')}</div>
         {moviesInitialLoading ? (
-          <div className={styles.state}>Chargement des films récents...</div>
+          <div className={styles.state}>{t('message.moviesInitialLoading')}</div>
         ) : moviesError ? (
-          <div className={styles.state}>Erreur: {moviesError}</div>
+          <div className={styles.state}>Error: {moviesError}</div>
         ) : movies.length === 0 ? (
-          <div className={styles.state}>Aucun film récemment ajouté.</div>
+          <div className={styles.state}>{t('message.noMovies')}</div>
         ) : (
           <div className={styles.posterRow}>
             {movies.map((movie) => (
@@ -58,17 +60,17 @@ export const Recents = ({ onSelectMovie, onSelectSeries }: RecentsProps) => {
             ))}
           </div>
         )}
-        {moviesLoading && !moviesInitialLoading && <div className={styles.state}>Mise à jour des films...</div>}
+        {moviesLoading && !moviesInitialLoading && <div className={styles.state}>{t('message.moviesLoading')}</div>}
       </section>
 
       <section className={styles.section}>
-        <div className={styles.sectionHeader}>Séries</div>
+        <div className={styles.sectionHeader}>{t('label.section.series')}</div>
         {seriesInitialLoading ? (
-          <div className={styles.state}>Chargement des séries récentes...</div>
+          <div className={styles.state}>{t('message.seriesInitialLoading')}</div>
         ) : seriesError ? (
-          <div className={styles.state}>Erreur: {seriesError}</div>
+          <div className={styles.state}>Error: {seriesError}</div>
         ) : series.length === 0 ? (
-          <div className={styles.state}>Aucune série récemment ajoutée.</div>
+          <div className={styles.state}>{t('message.noSeries')}</div>
         ) : (
           <div className={styles.posterRow}>
             {series.map((item) => (
@@ -76,7 +78,7 @@ export const Recents = ({ onSelectMovie, onSelectSeries }: RecentsProps) => {
             ))}
           </div>
         )}
-        {seriesLoading && !seriesInitialLoading && <div className={styles.state}>Mise à jour des séries...</div>}
+        {seriesLoading && !seriesInitialLoading && <div className={styles.state}>{t('message.seriesLoading')}</div>}
       </section>
     </div>
   );

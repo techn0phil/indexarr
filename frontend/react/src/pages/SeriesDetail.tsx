@@ -1,20 +1,22 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Series } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
-import { AppContext } from '../hooks/useAppContext';
+import { useAppContext } from '../hooks/useAppContext';
+import { useTranslation } from 'react-i18next';
 
 interface SeriesDetailProps {
   seriesId: number;
 }
 
 export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
+  const { t } = useTranslation('series-details');
   const [series, setSeries] = useState<Series | null>(null);
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedEpisodeId, setExpandedEpisodeId] = useState<number | null>(null);
-  const appContext = useContext(AppContext);
+  const { authMode, config, isDark, user } = useAppContext();
 
   // Slugify function to create URL-friendly strings
   const slugify = (text: string) =>
@@ -61,18 +63,19 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seriesId]);
 
-  if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
-  if (!series) return <div style={{ padding: '20px' }}>Série non trouvée</div>;
+  if (loading) return <div style={{ padding: '20px' }}>{t('message.loading')}</div>;
+  if (!series) return <div style={{ padding: '20px' }}>{t('message.seriesNotFound')}</div>;
 
   const season = series.seasons?.[currentSeason];
+  const statusColor = series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
 
   return (
     <div>
       {/* Hero */}
       <div style={{ background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)', padding: '24px' }}>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+        <div className={comStyles['series-hero']}>
           {/* Poster */}
-          <div style={{ width: '110px', minWidth: '110px', height: '160px', background: 'var(--color-background-secondary)', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '6px', overflow: 'hidden' }}>
+          <div className={comStyles['series-hero-poster']}>
             {series.poster ? (
               <img
                 src={series.poster}
@@ -106,45 +109,19 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
           {/* Info */}
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h1 className={comStyles['series-hero-title']}>
               {series.title}
               {typeof series.rating === 'number' && (
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  background: 'var(--color-badge-rating)',
-                  color: 'var(--color-badge-rating-text)',
-                  borderRadius: '99px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  padding: '2px 10px 2px 7px',
-                  border: 'none',
-                  lineHeight: 1,
-                  minWidth: '36px',
-                  height: '22px',
-                }}>
+                <span className={comStyles['series-hero-rating']}>
                   <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
                   <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{series.rating?.toFixed(1)}</span>
                 </span>
               )}
 
               {/* Popup contextual menu */}
-              <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+              {(authMode === 'none' || user?.role === 'admin') && (<div className={comStyles['floating-context-menu']}>
                 <button
-                  style={{
-                    background: 'var(--color-background-primary)',
-                    border: '0.5px solid var(--color-border-tertiary)',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    padding: 0,
-                    position: 'relative',
-                  }}
+                  className={comStyles['menu-button']}
                   aria-label="Menu"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -171,7 +148,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       borderRadius: '8px',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
                       zIndex: 10,
-                      minWidth: '120px',
+                      minWidth: '140px',
                     }}
                     tabIndex={-1}
                   >
@@ -197,40 +174,42 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         <path d="M12 2.5v2.5H9.5" />
                         <path d="M4 13.5v-2.5H6.5" />
                       </svg>
-                      Rafraîchir
+                      {t('button.refresh')}
                     </button>
                   </div>
                 )}
-              </div>
+              </div>)}
             </h1>
-            <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div className={comStyles['series-hero-metadata']}>
+              {(series.yearStart > 0) ? (<>
+                <span>
+                  {series.yearStart}{series.yearEnd ? ` – ${series.yearEnd}` : ''}
+                </span>
+                <span>·</span>
+              </>) : null}
               <span>
-                {series.yearStart} – {series.yearEnd}
+                {t('label.season', { count: series.seasonCount })}
               </span>
               <span>·</span>
               <span>
-                {series.seasonCount} saisons
-              </span>
-              <span>·</span>
-              <span>
-                {series.episodeCount} épisodes
+                {t('label.episode', { count: series.episodeCount })}
               </span>
               <span>·</span>
               <span>{series.genres}</span>
               <span>·</span>
-              <span style={{ color: '#1D9E75', fontWeight: 500 }}>
-                {series.status === 'complete' ? 'Complète' : 'En cours'}
+              <span style={{ color: statusColor, fontWeight: 500 }}>
+                {series.status === 'complete' ? t('status.complete') : series.status === 'ongoing' ? t('status.ongoing') : t('status.upcoming')}
               </span>
             </div>
 
             {series.seasons?.[0]?.episodes && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+              <div className={comStyles['badges-container']}>
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840x') && (
                   <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     4K
                   </span>
                 )}
-                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920x') && (
                   <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     1080p
                   </span>
@@ -250,12 +229,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     HDR10
                   </span>
                 )}
-                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('TrueHD')) && (
                   <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     TrueHD
                   </span>
                 )}
-                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('E-AC-3')) && (
                   <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     Dolby Digital Plus
                   </span>
@@ -263,6 +242,16 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
                   <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                     Atmos
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS:X') && (
+                  <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    DTS:X
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS-HD MA') && (
+                  <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    DTS-HD Master Audio
                   </span>
                 )}
                 {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
@@ -278,20 +267,20 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               </div>
             )}
 
-            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.6, maxWidth: '560px' }}>
+            <p className={comStyles['series-hero-synopsis']}>
               {series.synopsis}
             </p>
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-              {appContext?.config?.sonarrUrl && (
-                <a href={`${appContext.config.sonarrUrl}/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {(authMode === 'none' || user?.role === 'admin') && config?.sonarrUrl && (
+                <a href={`${config.sonarrUrl}/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/sonarr-light.png" alt="Sonarr Light" style={{ width: '12px', height: '12px' }} />
                   Sonarr
                 </a>
               )}
               <a href={`https://thetvdb.com/series/${series.slug || slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-dark.png'} alt="TVDB Light" style={{ width: '12px', height: '12px' }} />
+                <img src={isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-dark.png'} alt="TVDB Light" style={{ width: '12px', height: '12px' }} />
                 TVDB
               </a>
             </div>
@@ -319,7 +308,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               transition: 'all 0.15s',
             }}
           >
-            Saison {s.number}
+            {t('section.season', { number: s.number })}
           </button>
         ))}
       </div>
@@ -329,11 +318,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
         <div style={{ padding: '16px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
-              Saison {season.number} — {season.episodes?.length} épisodes
+              {t('section.season', { number: season.number })} — {t('label.episode', { count: season.episodes?.length || 0 })}
             </h2>
             <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
-              <span style={{ color: '#1D9E75' }}>{season.availableEps} disponibles</span>
-              {season.missingEps > 0 && <span style={{ color: '#E24B4A' }}>{season.missingEps} manquant{season.missingEps > 1 ? 's' : ''}</span>}
+              <span style={{ color: '#1D9E75' }}>{t('label.available', { count: season.availableEps })}</span>
+              {season.missingEps > 0 && <span style={{ color: '#E24B4A' }}>{t('label.missing', { count: season.missingEps })}</span>}
             </div>
           </div>
 
@@ -343,45 +332,33 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               return (
                 <div
                   key={ep.id}
+                  className={comStyles['episode-card']}
                   style={{
-                    border: `0.5px solid ${isExpanded ? '#5DCAA5' : 'var(--color-border-tertiary)'}`,
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    background: 'var(--color-background-primary)',
-                    transition: 'border-color 0.12s',
+                    border: `0.5px solid ${isExpanded ? 'var(--color-border-secondary)' : 'var(--color-border-tertiary)'}`,
                   }}
                 >
                   {/* Episode Row */}
-                  <div
-                    onClick={() => toggleEpisode(ep.id)}
-                    style={{
-                      padding: '10px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', minWidth: '28px' }}>
+                  <div className={comStyles['episode-card-header']} onClick={() => toggleEpisode(ep.id)}>
+                    <div className={comStyles['episode-card-number']}>
                       E{String(ep.episodeNum).padStart(2, '0')}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div className={comStyles['episode-card-info']}>
+                      <div className={comStyles['episode-card-title']}>
                         {ep.title}
                       </div>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                      <div className={comStyles['episode-card-duration']}>
                         {Math.round(ep.duration / 60)} min
                       </div>
                     </div>
 
                     {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flexShrink: 0 }}>
-                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840x') && (
                         <span className={comStyles['badge-4k']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           4K
                         </span>
                       )}
-                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                      {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920x') && (
                         <span className={comStyles['badge-1080p']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           1080p
                         </span>
@@ -401,12 +378,12 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                           HDR10
                         </span>
                       )}
-                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('TrueHD')) && (
                         <span className={comStyles['badge-truehd']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           TrueHD
                         </span>
                       )}
-                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('E-AC-3')) && (
                         <span className={comStyles['badge-ddplus']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           DD+
                         </span>
@@ -414,6 +391,16 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                       {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
                         <span className={comStyles['badge-atmos']} style={{ fontSize: '9px', padding: '2px 6px' }}>
                           Atmos
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS:X') && (
+                        <span className={comStyles['badge-dts']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DTS:X
+                        </span>
+                      )}
+                      {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS-HD MA') && (
+                        <span className={comStyles['badge-dts']} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                          DTS-HD MA
                         </span>
                       )}
                       {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
@@ -426,37 +413,21 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                           {ep.mediaInfo.videoTracks?.[0]?.codec}
                         </span>
                       )}
-                      {ep.status === 'missing' && <span className={comStyles['badge-missing']} style={{ fontSize: '9px', padding: '2px 6px' }}>Manquant</span>}
+                      {ep.status === 'missing' && <span className={comStyles['badge-missing']} style={{ fontSize: '9px', padding: '2px 6px' }}>{t('status.missing')}</span>}
                     </div>
 
-                    <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right', flexShrink: 0 }}>
+                    <div className={comStyles['episode-card-filesize']}>
                       {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
                     </div>
 
-                    <div
-                      style={{
-                        width: '7px',
-                        height: '7px',
-                        borderRadius: '50%',
-                        background: ep.status === 'available' ? '#1D9E75' : '#E24B4A',
-                        flexShrink: 0,
-                      }}
-                    />
+                    <div className={comStyles['episode-card-status']} style={{ background: ep.status === 'available' ? '#1D9E75' : '#E24B4A' }} />
 
                     {/* Expand button */}
                     <div
+                      className={comStyles['episode-card-expand-button']}
                       style={{
-                        width: '22px',
-                        height: '22px',
-                        border: `0.5px solid ${isExpanded ? 'var(--color-primary-accent)' : 'var(--color-border-tertiary)'}`,
-                        borderRadius: '4px',
+                        border: `0.5px solid ${isExpanded ? 'var(--color-border-secondary)' : 'var(--color-border-tertiary)'}`,
                         background: isExpanded ? 'var(--color-background-secondary)' : 'var(--color-background-secondary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                        transition: 'all 0.15s',
                       }}
                     >
                       <svg
@@ -464,7 +435,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         height="9"
                         viewBox="0 0 9 9"
                         fill="none"
-                        stroke={isExpanded ? '#1D9E75' : 'var(--color-text-tertiary)'}
+                        stroke={isExpanded ? 'var(--color-text-secondary)' : 'var(--color-text-tertiary)'}
                         strokeWidth="1.5"
                         style={{
                           transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
@@ -512,36 +483,36 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                               <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                               <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
                             </svg>
-                            Vidéo
+                            {t('metadata.video.title')}
                             <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                           </div>
                           {ep.mediaInfo.videoTracks?.[0] && (
                             <>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
-                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].codec || '—'}</span>
+                              <div className={comStyles['media-info-property']}>
+                                <span className={comStyles['media-info-property-name']}>{t('metadata.video.codec')}</span>
+                                <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].codec || '—'}</span>
                               </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Résolution</span>
-                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].resolution || '—'}</span>
+                              <div className={comStyles['media-info-property']}>
+                                <span className={comStyles['media-info-property-name']}>{t('metadata.video.resolution')}</span>
+                                <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].resolution || '—'}</span>
                               </div>
                               {ep.mediaInfo.videoTracks[0].hdr && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>HDR</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].hdr}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.video.hdr')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].hdr || '—'}</span>
                                 </div>
                               )}
-                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
-                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].bitrate || '—'}</span>
+                              <div className={comStyles['media-info-property']}>
+                                <span className={comStyles['media-info-property-name']}>{t('metadata.video.bitrate')}</span>
+                                <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].bitrate || '—'}</span>
                               </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Fréquence d'images</span>
-                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].fps || '—'} fps</span>
+                              <div className={comStyles['media-info-property']}>
+                                <span className={comStyles['media-info-property-name']}>{t('metadata.video.frameRate')}</span>
+                                <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].fps || '—'} fps</span>
                               </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>Espace colorimétrique</span>
-                                <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{ep.mediaInfo.videoTracks[0].colorSpace || '—'}</span>
+                              <div className={comStyles['media-info-property']}>
+                                <span className={comStyles['media-info-property-name']}>{t('metadata.video.colorSpace')}</span>
+                                <span className={comStyles['media-info-property-value']}>{ep.mediaInfo.videoTracks[0].colorSpace || '—'}</span>
                               </div>
                             </>
                           )}
@@ -568,28 +539,28 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                                     <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                                   </svg>
-                                  Audio {(ep.mediaInfo?.audioTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  {t('metadata.audio.title', { track: trackIdx + 1 })}
                                   <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Codec</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.codec || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.audio.codec')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.codec || '—'}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Canaux</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.channels || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.audio.channels')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.channels || '—'}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Échantillonnage</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.sampleRate || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.audio.sampleRate')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.sampleRate || '—'}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Bitrate</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.bitrate || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.audio.bitrate')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.bitrate || '—'}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.audio.language')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{t(`value.language.${track.language}`) === `value.language.${track.language}` ? track.language || '—' : t(`value.language.${track.language}`)}</span>
                                 </div>
                               </div>
                             ))
@@ -610,10 +581,10 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
                                 <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
                               </svg>
-                              Audio
+                              {t('metadata.audio.title', { track: '' })}
                               <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                             </div>
-                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>{t('message.none')}</div>
                           </>)}
                         </div>
 
@@ -639,20 +610,20 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                     <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                                     <path d="M5 8h6M5 10h4" />
                                   </svg>
-                                  Sous-titres {(ep.mediaInfo?.subtitleTracks?.length || 0) > 1 ? trackIdx + 1 : ''}
+                                  {t('metadata.subtitle.title', { track: trackIdx + 1 })}
                                   <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Langue</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.language || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.subtitle.language')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{t(`value.language.${track.language}`) === `value.language.${track.language}` ? track.language || '—' : t(`value.language.${track.language}`)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Format</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.format || '—'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.subtitle.format')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.format || '—'}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '10px' }}>
-                                  <span style={{ color: 'var(--color-text-tertiary)' }}>Forcé</span>
-                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{track.forced ? 'Oui' : 'Non'}</span>
+                                <div className={comStyles['media-info-property']}>
+                                  <span className={comStyles['media-info-property-name']}>{t('metadata.subtitle.forced')}</span>
+                                  <span className={comStyles['media-info-property-value']}>{track.forced ? t('value.yes') : t('value.no')}</span>
                                 </div>
                               </div>
                             ))
@@ -674,31 +645,16 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                                 <rect x="2.5" y="4.5" width="11" height="7" rx="1.2" />
                                 <path d="M5 8h6M5 10h4" />
                               </svg>
-                              Sous-titres
+                              {t('metadata.subtitle.title', { track: '' })}
                               <div style={{ flex: 1, height: '1px', background: 'var(--color-border-secondary)' }} />
                             </div>
 
-                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>Aucun</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', padding: '3px 0' }}>{t('message.none')}</div>
                           </>)}
                         </div>
 
                         {/* File Path */}
-                        <div
-                          style={{
-                            gridColumn: '1 / -1',
-                            fontSize: '9px',
-                            color: 'var(--color-text-tertiary)',
-                            fontFamily: 'var(--font-mono)',
-                            padding: '6px 8px',
-                            background: 'var(--color-background-tertiary)',
-                            borderRadius: '4px',
-                            border: '0.5px solid var(--color-border-tertiary)',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                          title={ep.filePath}
-                        >
+                        <div className={comStyles['file-path']} title={ep.filePath}>
                           <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75, marginRight: 5 }}>
                             <path d="M4.5 2h5l3 3v9a1 1 0 01-1 1h-7a1 1 0 01-1-1V3a1 1 0 011-1z"></path>
                             <path d="M9.5 2v3h3"></path>

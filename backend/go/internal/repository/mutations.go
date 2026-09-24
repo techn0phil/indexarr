@@ -2,10 +2,11 @@ package repository
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"strings"
 	"time"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 )
 
@@ -24,7 +25,7 @@ func retryOnLock(fn func() error) error {
 		if strings.Contains(err.Error(), "database is locked") {
 			lastErr = err
 			if attempt < len(backoffs) {
-				log.Printf("Database locked, retrying in %v (attempt %d/3)", backoffs[attempt], attempt+1)
+				config.GlobalLogger.Warn().Dur("retry_delay", backoffs[attempt]).Str("attempt", fmt.Sprintf("%d/3", attempt+1)).Msg("Database locked, retrying")
 				time.Sleep(backoffs[attempt])
 				continue
 			}
@@ -279,11 +280,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 		defer tx.Rollback()
 
 		result, err := tx.Exec(`
-			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug, total_season_count, total_episode_count)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug)
+			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.TotalSeasonCount, series.TotalEpisodeCount)
 		if err != nil {
 			return err
 		}
@@ -384,12 +385,71 @@ func GetEpisodeBySeriesSeasonEpisode(db *sql.DB, seriesID int64, seasonNum, epis
 // UpdateEpisode updates an existing episode
 func UpdateEpisode(db *sql.DB, episode *models.Episode) error {
 	return retryOnLock(func() error {
-		_, err := db.Exec(`
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		// Update episode
+		_, err = tx.Exec(`
 			UPDATE episodes
 			SET title = ?, duration = ?, status = ?, file_size = ?, file_path = ?, last_scanned = ?
 			WHERE id = ?
 		`, episode.Title, episode.Duration, episode.Status, episode.FileSize, episode.FilePath, time.Now().Format(time.RFC3339), episode.ID)
-		return err
+
+		if err != nil {
+			return err
+		}
+
+		// Delete existing media info (simpler than diffing)
+		_, err = tx.Exec(`DELETE FROM video_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM audio_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM subtitle_tracks WHERE episode_id = ?`, episode.ID)
+		if err != nil {
+			return err
+		}
+
+		// Re-insert media info
+		if episode.MediaInfo != nil {
+			for _, vt := range episode.MediaInfo.VideoTracks {
+				_, err := tx.Exec(`
+					INSERT INTO video_tracks (episode_id, codec, resolution, fps, bitrate, hdr, color_space)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				`, episode.ID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, at := range episode.MediaInfo.AudioTracks {
+				_, err := tx.Exec(`
+					INSERT INTO audio_tracks (episode_id, codec, channels, language, sample_rate, bitrate)
+					VALUES (?, ?, ?, ?, ?, ?)
+				`, episode.ID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, st := range episode.MediaInfo.SubtitleTracks {
+				_, err := tx.Exec(`
+					INSERT INTO subtitle_tracks (episode_id, language, format)
+					VALUES (?, ?, ?)
+				`, episode.ID, st.Language, st.Format)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return tx.Commit()
 	})
 }
 
@@ -398,9 +458,9 @@ func GetSeriesByTitleAndYear(db *sql.DB, title string, year int) (*models.Series
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
 		FROM series WHERE LOWER(title) = LOWER(?) AND year_start = ?
-	`, title, year).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, title, year).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
 	if poster.Valid {
@@ -424,9 +484,9 @@ func GetSeriesByTMDBId(db *sql.DB, tmdbID int64) (*models.Series, error) {
 	var sonarrID sql.NullInt64
 	var titleSlug sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
 		FROM series WHERE tmdb_id = ?
-	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrID, &titleSlug)
 	if poster.Valid {
@@ -456,9 +516,9 @@ func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
 	var sonarrIDVal sql.NullInt64
 	var titleSlug sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
+		SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug
 		FROM series WHERE sonarr_id = ?
-	`, sonarrID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+	`, sonarrID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount, &series.MissingEpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug, &sonarrIDVal, &titleSlug)
 	if poster.Valid {
@@ -481,15 +541,17 @@ func GetSeriesBySonarrID(db *sql.DB, sonarrID int64) (*models.Series, error) {
 	return &series, nil
 }
 
-// UpdateSeriesCounts updates season_count and episode_count for a series
+// UpdateSeriesCounts updates season_count, episode_count, and file_size for a series
 func UpdateSeriesCounts(db *sql.DB, seriesID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`
 			UPDATE series SET
 				season_count = (SELECT COUNT(DISTINCT season_num) FROM episodes WHERE series_id = ?),
-				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ?)
+				episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'available'),
+				missing_episode_count = (SELECT COUNT(*) FROM episodes WHERE series_id = ? AND status = 'missing'),
+				file_size = (SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE series_id = ?)
 			WHERE id = ?
-		`, seriesID, seriesID, seriesID)
+		`, seriesID, seriesID, seriesID, seriesID, seriesID)
 		return err
 	})
 }
@@ -623,10 +685,26 @@ func DeleteEpisodeByPath(db *sql.DB, pathPattern string) error {
 	})
 }
 
+// DeleteEpisodeBySeriesAndSeasonNumber deletes episodes by series ID and season number
+func DeleteEpisodeBySeriesAndSeasonNumber(db *sql.DB, seriesID int64, seasonNum int) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM episodes WHERE series_id = ? AND season_num = ?`, seriesID, seasonNum)
+		return err
+	})
+}
+
 // DeleteSeries deletes a series by ID (cascade constraints handle episodes, seasons, cast, and tracks)
 func DeleteSeries(db *sql.DB, seriesID int64) error {
 	return retryOnLock(func() error {
 		_, err := db.Exec(`DELETE FROM series WHERE id = ?`, seriesID)
+		return err
+	})
+}
+
+// DeleteSeasonBySeriesAndSeasonNumber deletes a season by series ID and season number
+func DeleteSeasonBySeriesAndSeasonNumber(db *sql.DB, seriesID int64, seasonNum int) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM seasons WHERE series_id = ? AND number = ?`, seriesID, seasonNum)
 		return err
 	})
 }
@@ -664,10 +742,10 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		// Update series
 		_, err = tx.Exec(`
 			UPDATE series
-			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?, sonarr_id = ?, title_slug = ?
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?, slug = ?, sonarr_id = ?, title_slug = ?, total_season_count = ?, total_episode_count = ?
 			WHERE id = ?
 		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
-			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.ID)
+			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.Slug, series.SonarrID, series.TitleSlug, series.TotalSeasonCount, series.TotalEpisodeCount, series.ID)
 		if err != nil {
 			return err
 		}

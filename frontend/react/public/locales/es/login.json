@@ -1,0 +1,17 @@
+{
+  "title": "Iniciar sesión",
+  "fields": {
+    "username": "Nombre de usuario",
+    "password": "Contraseña"
+  },
+  "buttons": {
+    "submit": "Iniciar sesión"
+  },
+  "errors": {
+    "invalidRequestBody": "Cuerpo de la solicitud no válido",
+    "invalidCredentials": "Credenciales no válidas",
+    "userDisabled": "Cuenta desactivada",
+    "failedToGenerateToken": "Error al generar el token de autenticación",
+    "notAuthenticated": "Usuario no autenticado"
+  }
+}
