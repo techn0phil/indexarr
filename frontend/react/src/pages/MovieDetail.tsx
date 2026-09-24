@@ -370,7 +370,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                         {t('metadata.video.hdr')}
                       </td>
                       <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                        {videoTrack.hdr || t('value.unknown')}
+                        {videoTrack.hdr || t('value.no')}
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
