@@ -6,6 +6,7 @@
   "nav": {
     "movies": "Movies",
     "series": "Series",
+    "latest": "Latest additions",
     "users": "Users"
   },
   "button": {

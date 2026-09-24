@@ -5,8 +5,8 @@ import { useAppContext } from '../hooks/useAppContext';
 import { apiClient } from '../api/client';
 
 interface SidebarProps {
-  activeNav: 'movies' | 'series' | 'users';
-  onNavClick: (page: 'movies' | 'series' | 'users') => void;
+  activeNav: 'movies' | 'series' | 'latest' | 'users';
+  onNavClick: (page: 'movies' | 'series' | 'latest' | 'users') => void;
   isDrawerOpen?: boolean;
 }
 
@@ -75,16 +75,19 @@ export const Sidebar = ({ activeNav, onNavClick, isDrawerOpen = false }: Sidebar
           <span className={styles['nav-badge']}>{context?.stats?.totalSeries ?? 0}</span>
         </div>
 
-        {/* Menus to be implemented in the future: */}
-        {/* <div className={styles['nav-item']}>
+        <div
+          className={`${styles['nav-item']} ${activeNav === 'latest' ? styles.active : ''}`}
+          onClick={() => onNavClick('latest')}
+        >
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="5" />
             <path d="M8 5v3l2 2" />
           </svg>
-          Récents
+          {t('nav.latest')}
         </div>
 
-        <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
+        {/* Menus to be implemented in the future: */}
+        {/* <div className={styles['nav-group']} style={{ marginTop: '6px' }}>
           Analyse
         </div>
 

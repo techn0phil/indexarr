@@ -74,7 +74,7 @@
   --breakpoint-sidebar-drawer: 900px;
 
   /* Sidebar drawer animation */
-  --sidebar-drawer-width: 210px;
+  --sidebar-drawer-width: 220px;
   --sidebar-animation-duration: 0.3s;
   --overlay-backdrop-color: rgba(0, 0, 0, 0.5);
 }
