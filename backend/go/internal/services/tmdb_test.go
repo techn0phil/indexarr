@@ -33,7 +33,7 @@ func TestTMDBSearchMovie_RetryWithoutYear(t *testing.T) {
 		if got := r.URL.Query().Get("primary_release_year"); got != "" {
 			t.Fatalf("expected retry call without year, got %q", got)
 		}
-		fmt.Fprint(w, `{"page":1,"total_results":1,"results":[{"id":603,"title":"The Matrix"}]}`)
+		fmt.Fprint(w, `{"page":1,"total_results":1,"results":[{"id":603,"title":"The Matrix","release_date":"1999-03-31"}]}`)
 	}))
 	defer srv.Close()
 
