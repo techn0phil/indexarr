@@ -1,0 +1,17 @@
+{
+  "label": {
+    "title": "Récemment ajoutés",
+    "section": {
+      "movies": "Films",
+      "series": "Séries"
+    }
+  },
+  "message": {
+    "moviesInitialLoading": "Chargement des derniers films...",
+    "seriesInitialLoading": "Chargement des dernières séries...",
+    "moviesLoading": "Mise à jour des films...",
+    "seriesLoading": "Mise à jour des séries...",
+    "noMovies": "Aucun film ajouté",
+    "noSeries": "Aucune série ajoutée"
+  }
+}
