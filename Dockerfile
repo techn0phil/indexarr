@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Build Frontend (React + Vite)
 # =============================================================================
-FROM node:26.10.0-alpine AS frontend-builder
+FROM node:26.12.0-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
@@ -21,7 +21,7 @@ RUN npm run build
 # =============================================================================
 # Stage 2: Build Backend (Go)
 # =============================================================================
-FROM golang:1.27.1-alpine AS backend-builder
+FROM golang:1.27.2-alpine AS backend-builder
 
 WORKDIR /build/backend
 
