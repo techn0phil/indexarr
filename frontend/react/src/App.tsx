@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ListFilms } from './pages/ListFilms';
 import { ListSeries } from './pages/ListSeries';
+import { Recents } from './pages/Recents';
 import { MovieDetail } from './pages/MovieDetail';
 import { SeriesDetail } from './pages/SeriesDetail';
 import { UsersPage } from './pages/UsersPage';
@@ -46,15 +47,17 @@ const AppContent = () => {
   
   if (!context) return null;
 
-  const activeNav = useMemo<'movies' | 'series' | 'users'>(() => {
+  const activeNav = useMemo<'movies' | 'series' | 'latest' | 'users'>(() => {
     if (location.pathname.startsWith('/admin/users')) return 'users';
     if (location.pathname.startsWith('/series')) return 'series';
+    if (location.pathname.startsWith('/latest')) return 'latest';
     return 'movies';
   }, [location.pathname]);
 
-  const handleSidebarNav = (page: 'movies' | 'series' | 'users') => {
+  const handleSidebarNav = (page: 'movies' | 'series' | 'latest' | 'users') => {
     if (page === 'movies') navigate('/movies');
     else if (page === 'series') navigate('/series');
+    else if (page === 'latest') navigate('/latest');
     else if (page === 'users') navigate('/admin/users');
 
     // Close drawer on mobile when nav item clicked
@@ -77,7 +80,7 @@ const AppContent = () => {
       return;
     }
 
-    navigate(activeNav === 'series' ? '/series' : '/movies');
+    navigate(activeNav === 'latest' ? '/latest' : activeNav === 'series' ? '/series' : '/movies');
   };
 
   return (
@@ -143,6 +146,17 @@ const AppContent = () => {
               element={(
                 <div className={layoutStyles.page + ' ' + layoutStyles.active}>
                   <SeriesDetailFromRoute />
+                </div>
+              )}
+            />
+            <Route
+              path="/latest"
+              element={(
+                <div className={layoutStyles.page + ' ' + layoutStyles.active}>
+                  <Recents
+                    onSelectMovie={(id) => navigate(`/movies/${id}`)}
+                    onSelectSeries={(id) => navigate(`/series/${id}`)}
+                  />
                 </div>
               )}
             />
