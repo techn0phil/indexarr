@@ -45,7 +45,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -tags musl -ldflags="-s -w -extldflags 
 # =============================================================================
 # Stage 3: Runtime (Alpine with Nginx + mediainfo + Go backend)
 # =============================================================================
-FROM alpine:3.24.2
+FROM alpine:3.24.3
 
 # Build arguments for dynamic user/group configuration
 ARG UID=1000
