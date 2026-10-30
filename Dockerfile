@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Build Frontend (React + Vite)
 # =============================================================================
-FROM node:26.12.1-alpine AS frontend-builder
+FROM node:26.13.0-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
