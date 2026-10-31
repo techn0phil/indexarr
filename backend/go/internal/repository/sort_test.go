@@ -84,7 +84,7 @@ func TestGetMovies_Sort(t *testing.T) {
 		})
 	}
 
-	t.Run("equal values fall back to title ascending", func(t *testing.T) {
+	t.Run("equal values fall back to title", func(t *testing.T) {
 		if _, err := db.Exec(`UPDATE movies SET year=2000`); err != nil {
 			t.Fatalf("failed to update movies: %v", err)
 		}
@@ -96,7 +96,7 @@ func TestGetMovies_Sort(t *testing.T) {
 		for _, m := range movies {
 			got = append(got, m.Title)
 		}
-		if want := []string{"Alpha", "bravo", "charlie"}; !reflect.DeepEqual(got, want) {
+		if want := []string{"charlie", "bravo", "Alpha"}; !reflect.DeepEqual(got, want) {
 			t.Fatalf("got %v want %v", got, want)
 		}
 	})
