@@ -1,4 +1,15 @@
 {
+  "sort": {
+    "label": "Sort by",
+    "option": {
+      "title": "Title",
+      "year": "Year",
+      "duration": "Duration",
+      "rating": "Rating",
+      "size": "Size",
+      "added": "Date added"
+    }
+  },
   "filter": {
     "label": "Filters",
     "button": {

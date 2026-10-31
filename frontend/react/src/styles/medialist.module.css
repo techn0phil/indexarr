@@ -20,6 +20,12 @@
   margin-right: 2px;
 }
 
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .stat-card-section {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
