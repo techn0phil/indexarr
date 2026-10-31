@@ -2,11 +2,74 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
 	"indexarr/internal/models"
 )
+
+// ErrInvalidSort is returned when the sort option is not in the whitelist.
+var ErrInvalidSort = errors.New("invalid sort option")
+
+const titleSortExpr = "title COLLATE NOCASE"
+
+var movieSortColumns = map[string]string{
+	"title":    titleSortExpr,
+	"year":     "year",
+	"duration": "duration",
+	"rating":   "rating",
+	"size":     "file_size",
+	"added":    "date_added",
+}
+
+var seriesSortColumns = map[string]string{
+	"title":    titleSortExpr,
+	"year":     "year_start",
+	"seasons":  "total_season_count",
+	"episodes": "total_episode_count",
+	"rating":   "rating",
+	"size":     "file_size",
+	"added":    "date_added",
+}
+
+// buildOrderBy turns a sort option ("year", "-year") into an ORDER BY fragment; empty means title ascending.
+func buildOrderBy(sort string, columns map[string]string) (string, error) {
+	if sort == "" {
+		sort = "title"
+	}
+
+	direction := "ASC"
+	key := sort
+	if strings.HasPrefix(sort, "-") {
+		direction = "DESC"
+		key = sort[1:]
+	}
+
+	column, ok := columns[key]
+	if !ok {
+		return "", fmt.Errorf("%w: %q", ErrInvalidSort, sort)
+	}
+
+	orderBy := column + " " + direction
+	if column != titleSortExpr {
+		orderBy += ", " + titleSortExpr + " " + direction
+	}
+	// Keeps pagination deterministic when titles are equal.
+	return orderBy + ", id " + direction, nil
+}
+
+// ValidateMovieSort reports whether sort is a valid movie sort option.
+func ValidateMovieSort(sort string) error {
+	_, err := buildOrderBy(sort, movieSortColumns)
+	return err
+}
+
+// ValidateSeriesSort reports whether sort is a valid series sort option.
+func ValidateSeriesSort(sort string) error {
+	_, err := buildOrderBy(sort, seriesSortColumns)
+	return err
+}
 
 // buildOrClause creates an OR condition from comma-separated values
 // Example: "3840,1920" returns "(resolution LIKE '%3840%' OR resolution LIKE '%1920%')"
@@ -36,6 +99,11 @@ func buildOrClause(fieldName, filterValue string) string {
 }
 
 func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int64, error) {
+	orderBy, err := buildOrderBy(filters.Sort, movieSortColumns)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	// Default pagination
 	if filters.PageSize <= 0 {
 		filters.PageSize = 50
@@ -83,19 +151,9 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 
 	// Count total
 	var total int64
-	err := db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM movies WHERE %s", where)).Scan(&total)
+	err = db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM movies WHERE %s", where)).Scan(&total)
 	if err != nil {
 		return nil, 0, err
-	}
-
-	orderBy := "title"
-	switch filters.Sort {
-	case "added":
-		orderBy = "COALESCE(date_added, '') DESC, id DESC"
-	case "year":
-		orderBy = "year DESC, id DESC"
-	case "size":
-		orderBy = "file_size DESC, id DESC"
 	}
 
 	// Query movies
@@ -221,6 +279,11 @@ func GetMediaInfoForMovie(db *sql.DB, movieID int64) (*models.MediaInfo, error) 
 }
 
 func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int64, error) {
+	orderBy, err := buildOrderBy(filters.Sort, seriesSortColumns)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	if filters.PageSize <= 0 {
 		filters.PageSize = 50
 	}
@@ -265,19 +328,9 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 	}
 
 	var total int64
-	err := db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM series WHERE %s", where)).Scan(&total)
+	err = db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM series WHERE %s", where)).Scan(&total)
 	if err != nil {
 		return nil, 0, err
-	}
-
-	orderBy := "title"
-	switch filters.Sort {
-	case "added":
-		orderBy = "COALESCE(date_added, '') DESC, id DESC"
-	case "year":
-		orderBy = "year_start DESC, id DESC"
-	case "size":
-		orderBy = "file_size DESC, id DESC"
 	}
 
 	query := fmt.Sprintf(`SELECT id, title, year_start, year_end, season_count, episode_count, missing_episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug, sonarr_id, title_slug, total_season_count, total_episode_count FROM series WHERE %s ORDER BY %s LIMIT ? OFFSET ?`, where, orderBy)

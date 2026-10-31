@@ -37,6 +37,11 @@ func ListMovies(db *sql.DB) http.HandlerFunc {
 			PageSize:   pageSize,
 		}
 
+		if err := repository.ValidateMovieSort(filters.Sort); err != nil {
+			respondError(w, 400, err.Error())
+			return
+		}
+
 		movies, total, err := repository.GetMovies(db, filters)
 		if err != nil {
 			respondError(w, 500, err.Error())
@@ -92,6 +97,11 @@ func ListSeries(db *sql.DB) http.HandlerFunc {
 			Search:     r.URL.Query().Get("search"),
 			Page:       page,
 			PageSize:   pageSize,
+		}
+
+		if err := repository.ValidateSeriesSort(filters.Sort); err != nil {
+			respondError(w, 400, err.Error())
+			return
 		}
 
 		series, total, err := repository.GetSeries(db, filters)

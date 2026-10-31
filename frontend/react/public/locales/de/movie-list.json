@@ -1,4 +1,15 @@
 {
+  "sort": {
+    "label": "Sortieren nach",
+    "option": {
+      "title": "Titel",
+      "year": "Jahr",
+      "duration": "Dauer",
+      "rating": "Bewertung",
+      "size": "Größe",
+      "added": "Hinzugefügt am"
+    }
+  },
   "filter": {
     "label": "Filter",
     "button": {

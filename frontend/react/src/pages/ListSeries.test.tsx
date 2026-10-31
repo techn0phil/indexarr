@@ -123,4 +123,34 @@ describe('ListSeries', () => {
 
     expect(localStorage.getItem('series-view')).toBe('list');
   });
+
+  it('sends the sort param and persists the selection', async () => {
+    const user = userEvent.setup();
+    render(<ListSeries onSelectSeries={vi.fn()} />);
+
+    await screen.findByText('Series A');
+
+    await user.click(screen.getByRole('button', { name: 'sort.label' }));
+    await user.click(screen.getByText('sort.option.episodes'));
+
+    await waitFor(() => {
+      expect(apiClient.getSeries).toHaveBeenCalledWith(1, 50, expect.objectContaining({ sort: 'episodes' }));
+    });
+    expect(JSON.parse(localStorage.getItem('series-sort') as string)).toEqual({ key: 'episodes', order: 'asc' });
+
+    await user.click(screen.getByRole('button', { name: 'sort.label' }));
+    await user.click(screen.getByRole('button', { name: 'sort.option.episodes' }));
+
+    await waitFor(() => {
+      expect(apiClient.getSeries).toHaveBeenCalledWith(1, 50, expect.objectContaining({ sort: '-episodes' }));
+    });
+  });
+
+  it('restores the saved sort from localStorage', async () => {
+    localStorage.setItem('series-sort', JSON.stringify({ key: 'seasons', order: 'desc' }));
+    render(<ListSeries onSelectSeries={vi.fn()} />);
+
+    await screen.findByText('Series A');
+    expect(apiClient.getSeries).toHaveBeenCalledWith(1, 50, { sort: '-seasons' });
+  });
 });

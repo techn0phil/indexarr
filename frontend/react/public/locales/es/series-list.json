@@ -1,4 +1,16 @@
 {
+  "sort": {
+    "label": "Ordenar por",
+    "option": {
+      "title": "Nombre",
+      "year": "Año de estreno",
+      "seasons": "Número de temporadas",
+      "episodes": "Número de episodios",
+      "rating": "Valoración",
+      "size": "Tamaño",
+      "added": "Fecha de adición"
+    }
+  },
   "filter": {
     "label": "Filtros",
     "button": {

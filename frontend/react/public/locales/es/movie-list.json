@@ -1,4 +1,15 @@
 {
+  "sort": {
+    "label": "Ordenar por",
+    "option": {
+      "title": "Título",
+      "year": "Año",
+      "duration": "Duración",
+      "rating": "Valoración",
+      "size": "Tamaño",
+      "added": "Fecha de adición"
+    }
+  },
   "filter": {
     "label": "Filtros",
     "button": {

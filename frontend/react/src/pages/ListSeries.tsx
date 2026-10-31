@@ -9,6 +9,8 @@ import { StatCard } from '../components/StatCard';
 import { FilterChip } from '../components/FilterChip';
 import { FilterModal } from '../components/FilterModal';
 import { ViewToggle } from '../components/ViewToggle';
+import { SortDropdown } from '../components/SortDropdown';
+import { useSortPreference, toSortParam } from '../hooks/useSortPreference';
 import { ScanStatusCard } from '../components/ScanStatusCard';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/medialist.module.css';
@@ -20,6 +22,8 @@ interface ListSeriesProps {
 
 type FilterType = 'status' | 'resolution' | 'codec' | 'audio' | 'hdr';
 type ViewType = 'grid' | 'list';
+
+const SORT_KEYS = ['title', 'year', 'seasons', 'episodes', 'rating', 'size', 'added'];
 
 const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
   status: [
@@ -75,6 +79,8 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     return (saved as ViewType) || 'grid';
   });
   const context = useAppContext();
+  const { sort, selectSort, isDefault: isDefaultSort } = useSortPreference('series-sort', SORT_KEYS, 'title');
+  const sortOptions = SORT_KEYS.map((key) => ({ value: key, label: t(`sort.option.${key}`) }));
 
   // Build filter params for API
   const filters = useMemo(() => {
@@ -87,8 +93,11 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     if (searchQuery) {
       params.search = searchQuery;
     }
+    if (!isDefaultSort) {
+      params.sort = toSortParam(sort);
+    }
     return params;
-  }, [activeFilters, searchQuery]);
+  }, [activeFilters, searchQuery, sort, isDefaultSort]);
 
   // Use infinite list hook for pagination
   const { items: series, loading, isInitialLoading, hasMore, loadMore, reset } = useInfiniteList<Series>({
@@ -221,7 +230,10 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           )}
         </div>
 
-        <ViewToggle view={view} onViewChange={handleViewChange} />
+        <div className={styles['view-controls']}>
+          <SortDropdown options={sortOptions} sort={sort} onSelect={selectSort} ariaLabel={t('sort.label')} />
+          <ViewToggle view={view} onViewChange={handleViewChange} />
+        </div>
       </div>
 
       {/* Stats */}
