@@ -76,6 +76,9 @@
   grid-auto-columns: minmax(148px, 148px);
   gap: 12px;
   overflow-x: auto;
+  /* Room for the card's hover lift (translateY(-4px)); overflow-x: auto also clips vertically */
+  padding-top: 6px;
+  margin-top: -6px;
   padding-bottom: 20px;
   scrollbar-width: thin;
 }
