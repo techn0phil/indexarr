@@ -104,10 +104,10 @@ DELETE /api/auth/users/:id              # Delete user (admin only)
 POST /api/auth/logout                   # Logout (clear auth cookie)
 
 # Media endpoints
-GET  /api/movies                        # List with filters (status, resolution, codec, audio, HDR, search)
+GET  /api/movies                        # List with filters (status, resolution, codec, audio, HDR, search) and sort (title|year|duration|rating|size|added, '-' prefix = descending)
 GET  /api/movies/:id                    # Movie details + cast + mediainfo
 POST /api/movies/:id/refresh            # Refresh single movie metadata
-GET  /api/series                        # List series with filters
+GET  /api/series                        # List series with filters and sort (title|year|seasons|episodes|rating|size|added, '-' prefix = descending)
 GET  /api/series/:id                    # Series details + seasons + episodes
 POST /api/series/:id/refresh            # Refresh single series metadata
 POST /api/scan                          # Trigger full scan (all media)

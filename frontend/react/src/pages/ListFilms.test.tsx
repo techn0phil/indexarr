@@ -127,4 +127,35 @@ describe('ListFilms', () => {
 
     expect(localStorage.getItem('films-view')).toBe('list');
   });
+
+  it('sends the sort param and persists the selection', async () => {
+    const user = userEvent.setup();
+    render(<ListFilms onSelectMovie={vi.fn()} />);
+
+    await screen.findByText('Movie A');
+
+    await user.click(screen.getByRole('button', { name: 'sort.label' }));
+    await user.click(screen.getByText('sort.option.year'));
+
+    await waitFor(() => {
+      expect(apiClient.getMovies).toHaveBeenCalledWith(1, 50, expect.objectContaining({ sort: 'year' }));
+    });
+    expect(JSON.parse(localStorage.getItem('films-sort') as string)).toEqual({ key: 'year', order: 'asc' });
+
+    await user.click(screen.getByRole('button', { name: 'sort.label' }));
+    await user.click(screen.getByRole('button', { name: 'sort.option.year' }));
+
+    await waitFor(() => {
+      expect(apiClient.getMovies).toHaveBeenCalledWith(1, 50, expect.objectContaining({ sort: '-year' }));
+    });
+    expect(JSON.parse(localStorage.getItem('films-sort') as string)).toEqual({ key: 'year', order: 'desc' });
+  });
+
+  it('restores the saved sort from localStorage', async () => {
+    localStorage.setItem('films-sort', JSON.stringify({ key: 'size', order: 'desc' }));
+    render(<ListFilms onSelectMovie={vi.fn()} />);
+
+    await screen.findByText('Movie A');
+    expect(apiClient.getMovies).toHaveBeenCalledWith(1, 50, { sort: '-size' });
+  });
 });

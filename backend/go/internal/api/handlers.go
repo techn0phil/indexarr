@@ -31,9 +31,15 @@ func ListMovies(db *sql.DB) http.HandlerFunc {
 			Codec:      r.URL.Query().Get("codec"),
 			Audio:      r.URL.Query().Get("audio"),
 			HDR:        r.URL.Query().Get("hdr"),
+			Sort:       r.URL.Query().Get("sort"),
 			Search:     r.URL.Query().Get("search"),
 			Page:       page,
 			PageSize:   pageSize,
+		}
+
+		if err := repository.ValidateMovieSort(filters.Sort); err != nil {
+			respondError(w, 400, err.Error())
+			return
 		}
 
 		movies, total, err := repository.GetMovies(db, filters)
@@ -87,9 +93,15 @@ func ListSeries(db *sql.DB) http.HandlerFunc {
 			Codec:      r.URL.Query().Get("codec"),
 			Audio:      r.URL.Query().Get("audio"),
 			HDR:        r.URL.Query().Get("hdr"),
+			Sort:       r.URL.Query().Get("sort"),
 			Search:     r.URL.Query().Get("search"),
 			Page:       page,
 			PageSize:   pageSize,
+		}
+
+		if err := repository.ValidateSeriesSort(filters.Sort); err != nil {
+			respondError(w, 400, err.Error())
+			return
 		}
 
 		series, total, err := repository.GetSeries(db, filters)
