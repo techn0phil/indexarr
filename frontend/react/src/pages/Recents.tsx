@@ -14,8 +14,8 @@ interface RecentsProps {
 
 export const Recents = ({ onSelectMovie, onSelectSeries }: RecentsProps) => {
   const { t } = useTranslation('latest');
-  const movieFilters = useMemo(() => ({ sort: 'added' }), []);
-  const seriesFilters = useMemo(() => ({ sort: 'added' }), []);
+  const movieFilters = useMemo(() => ({ sort: '-added' }), []);
+  const seriesFilters = useMemo(() => ({ sort: '-added' }), []);
 
   const {
     items: movies,
