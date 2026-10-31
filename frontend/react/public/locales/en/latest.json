@@ -1,0 +1,18 @@
+{
+  "label": {
+    "title": "Recently added",
+    "section": {
+      "movies": "Movies",
+      "series": "Series"
+    },
+    "seeAll": "See all"
+  },
+  "message": {
+    "moviesInitialLoading": "Loading latest movies...",
+    "seriesInitialLoading": "Loading latest series...",
+    "moviesLoading": "Updating movies...",
+    "seriesLoading": "Updating series...",
+    "noMovies": "No movie added",
+    "noSeries": "No series added"
+  }
+}

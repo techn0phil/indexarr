@@ -11,8 +11,8 @@
 /* Desktop: Sidebar fixed on left */
 @media (min-width: 901px) {
   .sidebar {
-    min-width: 210px;
-    width: 210px;
+    min-width: 220px;
+    width: 220px;
     position: static;
     height: auto;
   }
