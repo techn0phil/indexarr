@@ -4,7 +4,8 @@
     "section": {
       "movies": "Movies",
       "series": "Series"
-    }
+    },
+    "seeAll": "See all"
   },
   "message": {
     "moviesInitialLoading": "Loading latest movies...",

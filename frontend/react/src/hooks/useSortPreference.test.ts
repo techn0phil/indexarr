@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { toSortParam, useSortPreference } from './useSortPreference';
 
@@ -45,6 +45,37 @@ describe('useSortPreference', () => {
     expect(renderHook(() => useSortPreference('test-sort', KEYS, 'title')).result.current.sort).toEqual({
       key: 'title',
       order: 'asc',
+    });
+  });
+
+  describe('?sort= URL param', () => {
+    afterEach(() => window.history.replaceState(null, '', '/'));
+
+    it('overrides the saved value without persisting it', () => {
+      localStorage.setItem('test-sort', JSON.stringify({ key: 'title', order: 'asc' }));
+      window.history.replaceState(null, '', '/movies?sort=-year');
+
+      const { result } = renderHook(() => useSortPreference('test-sort', KEYS, 'title'));
+
+      expect(result.current.sort).toEqual({ key: 'year', order: 'desc' });
+      expect(JSON.parse(localStorage.getItem('test-sort') as string)).toEqual({ key: 'title', order: 'asc' });
+    });
+
+    it('ignores invalid values', () => {
+      window.history.replaceState(null, '', '/movies?sort=-bogus');
+
+      const { result } = renderHook(() => useSortPreference('test-sort', KEYS, 'title'));
+
+      expect(result.current.sort).toEqual({ key: 'title', order: 'asc' });
+    });
+
+    it('is removed from the URL once the user picks a sort', () => {
+      window.history.replaceState(null, '', '/movies?sort=-year&x=1');
+
+      const { result } = renderHook(() => useSortPreference('test-sort', KEYS, 'title'));
+      act(() => result.current.selectSort('title'));
+
+      expect(window.location.search).toBe('?x=1');
     });
   });
 
