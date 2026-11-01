@@ -170,4 +170,63 @@ describe('useInfiniteList', () => {
     });
     expect(mockFetchFn).toHaveBeenLastCalledWith(1, 2, { status: 'missing' });
   });
+
+  it('loads the next page only once when loadMore is called twice before rerender', async () => {
+    mockFetchFn
+      .mockResolvedValueOnce({ success: true, data: page1, total: 4, page: 1, pageSize: 2 })
+      .mockResolvedValue({ success: true, data: page2, total: 4, page: 2, pageSize: 2 });
+
+    const { result } = renderHook(() =>
+      useInfiniteList<Item>({ fetchFn: mockFetchFn, pageSize: 2, filters: emptyFilters })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isInitialLoading).toBe(false);
+    });
+
+    act(() => {
+      const loadMore = result.current.loadMore;
+      loadMore();
+      loadMore();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(mockFetchFn).toHaveBeenCalledTimes(2);
+    expect(result.current.items).toEqual([...page1, ...page2]);
+  });
+
+  it('ignores a response started before filters changed', async () => {
+    const pendingRequests: Array<(response: PaginatedResponse<Item>) => void> = [];
+    mockFetchFn.mockImplementation(
+      () => new Promise<PaginatedResponse<Item>>((resolve) => pendingRequests.push(resolve))
+    );
+
+    const { result, rerender } = renderHook(
+      ({ filters }) => useInfiniteList<Item>({ fetchFn: mockFetchFn, pageSize: 2, filters }),
+      { initialProps: { filters: { status: 'available' } } }
+    );
+
+    await act(async () => {
+      pendingRequests[0]({ success: true, data: page1, total: 4, page: 1, pageSize: 2 });
+    });
+
+    act(() => {
+      result.current.loadMore();
+    });
+
+    rerender({ filters: { status: 'missing' } });
+
+    const [, resolveStalePage2, resolveNewPage1] = pendingRequests;
+    await act(async () => {
+      resolveNewPage1({ success: true, data: page1, total: 4, page: 1, pageSize: 2 });
+    });
+    await act(async () => {
+      resolveStalePage2({ success: true, data: page2, total: 4, page: 2, pageSize: 2 });
+    });
+
+    expect(result.current.items).toEqual(page1);
+  });
 });

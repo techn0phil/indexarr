@@ -99,7 +99,6 @@ export function useInfiniteList<T>({
   // Reset to page 1 and clear items
   const reset = useCallback(() => {
     generationRef.current += 1;
-    loadingRef.current = false;
     pageRef.current = 1;
     setItems([]);
     setPage(1);
