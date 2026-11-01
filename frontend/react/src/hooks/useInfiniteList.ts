@@ -34,6 +34,9 @@ export function useInfiniteList<T>({
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isInitialMount = useRef(true);
+  const loadingRef = useRef(false);
+  const pageRef = useRef(1);
+  const generationRef = useRef(0);
 
   // Derive hasMore from items length vs total
   const hasMore = items.length < total;
@@ -41,11 +44,17 @@ export function useInfiniteList<T>({
   // Load a page of data
   const loadPage = useCallback(
     async (pageNum: number, append: boolean = true) => {
+      const generation = generationRef.current;
+      loadingRef.current = true;
       setLoading(true);
       setError(null);
       try {
         const response = await fetchFn(pageNum, pageSize, filters);
-        
+
+        if (generation !== generationRef.current) {
+          return;
+        }
+
         if (!response.success) {
           throw new Error(response.error || 'Failed to fetch data');
         }
@@ -61,11 +70,17 @@ export function useInfiniteList<T>({
         }
         setIsInitialLoading(false);
       } catch (err) {
+        if (generation !== generationRef.current) {
+          return;
+        }
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
         console.error('Failed to load page:', err);
       } finally {
-        setLoading(false);
+        if (generation === generationRef.current) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     },
     [fetchFn, pageSize, filters]
@@ -73,15 +88,19 @@ export function useInfiniteList<T>({
 
   // Load next page
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
+    if (!loadingRef.current && hasMore) {
+      const nextPage = pageRef.current + 1;
+      pageRef.current = nextPage;
       setPage(nextPage);
       loadPage(nextPage, true);
     }
-  }, [loading, hasMore, page, loadPage]);
+  }, [hasMore, loadPage]);
 
   // Reset to page 1 and clear items
   const reset = useCallback(() => {
+    generationRef.current += 1;
+    loadingRef.current = false;
+    pageRef.current = 1;
     setItems([]);
     setPage(1);
     setTotal(0);
